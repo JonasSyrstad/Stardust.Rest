@@ -1,0 +1,871 @@
+2018-03-21 14:10:12.066 +01:00 [Critical] Microsoft.AspNetCore.Hosting.Internal.WebHost: Application startup exception
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at Stardust.Interstellar.Rest.Common.ExtensionsFactory.get_Logger()
+   at Stardust.Interstellar.Rest.Service.ServiceBuilder.CreateServiceImplementation(Type interfaceType, IServiceLocator serviceLocator) in C:\Private\Interstellar\Stardust.Interstellar.Rest.Annotations\Stardust.Interstellar.Rest.CoreService\ServiceBuilder.cs:line 64
+   at Stardust.Interstellar.Rest.Service.ServiceFactory.CreateServiceImplementation[T](IServiceLocator serviceLocator) in C:\Private\Interstellar\Stardust.Interstellar.Rest.Annotations\Stardust.Interstellar.Rest.CoreService\ServiceFactory.cs:line 78
+   at Stardust.Interstellar.Rest.Service.ServiceFactory.AddAsController[TService,TImplementation](IMvcBuilder builder) in C:\Private\Interstellar\Stardust.Interstellar.Rest.Annotations\Stardust.Interstellar.Rest.CoreService\ServiceFactory.cs:line 21
+   at NetCoreTestWeb.Startup.ConfigureServices(IServiceCollection services) in C:\Private\Interstellar\Stardust.Interstellar.Rest.Annotations\NetCoreTestWeb\Startup.cs:line 44
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Hosting.ConventionBasedStartup.ConfigureServices(IServiceCollection services)
+   at Microsoft.AspNetCore.Hosting.Internal.WebHost.EnsureApplicationServices()
+   at Microsoft.AspNetCore.Hosting.Internal.WebHost.BuildApplication()
+2018-03-21 14:10:12.784 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/  
+2018-03-21 14:10:12.856 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 72.2082ms 500 text/html; charset=utf-8
+2018-03-21 14:10:12.997 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/favicon.ico  
+2018-03-21 14:10:13.047 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 50.216ms 500 text/html; charset=utf-8
+2018-03-21 14:12:33.136 +01:00 [Debug] NetCoreTestWeb.Startup: Generating webapi controller for NetCoreTestWeb.Controllers.IMyServies
+2018-03-21 14:12:33.781 +01:00 [Information] Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager: User profile is available. Using 'C:\Users\jonsyr\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2018-03-21 14:12:34.302 +01:00 [Debug] NetCoreTestWeb.Startup: configured!
+2018-03-21 14:12:35.357 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/  
+2018-03-21 14:12:36.070 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 716.4003ms 200 text/html
+2018-03-21 14:12:36.104 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/css/typography.css  
+2018-03-21 14:12:36.112 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/css/screen.css  
+2018-03-21 14:12:36.120 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/lib/object-assign-pollyfill.js  
+2018-03-21 14:12:36.122 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/lib/jquery-1.8.0.min.js  
+2018-03-21 14:12:36.123 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/css/reset.css  
+2018-03-21 14:12:36.134 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/lib/backbone-min.js  
+2018-03-21 14:12:36.229 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /lib/jquery-1.8.0.min.js was not modified
+2018-03-21 14:12:36.229 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /lib/object-assign-pollyfill.js was not modified
+2018-03-21 14:12:36.229 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /css/reset.css was not modified
+2018-03-21 14:12:36.229 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /css/typography.css was not modified
+2018-03-21 14:12:36.248 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /css/screen.css was not modified
+2018-03-21 14:12:36.249 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /lib/backbone-min.js was not modified
+2018-03-21 14:12:36.303 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 169.086ms 304 application/javascript
+2018-03-21 14:12:36.303 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 179.7806ms 304 text/css
+2018-03-21 14:12:36.313 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 191.1828ms 304 application/javascript
+2018-03-21 14:12:36.412 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 307.7455ms 304 text/css
+2018-03-21 14:12:36.448 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 327.2929ms 304 application/javascript
+2018-03-21 14:12:36.495 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/lib/jsoneditor.min.js  
+2018-03-21 14:12:36.558 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/lib/marked.js  
+2018-03-21 14:12:36.588 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 476.1893ms 304 text/css
+2018-03-21 14:12:36.660 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/lib/highlight.9.1.0.pack_extended.js  
+2018-03-21 14:12:36.684 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/lib/highlight.9.1.0.pack.js  
+2018-03-21 14:12:36.726 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/lib/swagger-oauth.js  
+2018-03-21 14:12:36.767 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /lib/swagger-oauth.js was not modified
+2018-03-21 14:12:36.767 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /lib/jsoneditor.min.js was not modified
+2018-03-21 14:12:36.767 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /lib/highlight.9.1.0.pack.js was not modified
+2018-03-21 14:12:36.820 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /lib/marked.js was not modified
+2018-03-21 14:12:36.834 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 339.3638ms 304 application/javascript
+2018-03-21 14:12:36.881 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 196.9047ms 304 application/javascript
+2018-03-21 14:12:36.939 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /lib/highlight.9.1.0.pack_extended.js was not modified
+2018-03-21 14:12:36.983 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 323.437ms 304 application/javascript
+2018-03-21 14:12:37.047 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 489.274ms 304 application/javascript
+2018-03-21 14:12:37.089 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/swagger-ui.min.js  
+2018-03-21 14:12:37.119 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 392.8398ms 304 application/javascript
+2018-03-21 14:12:37.205 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/lib/jquery.ba-bbq.min.js  
+2018-03-21 14:12:37.238 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/lib/lodash.min.js  
+2018-03-21 14:12:37.322 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/lib/jquery.wiggle.min.js  
+2018-03-21 14:12:37.328 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/lib/handlebars-4.0.5.js  
+2018-03-21 14:12:37.340 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /lib/lodash.min.js was not modified
+2018-03-21 14:12:37.364 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /lib/jquery.wiggle.min.js was not modified
+2018-03-21 14:12:37.365 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /lib/handlebars-4.0.5.js was not modified
+2018-03-21 14:12:37.367 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /lib/jquery.ba-bbq.min.js was not modified
+2018-03-21 14:12:37.406 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 78.1007ms 304 application/javascript
+2018-03-21 14:12:37.435 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/lib/jquery.slideto.min.js  
+2018-03-21 14:12:37.439 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /lib/jquery.slideto.min.js was not modified
+2018-03-21 14:12:37.495 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /swagger-ui.min.js was not modified
+2018-03-21 14:12:37.508 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 183.1698ms 304 application/javascript
+2018-03-21 14:12:37.541 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 451.2875ms 304 application/javascript
+2018-03-21 14:12:37.553 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 315.3976ms 304 application/javascript
+2018-03-21 14:12:37.571 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 366.7274ms 304 application/javascript
+2018-03-21 14:12:37.655 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/images/logo_small.png  
+2018-03-21 14:12:37.667 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /images/logo_small.png was not modified
+2018-03-21 14:12:37.667 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 231.8536ms 304 application/javascript
+2018-03-21 14:12:37.683 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 27.6766ms 304 image/png
+2018-03-21 14:12:37.708 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/css/print.css  
+2018-03-21 14:12:37.753 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /css/print.css was not modified
+2018-03-21 14:12:37.769 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 60.9989ms 304 text/css
+2018-03-21 14:12:37.965 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/v1/swagger.json  
+2018-03-21 14:12:38.005 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/images/favicon-32x32.png  
+2018-03-21 14:12:38.024 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /images/favicon-32x32.png was not modified
+2018-03-21 14:12:38.038 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 32.868ms 304 image/png
+2018-03-21 14:12:38.066 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/images/favicon-16x16.png  
+2018-03-21 14:12:38.094 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /images/favicon-16x16.png was not modified
+2018-03-21 14:12:38.097 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 30.8529ms 304 image/png
+2018-03-21 14:12:38.414 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 448.5149ms 200 application/json
+2018-03-21 14:12:42.197 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/images/throbber.gif  
+2018-03-21 14:12:42.225 +01:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: The file /images/throbber.gif was not modified
+2018-03-21 14:12:42.228 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 30.6203ms 304 image/gif
+2018-03-21 14:12:44.675 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo/fdfdf  
+2018-03-21 14:12:44.779 +01:00 [Debug] Stardust.Aadb2c.AuthenticationFilter.B2COAuthHandler: Looking for bearer token! HandleAuthenticateAsync
+2018-03-21 14:12:44.781 +01:00 [Debug] Stardust.Aadb2c.AuthenticationFilter.B2COAuthHandler: No bearer token provided
+2018-03-21 14:12:44.784 +01:00 [Debug] Stardust.Aadb2c.AuthenticationFilter.B2COAuthHandler: AuthenticationScheme: OAuth2 was not authenticated.
+2018-03-21 14:12:44.795 +01:00 [Information] Microsoft.AspNetCore.Authorization.DefaultAuthorizationService: Authorization failed for user: (null).
+2018-03-21 14:12:44.797 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Authorization failed for the request at filter 'Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter'.
+2018-03-21 14:12:44.803 +01:00 [Information] Microsoft.AspNetCore.Mvc.ChallengeResult: Executing ChallengeResult with authentication schemes (OAuth2).
+2018-03-21 14:12:44.810 +01:00 [Debug] Stardust.Aadb2c.AuthenticationFilter.B2COAuthHandler: Test
+2018-03-21 14:12:44.812 +01:00 [Information] Stardust.Aadb2c.AuthenticationFilter.B2COAuthHandler: AuthenticationScheme: OAuth2 was challenged.
+2018-03-21 14:12:44.817 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo (a41718b0e06b407fbfe27a92fd8a2b1e_ServiceWrapper) in 66.057ms
+2018-03-21 14:12:44.824 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 149.1547ms 401 
+2018-03-21 14:12:52.275 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/dfdfd  
+2018-03-21 14:12:52.287 +01:00 [Debug] Stardust.Aadb2c.AuthenticationFilter.B2COAuthHandler: Looking for bearer token! HandleAuthenticateAsync
+2018-03-21 14:12:52.289 +01:00 [Debug] Stardust.Aadb2c.AuthenticationFilter.B2COAuthHandler: No bearer token provided
+2018-03-21 14:12:52.291 +01:00 [Debug] Stardust.Aadb2c.AuthenticationFilter.B2COAuthHandler: AuthenticationScheme: OAuth2 was not authenticated.
+2018-03-21 14:12:52.293 +01:00 [Information] Microsoft.AspNetCore.Authorization.DefaultAuthorizationService: Authorization failed for user: (null).
+2018-03-21 14:12:52.296 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Authorization failed for the request at filter 'Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter'.
+2018-03-21 14:12:52.299 +01:00 [Information] Microsoft.AspNetCore.Mvc.ChallengeResult: Executing ChallengeResult with authentication schemes (OAuth2).
+2018-03-21 14:12:52.301 +01:00 [Debug] Stardust.Aadb2c.AuthenticationFilter.B2COAuthHandler: Test
+2018-03-21 14:12:52.303 +01:00 [Information] Stardust.Aadb2c.AuthenticationFilter.B2COAuthHandler: AuthenticationScheme: OAuth2 was challenged.
+2018-03-21 14:12:52.306 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (a41718b0e06b407fbfe27a92fd8a2b1e_ServiceWrapper) in 19.4057ms
+2018-03-21 14:12:52.309 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 33.8444ms 401 
+2018-03-21 14:13:29.209 +01:00 [Debug] NetCoreTestWeb.Startup: Generating webapi controller for NetCoreTestWeb.Controllers.IMyServies
+2018-03-21 14:13:29.964 +01:00 [Debug] NetCoreTestWeb.Startup: configured!
+2018-03-21 14:13:29.603 +01:00 [Information] Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager: User profile is available. Using 'C:\Users\jonsyr\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2018-03-21 14:13:30.841 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/  
+2018-03-21 14:13:31.356 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 518.7317ms 200 text/html
+2018-03-21 14:13:31.748 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/v1/swagger.json  
+2018-03-21 14:13:32.063 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 315.3673ms 200 application/json
+2018-03-21 14:13:37.832 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/asdf  
+2018-03-21 14:13:37.928 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (c2e98c622d11477ca396208a0b15e792_ServiceWrapper) in 19.183ms
+2018-03-21 14:13:38.058 +01:00 [Error] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware: An unhandled exception has occurred while executing the request
+System.InvalidOperationException: Unable to resolve service for type 'Stardust.Interstellar.Rest.Extensions.IServiceLocator' while attempting to activate 'TempModule.Controllers.MyServiesController'.
+   at Microsoft.Extensions.Internal.ActivatorUtilities.GetService(IServiceProvider sp, Type type, Type requiredBy, Boolean isDefaultParameterRequired)
+   at lambda_method(Closure , IServiceProvider , Object[] )
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerActivatorProvider.<>c__DisplayClass4_0.<CreateActivator>b__0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass5_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeInnerFilterAsync>d__14.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeNextResourceFilter>d__22.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Rethrow(ResourceExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeFilterPipelineAsync>d__17.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeAsync>d__15.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.<Invoke>d__7.MoveNext()
+2018-03-21 14:13:38.244 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 411.6652ms 500 text/html; charset=utf-8
+2018-03-21 14:13:42.013 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/asdf  
+2018-03-21 14:13:42.019 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (c2e98c622d11477ca396208a0b15e792_ServiceWrapper) in 1.6636ms
+2018-03-21 14:13:42.053 +01:00 [Error] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware: An unhandled exception has occurred while executing the request
+System.InvalidOperationException: Unable to resolve service for type 'Stardust.Interstellar.Rest.Extensions.IServiceLocator' while attempting to activate 'TempModule.Controllers.MyServiesController'.
+   at Microsoft.Extensions.Internal.ActivatorUtilities.GetService(IServiceProvider sp, Type type, Type requiredBy, Boolean isDefaultParameterRequired)
+   at lambda_method(Closure , IServiceProvider , Object[] )
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerActivatorProvider.<>c__DisplayClass4_0.<CreateActivator>b__0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass5_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeInnerFilterAsync>d__14.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeNextResourceFilter>d__22.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Rethrow(ResourceExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeFilterPipelineAsync>d__17.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeAsync>d__15.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.<Invoke>d__7.MoveNext()
+2018-03-21 14:13:42.174 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 161.4498ms 500 text/html; charset=utf-8
+2018-03-21 14:13:52.040 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/asdf  
+2018-03-21 14:13:52.045 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (c2e98c622d11477ca396208a0b15e792_ServiceWrapper) in 2.3009ms
+2018-03-21 14:13:52.082 +01:00 [Error] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware: An unhandled exception has occurred while executing the request
+System.InvalidOperationException: Unable to resolve service for type 'Stardust.Interstellar.Rest.Extensions.IServiceLocator' while attempting to activate 'TempModule.Controllers.MyServiesController'.
+   at Microsoft.Extensions.Internal.ActivatorUtilities.GetService(IServiceProvider sp, Type type, Type requiredBy, Boolean isDefaultParameterRequired)
+   at lambda_method(Closure , IServiceProvider , Object[] )
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerActivatorProvider.<>c__DisplayClass4_0.<CreateActivator>b__0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass5_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeInnerFilterAsync>d__14.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeNextResourceFilter>d__22.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Rethrow(ResourceExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeFilterPipelineAsync>d__17.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeAsync>d__15.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.<Invoke>d__7.MoveNext()
+2018-03-21 14:13:52.250 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 210.4908ms 500 text/html; charset=utf-8
+2018-03-21 14:15:54.038 +01:00 [Debug] NetCoreTestWeb.Startup: Generating webapi controller for NetCoreTestWeb.Controllers.IMyServies
+2018-03-21 14:15:54.756 +01:00 [Debug] NetCoreTestWeb.Startup: configured!
+2018-03-21 14:15:54.372 +01:00 [Information] Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager: User profile is available. Using 'C:\Users\jonsyr\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2018-03-21 14:15:55.698 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/  
+2018-03-21 14:15:56.283 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 587.8381ms 200 text/html
+2018-03-21 14:15:56.660 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/v1/swagger.json  
+2018-03-21 14:15:56.976 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 315.4361ms 200 application/json
+2018-03-21 14:16:12.484 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/asdf  
+2018-03-21 14:16:12.565 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (2263ec17d7e44357bf85e2e87a361f52_ServiceWrapper) in 8.2542ms
+2018-03-21 14:16:12.670 +01:00 [Error] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware: An unhandled exception has occurred while executing the request
+System.InvalidOperationException: Unable to resolve service for type 'Stardust.Interstellar.Rest.Extensions.IServiceLocator' while attempting to activate 'TempModule.Controllers.MyServiesController'.
+   at Microsoft.Extensions.Internal.ActivatorUtilities.GetService(IServiceProvider sp, Type type, Type requiredBy, Boolean isDefaultParameterRequired)
+   at lambda_method(Closure , IServiceProvider , Object[] )
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerActivatorProvider.<>c__DisplayClass4_0.<CreateActivator>b__0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass5_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeInnerFilterAsync>d__14.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeNextResourceFilter>d__22.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Rethrow(ResourceExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeFilterPipelineAsync>d__17.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeAsync>d__15.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.<Invoke>d__7.MoveNext()
+2018-03-21 14:16:12.848 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 363.8552ms 500 text/html; charset=utf-8
+2018-03-21 14:16:17.220 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/asdf  
+2018-03-21 14:16:17.225 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (2263ec17d7e44357bf85e2e87a361f52_ServiceWrapper) in 1.468ms
+2018-03-21 14:16:17.265 +01:00 [Error] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware: An unhandled exception has occurred while executing the request
+System.InvalidOperationException: Unable to resolve service for type 'Stardust.Interstellar.Rest.Extensions.IServiceLocator' while attempting to activate 'TempModule.Controllers.MyServiesController'.
+   at Microsoft.Extensions.Internal.ActivatorUtilities.GetService(IServiceProvider sp, Type type, Type requiredBy, Boolean isDefaultParameterRequired)
+   at lambda_method(Closure , IServiceProvider , Object[] )
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerActivatorProvider.<>c__DisplayClass4_0.<CreateActivator>b__0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass5_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeInnerFilterAsync>d__14.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeNextResourceFilter>d__22.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Rethrow(ResourceExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeFilterPipelineAsync>d__17.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeAsync>d__15.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.<Invoke>d__7.MoveNext()
+2018-03-21 14:16:17.417 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 197.4605ms 500 text/html; charset=utf-8
+2018-03-21 14:18:31.835 +01:00 [Critical] Microsoft.AspNetCore.Hosting.Internal.WebHost: Application startup exception
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at Stardust.Interstellar.Rest.Common.ExtensionsFactory.get_Logger()
+   at Stardust.Interstellar.Rest.Service.ServiceBuilder.CreateServiceImplementation(Type interfaceType, IServiceLocator serviceLocator) in C:\Private\Interstellar\Stardust.Interstellar.Rest.Annotations\Stardust.Interstellar.Rest.CoreService\ServiceBuilder.cs:line 64
+   at Stardust.Interstellar.Rest.Service.ServiceFactory.CreateServiceImplementation[T](IServiceLocator serviceLocator) in C:\Private\Interstellar\Stardust.Interstellar.Rest.Annotations\Stardust.Interstellar.Rest.CoreService\ServiceFactory.cs:line 78
+   at Stardust.Interstellar.Rest.Service.ServiceFactory.AddAsController[TService,TImplementation](IMvcBuilder builder) in C:\Private\Interstellar\Stardust.Interstellar.Rest.Annotations\Stardust.Interstellar.Rest.CoreService\ServiceFactory.cs:line 21
+   at NetCoreTestWeb.Startup.ConfigureServices(IServiceCollection services) in C:\Private\Interstellar\Stardust.Interstellar.Rest.Annotations\NetCoreTestWeb\Startup.cs:line 44
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Hosting.ConventionBasedStartup.ConfigureServices(IServiceCollection services)
+   at Microsoft.AspNetCore.Hosting.Internal.WebHost.EnsureApplicationServices()
+   at Microsoft.AspNetCore.Hosting.Internal.WebHost.BuildApplication()
+2018-03-21 14:18:32.450 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/  
+2018-03-21 14:18:32.550 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 99.6451ms 500 text/html; charset=utf-8
+2018-03-21 14:18:32.676 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/favicon.ico  
+2018-03-21 14:18:32.707 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 31.21ms 500 text/html; charset=utf-8
+2018-03-21 14:20:09.872 +01:00 [Debug] NetCoreTestWeb.Startup: Generating webapi controller for NetCoreTestWeb.Controllers.IMyServies
+2018-03-21 14:20:10.559 +01:00 [Debug] NetCoreTestWeb.Startup: configured!
+2018-03-21 14:20:10.232 +01:00 [Information] Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager: User profile is available. Using 'C:\Users\jonsyr\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2018-03-21 14:20:11.486 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/  
+2018-03-21 14:20:12.252 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 768.232ms 200 text/html
+2018-03-21 14:20:12.654 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/v1/swagger.json  
+2018-03-21 14:20:12.961 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 307.1202ms 200 application/json
+2018-03-21 14:20:25.879 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/asdf  
+2018-03-21 14:20:25.973 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (c9ad11f7ef0a439a8b63d248940fad28_ServiceWrapper) in 14.9627ms
+2018-03-21 14:20:26.083 +01:00 [Error] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware: An unhandled exception has occurred while executing the request
+System.InvalidOperationException: Unable to resolve service for type 'Stardust.Interstellar.Rest.Extensions.IServiceLocator' while attempting to activate 'TempModule.Controllers.MyServiesController'.
+   at Microsoft.Extensions.Internal.ActivatorUtilities.GetService(IServiceProvider sp, Type type, Type requiredBy, Boolean isDefaultParameterRequired)
+   at lambda_method(Closure , IServiceProvider , Object[] )
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerActivatorProvider.<>c__DisplayClass4_0.<CreateActivator>b__0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass5_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeInnerFilterAsync>d__14.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeNextResourceFilter>d__22.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Rethrow(ResourceExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeFilterPipelineAsync>d__17.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeAsync>d__15.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.<Invoke>d__7.MoveNext()
+2018-03-21 14:20:26.261 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 381.7333ms 500 text/html; charset=utf-8
+2018-03-21 14:20:30.817 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/asdf  
+2018-03-21 14:20:30.823 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (c9ad11f7ef0a439a8b63d248940fad28_ServiceWrapper) in 2.6498ms
+2018-03-21 14:20:30.865 +01:00 [Error] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware: An unhandled exception has occurred while executing the request
+System.InvalidOperationException: Unable to resolve service for type 'Stardust.Interstellar.Rest.Extensions.IServiceLocator' while attempting to activate 'TempModule.Controllers.MyServiesController'.
+   at Microsoft.Extensions.Internal.ActivatorUtilities.GetService(IServiceProvider sp, Type type, Type requiredBy, Boolean isDefaultParameterRequired)
+   at lambda_method(Closure , IServiceProvider , Object[] )
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerActivatorProvider.<>c__DisplayClass4_0.<CreateActivator>b__0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass5_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeInnerFilterAsync>d__14.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeNextResourceFilter>d__22.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Rethrow(ResourceExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeFilterPipelineAsync>d__17.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeAsync>d__15.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.<Invoke>d__7.MoveNext()
+2018-03-21 14:20:31.147 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 329.8952ms 500 text/html; charset=utf-8
+2018-03-21 14:23:11.137 +01:00 [Debug] NetCoreTestWeb.Startup: Generating webapi controller for NetCoreTestWeb.Controllers.IMyServies
+2018-03-21 14:23:11.821 +01:00 [Debug] NetCoreTestWeb.Startup: configured!
+2018-03-21 14:23:11.428 +01:00 [Information] Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager: User profile is available. Using 'C:\Users\jonsyr\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2018-03-21 14:23:12.744 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/  
+2018-03-21 14:23:13.304 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 562.2819ms 200 text/html
+2018-03-21 14:23:13.655 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/v1/swagger.json  
+2018-03-21 14:23:14.023 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 368.3525ms 200 application/json
+2018-03-21 14:34:49.828 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/asdf  
+2018-03-21 14:34:49.979 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (d1a74728885b4e8ebfae49872560f713_ServiceWrapper) in 9.4308ms
+2018-03-21 14:34:50.090 +01:00 [Error] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware: An unhandled exception has occurred while executing the request
+System.InvalidOperationException: Unable to resolve service for type 'Stardust.Interstellar.Rest.Extensions.IServiceLocator' while attempting to activate 'TempModule.Controllers.MyServiesController'.
+   at Microsoft.Extensions.Internal.ActivatorUtilities.GetService(IServiceProvider sp, Type type, Type requiredBy, Boolean isDefaultParameterRequired)
+   at lambda_method(Closure , IServiceProvider , Object[] )
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerActivatorProvider.<>c__DisplayClass4_0.<CreateActivator>b__0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass5_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeInnerFilterAsync>d__14.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeNextResourceFilter>d__22.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Rethrow(ResourceExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeFilterPipelineAsync>d__17.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeAsync>d__15.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.<Invoke>d__7.MoveNext()
+2018-03-21 14:34:50.252 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 424.8738ms 500 text/html; charset=utf-8
+2018-03-21 14:36:48.685 +01:00 [Debug] NetCoreTestWeb.Startup: Generating webapi controller for NetCoreTestWeb.Controllers.IMyServies
+2018-03-21 14:36:49.731 +01:00 [Information] Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager: User profile is available. Using 'C:\Users\jonsyr\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2018-03-21 14:37:03.270 +01:00 [Debug] NetCoreTestWeb.Startup: configured!
+2018-03-21 14:37:04.983 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/  
+2018-03-21 14:37:05.505 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 523.046ms 200 text/html
+2018-03-21 14:37:05.814 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/v1/swagger.json  
+2018-03-21 14:37:06.053 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 239.0514ms 200 application/json
+2018-03-21 14:37:11.645 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/fdfd  
+2018-03-21 14:37:11.711 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (f5a1617519984e4e89a06aa2288801be_ServiceWrapper) in 6.3256ms
+2018-03-21 14:37:11.813 +01:00 [Error] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware: An unhandled exception has occurred while executing the request
+System.InvalidOperationException: Unable to resolve service for type 'Stardust.Interstellar.Rest.Extensions.IServiceLocator' while attempting to activate 'TempModule.Controllers.MyServiesController'.
+   at Microsoft.Extensions.Internal.ActivatorUtilities.GetService(IServiceProvider sp, Type type, Type requiredBy, Boolean isDefaultParameterRequired)
+   at lambda_method(Closure , IServiceProvider , Object[] )
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerActivatorProvider.<>c__DisplayClass4_0.<CreateActivator>b__0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass5_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeInnerFilterAsync>d__14.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeNextResourceFilter>d__22.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Rethrow(ResourceExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeFilterPipelineAsync>d__17.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeAsync>d__15.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.<Invoke>d__7.MoveNext()
+2018-03-21 14:37:11.956 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 310.8877ms 500 text/html; charset=utf-8
+2018-03-21 14:37:19.274 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/fdfd  
+2018-03-21 14:37:19.280 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (f5a1617519984e4e89a06aa2288801be_ServiceWrapper) in 1.4129ms
+2018-03-21 14:37:19.314 +01:00 [Error] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware: An unhandled exception has occurred while executing the request
+System.InvalidOperationException: Unable to resolve service for type 'Stardust.Interstellar.Rest.Extensions.IServiceLocator' while attempting to activate 'TempModule.Controllers.MyServiesController'.
+   at Microsoft.Extensions.Internal.ActivatorUtilities.GetService(IServiceProvider sp, Type type, Type requiredBy, Boolean isDefaultParameterRequired)
+   at lambda_method(Closure , IServiceProvider , Object[] )
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerActivatorProvider.<>c__DisplayClass4_0.<CreateActivator>b__0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass5_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeInnerFilterAsync>d__14.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeNextResourceFilter>d__22.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Rethrow(ResourceExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeFilterPipelineAsync>d__17.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeAsync>d__15.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.<Invoke>d__7.MoveNext()
+2018-03-21 14:37:19.430 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 155.8756ms 500 text/html; charset=utf-8
+2018-03-21 14:40:34.149 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/fdfd  
+2018-03-21 14:40:34.154 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (f5a1617519984e4e89a06aa2288801be_ServiceWrapper) in 1.7553ms
+2018-03-21 14:40:34.196 +01:00 [Error] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware: An unhandled exception has occurred while executing the request
+System.InvalidOperationException: Unable to resolve service for type 'Stardust.Interstellar.Rest.Extensions.IServiceLocator' while attempting to activate 'TempModule.Controllers.MyServiesController'.
+   at Microsoft.Extensions.Internal.ActivatorUtilities.GetService(IServiceProvider sp, Type type, Type requiredBy, Boolean isDefaultParameterRequired)
+   at lambda_method(Closure , IServiceProvider , Object[] )
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerActivatorProvider.<>c__DisplayClass4_0.<CreateActivator>b__0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass5_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeInnerFilterAsync>d__14.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeNextResourceFilter>d__22.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Rethrow(ResourceExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeFilterPipelineAsync>d__17.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeAsync>d__15.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.<Invoke>d__7.MoveNext()
+2018-03-21 14:40:34.325 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 175.8749ms 500 text/html; charset=utf-8
+2018-03-21 14:40:37.477 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/fdfd  
+2018-03-21 14:40:37.481 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (f5a1617519984e4e89a06aa2288801be_ServiceWrapper) in 1.6636ms
+2018-03-21 14:40:37.514 +01:00 [Error] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware: An unhandled exception has occurred while executing the request
+System.InvalidOperationException: Unable to resolve service for type 'Stardust.Interstellar.Rest.Extensions.IServiceLocator' while attempting to activate 'TempModule.Controllers.MyServiesController'.
+   at Microsoft.Extensions.Internal.ActivatorUtilities.GetService(IServiceProvider sp, Type type, Type requiredBy, Boolean isDefaultParameterRequired)
+   at lambda_method(Closure , IServiceProvider , Object[] )
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerActivatorProvider.<>c__DisplayClass4_0.<CreateActivator>b__0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass5_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeInnerFilterAsync>d__14.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeNextResourceFilter>d__22.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Rethrow(ResourceExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeFilterPipelineAsync>d__17.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeAsync>d__15.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.<Invoke>d__7.MoveNext()
+2018-03-21 14:40:37.618 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 141.3689ms 500 text/html; charset=utf-8
+2018-03-21 14:43:00.866 +01:00 [Information] Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager: User profile is available. Using 'C:\Users\jonsyr\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2018-03-21 14:43:03.304 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/  
+2018-03-21 14:43:03.763 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 461.7068ms 200 text/html
+2018-03-21 14:43:04.075 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/v1/swagger.json  
+2018-03-21 14:43:04.330 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 255.7786ms 200 application/json
+2018-03-21 14:43:42.333 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo/asdf  
+2018-03-21 14:43:42.401 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo (e4e43d9fbd514b6d89cfe269155f0490_ServiceWrapper) in 7.461ms
+2018-03-21 14:43:42.498 +01:00 [Error] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware: An unhandled exception has occurred while executing the request
+System.InvalidOperationException: Unable to resolve service for type 'Stardust.Interstellar.Rest.Extensions.IServiceLocator' while attempting to activate 'TempModule.Controllers.MyServiesController'.
+   at Microsoft.Extensions.Internal.ActivatorUtilities.GetService(IServiceProvider sp, Type type, Type requiredBy, Boolean isDefaultParameterRequired)
+   at lambda_method(Closure , IServiceProvider , Object[] )
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerActivatorProvider.<>c__DisplayClass4_0.<CreateActivator>b__0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass5_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeInnerFilterAsync>d__14.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeNextResourceFilter>d__22.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Rethrow(ResourceExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeFilterPipelineAsync>d__17.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeAsync>d__15.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.<Invoke>d__7.MoveNext()
+2018-03-21 14:43:42.636 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 302.8928ms 500 text/html; charset=utf-8
+2018-03-21 14:43:57.655 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo/asdf  
+2018-03-21 14:43:57.660 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo (e4e43d9fbd514b6d89cfe269155f0490_ServiceWrapper) in 1.4442ms
+2018-03-21 14:43:57.691 +01:00 [Error] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware: An unhandled exception has occurred while executing the request
+System.InvalidOperationException: Unable to resolve service for type 'Stardust.Interstellar.Rest.Extensions.IServiceLocator' while attempting to activate 'TempModule.Controllers.MyServiesController'.
+   at Microsoft.Extensions.Internal.ActivatorUtilities.GetService(IServiceProvider sp, Type type, Type requiredBy, Boolean isDefaultParameterRequired)
+   at lambda_method(Closure , IServiceProvider , Object[] )
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerActivatorProvider.<>c__DisplayClass4_0.<CreateActivator>b__0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass5_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeInnerFilterAsync>d__14.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeNextResourceFilter>d__22.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Rethrow(ResourceExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeFilterPipelineAsync>d__17.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeAsync>d__15.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.<Invoke>d__7.MoveNext()
+2018-03-21 14:43:57.860 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 204.7221ms 500 text/html; charset=utf-8
+2018-03-21 14:45:56.184 +01:00 [Debug] NetCoreTestWeb.Startup: Generating webapi controller for NetCoreTestWeb.Controllers.IMyServies
+2018-03-21 14:45:58.935 +01:00 [Debug] NetCoreTestWeb.Startup: configured!
+2018-03-21 14:45:59.549 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/  
+2018-03-21 14:46:00.000 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 453.0198ms 200 text/html
+2018-03-21 14:46:00.317 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/v1/swagger.json  
+2018-03-21 14:46:00.560 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 243.4166ms 200 application/json
+2018-03-21 14:46:03.802 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/fdfd  
+2018-03-21 14:46:09.840 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (7f606016d190410e98e7e5576102b9f4_ServiceWrapper) in 5971.8369ms
+2018-03-21 14:46:09.957 +01:00 [Error] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware: An unhandled exception has occurred while executing the request
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at Stardust.Interstellar.Rest.Common.ExtensionsFactory.GetServiceTemplate(MethodInfo methodInfo, IServiceLocator serviceLocator)
+   at Stardust.Interstellar.Rest.Service.ServiceWrapperBase`1.InitializeServiceApi(Type interfaceType) in C:\Private\Interstellar\Stardust.Interstellar.Rest.Annotations\Stardust.Interstellar.Rest.CoreService\ServiceWrapperBase.cs:line 411
+   at lambda_method(Closure , IServiceProvider , Object[] )
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerActivatorProvider.<>c__DisplayClass4_0.<CreateActivator>b__0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass5_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeInnerFilterAsync>d__14.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeNextResourceFilter>d__22.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Rethrow(ResourceExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeFilterPipelineAsync>d__17.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeAsync>d__15.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.<Invoke>d__7.MoveNext()
+2018-03-21 14:46:10.110 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 6307.7334ms 500 text/html; charset=utf-8
+2018-03-21 14:46:20.247 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/fdfd  
+2018-03-21 14:46:24.005 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (7f606016d190410e98e7e5576102b9f4_ServiceWrapper) in 3753.6812ms
+2018-03-21 14:46:24.049 +01:00 [Error] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware: An unhandled exception has occurred while executing the request
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at Stardust.Interstellar.Rest.Common.ExtensionsFactory.GetServiceTemplate(MethodInfo methodInfo, IServiceLocator serviceLocator)
+   at Stardust.Interstellar.Rest.Service.ServiceWrapperBase`1.InitializeServiceApi(Type interfaceType) in C:\Private\Interstellar\Stardust.Interstellar.Rest.Annotations\Stardust.Interstellar.Rest.CoreService\ServiceWrapperBase.cs:line 411
+   at lambda_method(Closure , IServiceProvider , Object[] )
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerActivatorProvider.<>c__DisplayClass4_0.<CreateActivator>b__0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass5_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeInnerFilterAsync>d__14.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeNextResourceFilter>d__22.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Rethrow(ResourceExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeFilterPipelineAsync>d__17.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeAsync>d__15.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.<Invoke>d__7.MoveNext()
+2018-03-21 14:46:24.159 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 3911.589ms 500 text/html; charset=utf-8
+2018-03-21 14:52:56.333 +01:00 [Information] Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager: User profile is available. Using 'C:\Users\jonsyr\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2018-03-21 14:52:58.732 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/  
+2018-03-21 14:52:59.201 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 470.9149ms 200 text/html
+2018-03-21 14:53:06.619 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/v1/swagger.json  
+2018-03-21 14:53:06.840 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 220.6198ms 200 application/json
+2018-03-21 14:53:09.924 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/ref  
+2018-03-21 14:53:14.818 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (2938756057414798acb88c4d6c3926de_ServiceWrapper) in 4831.2386ms
+2018-03-21 14:53:14.922 +01:00 [Error] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware: An unhandled exception has occurred while executing the request
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at Stardust.Interstellar.Rest.Common.ExtensionsFactory.GetServiceTemplate(MethodInfo methodInfo, IServiceLocator serviceLocator)
+   at Stardust.Interstellar.Rest.Service.ServiceWrapperBase`1.InitializeServiceApi(Type interfaceType) in C:\Private\Interstellar\Stardust.Interstellar.Rest.Annotations\Stardust.Interstellar.Rest.CoreService\ServiceWrapperBase.cs:line 411
+   at lambda_method(Closure , IServiceProvider , Object[] )
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerActivatorProvider.<>c__DisplayClass4_0.<CreateActivator>b__0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass5_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeInnerFilterAsync>d__14.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeNextResourceFilter>d__22.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Rethrow(ResourceExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeFilterPipelineAsync>d__17.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeAsync>d__15.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.<Invoke>d__7.MoveNext()
+2018-03-21 14:53:15.073 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 5149.135ms 500 text/html; charset=utf-8
+2018-03-21 14:53:42.823 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/ref  
+2018-03-21 14:53:45.496 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (2938756057414798acb88c4d6c3926de_ServiceWrapper) in 2668.2901ms
+2018-03-21 14:53:45.546 +01:00 [Error] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware: An unhandled exception has occurred while executing the request
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at Stardust.Interstellar.Rest.Common.ExtensionsFactory.GetServiceTemplate(MethodInfo methodInfo, IServiceLocator serviceLocator)
+   at Stardust.Interstellar.Rest.Service.ServiceWrapperBase`1.InitializeServiceApi(Type interfaceType) in C:\Private\Interstellar\Stardust.Interstellar.Rest.Annotations\Stardust.Interstellar.Rest.CoreService\ServiceWrapperBase.cs:line 411
+   at lambda_method(Closure , IServiceProvider , Object[] )
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerActivatorProvider.<>c__DisplayClass4_0.<CreateActivator>b__0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass5_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeInnerFilterAsync>d__14.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeNextResourceFilter>d__22.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Rethrow(ResourceExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeFilterPipelineAsync>d__17.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeAsync>d__15.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.<Invoke>d__7.MoveNext()
+2018-03-21 14:53:45.684 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 2860.1145ms 500 text/html; charset=utf-8
+2018-03-21 14:55:09.591 +01:00 [Debug] NetCoreTestWeb.Startup: Generating webapi controller for NetCoreTestWeb.Controllers.IMyServies
+2018-03-21 14:55:12.054 +01:00 [Debug] NetCoreTestWeb.Startup: configured!
+2018-03-21 14:55:12.763 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/  
+2018-03-21 14:55:13.228 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 467.6311ms 200 text/html
+2018-03-21 14:55:13.541 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/v1/swagger.json  
+2018-03-21 14:55:13.826 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 285.0446ms 200 application/json
+2018-03-21 14:55:24.184 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/asdf  
+2018-03-21 14:55:29.483 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (167bf258df2b4db388105d322c80a7fb_ServiceWrapper) in 5225.1591ms
+2018-03-21 14:55:29.595 +01:00 [Error] Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware: An unhandled exception has occurred while executing the request
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at Stardust.Interstellar.Rest.Common.ExtensionsFactory.GetServiceTemplate(MethodInfo methodInfo, IServiceLocator serviceLocator)
+   at Stardust.Interstellar.Rest.Service.ServiceWrapperBase`1.InitializeServiceApi(Type interfaceType) in C:\Private\Interstellar\Stardust.Interstellar.Rest.Annotations\Stardust.Interstellar.Rest.CoreService\ServiceWrapperBase.cs:line 411
+   at lambda_method(Closure , IServiceProvider , Object[] )
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerActivatorProvider.<>c__DisplayClass4_0.<CreateActivator>b__0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass5_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeInnerFilterAsync>d__14.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeNextResourceFilter>d__22.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Rethrow(ResourceExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeFilterPipelineAsync>d__17.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ResourceInvoker.<InvokeAsync>d__15.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.<Invoke>d__7.MoveNext()
+2018-03-21 14:55:29.737 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 5553.1086ms 500 text/html; charset=utf-8
+2018-03-21 15:18:25.441 +01:00 [Debug] NetCoreTestWeb.Startup: Generating webapi controller for NetCoreTestWeb.Controllers.IMyServies
+2018-03-21 15:18:25.924 +01:00 [Debug] NetCoreTestWeb.Startup: configured!
+2018-03-21 15:18:25.707 +01:00 [Information] Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager: User profile is available. Using 'C:\Users\jonsyr\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2018-03-21 15:18:26.759 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/  
+2018-03-21 15:18:27.431 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 674.8211ms 200 text/html
+2018-03-21 15:18:27.712 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/v1/swagger.json  
+2018-03-21 15:18:27.959 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 247.4469ms 200 application/json
+2018-03-21 15:18:31.326 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/asdf  
+2018-03-21 15:18:31.573 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executing action method TempModule.Controllers.MyServiesController.Echo2Async (8c7bfabfb99c4db68c6c2f442c4e24f4_ServiceWrapper) with arguments (asdf) - ModelState is Valid
+2018-03-21 15:18:31.617 +01:00 [Debug] NetCoreTestWeb.Startup: 
+2018-03-21 15:18:31.638 +01:00 [Information] Microsoft.AspNetCore.Mvc.Formatters.Json.Internal.JsonResultExecutor: Executing JsonResult, writing value NetCoreTestWeb.Controllers.StringWrapper.
+2018-03-21 15:18:31.650 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (8c7bfabfb99c4db68c6c2f442c4e24f4_ServiceWrapper) in 248.0669ms
+2018-03-21 15:18:31.656 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 329.3884ms 200 application/json; charset=utf-8
+2018-03-21 15:18:35.558 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/asdffff  
+2018-03-21 15:18:35.582 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executing action method TempModule.Controllers.MyServiesController.Echo2Async (8c7bfabfb99c4db68c6c2f442c4e24f4_ServiceWrapper) with arguments (asdffff) - ModelState is Valid
+2018-03-21 15:18:35.586 +01:00 [Debug] NetCoreTestWeb.Startup: 
+2018-03-21 15:18:35.602 +01:00 [Information] Microsoft.AspNetCore.Mvc.Formatters.Json.Internal.JsonResultExecutor: Executing JsonResult, writing value NetCoreTestWeb.Controllers.StringWrapper.
+2018-03-21 15:18:35.606 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (8c7bfabfb99c4db68c6c2f442c4e24f4_ServiceWrapper) in 44.8351ms
+2018-03-21 15:18:35.610 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 52.4482ms 200 application/json; charset=utf-8
+2018-03-21 15:18:36.405 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/asdffff  
+2018-03-21 15:18:36.426 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executing action method TempModule.Controllers.MyServiesController.Echo2Async (8c7bfabfb99c4db68c6c2f442c4e24f4_ServiceWrapper) with arguments (asdffff) - ModelState is Valid
+2018-03-21 15:18:36.429 +01:00 [Debug] NetCoreTestWeb.Startup: 
+2018-03-21 15:18:36.434 +01:00 [Information] Microsoft.AspNetCore.Mvc.Formatters.Json.Internal.JsonResultExecutor: Executing JsonResult, writing value NetCoreTestWeb.Controllers.StringWrapper.
+2018-03-21 15:18:36.438 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (8c7bfabfb99c4db68c6c2f442c4e24f4_ServiceWrapper) in 30.53ms
+2018-03-21 15:18:36.441 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 36.0824ms 200 application/json; charset=utf-8
+2018-03-21 15:18:36.573 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/asdffff  
+2018-03-21 15:18:36.597 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executing action method TempModule.Controllers.MyServiesController.Echo2Async (8c7bfabfb99c4db68c6c2f442c4e24f4_ServiceWrapper) with arguments (asdffff) - ModelState is Valid
+2018-03-21 15:18:36.600 +01:00 [Debug] NetCoreTestWeb.Startup: 
+2018-03-21 15:18:36.607 +01:00 [Information] Microsoft.AspNetCore.Mvc.Formatters.Json.Internal.JsonResultExecutor: Executing JsonResult, writing value NetCoreTestWeb.Controllers.StringWrapper.
+2018-03-21 15:18:36.610 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (8c7bfabfb99c4db68c6c2f442c4e24f4_ServiceWrapper) in 33.2497ms
+2018-03-21 15:18:36.614 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 40.3226ms 200 application/json; charset=utf-8
+2018-03-21 15:18:36.726 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/asdffff  
+2018-03-21 15:18:36.754 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executing action method TempModule.Controllers.MyServiesController.Echo2Async (8c7bfabfb99c4db68c6c2f442c4e24f4_ServiceWrapper) with arguments (asdffff) - ModelState is Valid
+2018-03-21 15:18:36.758 +01:00 [Debug] NetCoreTestWeb.Startup: 
+2018-03-21 15:18:36.764 +01:00 [Information] Microsoft.AspNetCore.Mvc.Formatters.Json.Internal.JsonResultExecutor: Executing JsonResult, writing value NetCoreTestWeb.Controllers.StringWrapper.
+2018-03-21 15:18:36.768 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (8c7bfabfb99c4db68c6c2f442c4e24f4_ServiceWrapper) in 37.9385ms
+2018-03-21 15:18:36.771 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 44.9249ms 200 application/json; charset=utf-8
+2018-03-21 15:18:36.853 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/asdffff  
+2018-03-21 15:18:36.888 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executing action method TempModule.Controllers.MyServiesController.Echo2Async (8c7bfabfb99c4db68c6c2f442c4e24f4_ServiceWrapper) with arguments (asdffff) - ModelState is Valid
+2018-03-21 15:18:36.891 +01:00 [Debug] NetCoreTestWeb.Startup: 
+2018-03-21 15:18:36.895 +01:00 [Information] Microsoft.AspNetCore.Mvc.Formatters.Json.Internal.JsonResultExecutor: Executing JsonResult, writing value NetCoreTestWeb.Controllers.StringWrapper.
+2018-03-21 15:18:36.899 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (8c7bfabfb99c4db68c6c2f442c4e24f4_ServiceWrapper) in 41.5467ms
+2018-03-21 15:18:36.902 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 48.5252ms 200 application/json; charset=utf-8
+2018-03-21 15:18:36.974 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/asdffff  
+2018-03-21 15:18:36.999 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executing action method TempModule.Controllers.MyServiesController.Echo2Async (8c7bfabfb99c4db68c6c2f442c4e24f4_ServiceWrapper) with arguments (asdffff) - ModelState is Valid
+2018-03-21 15:18:37.002 +01:00 [Debug] NetCoreTestWeb.Startup: 
+2018-03-21 15:18:37.006 +01:00 [Information] Microsoft.AspNetCore.Mvc.Formatters.Json.Internal.JsonResultExecutor: Executing JsonResult, writing value NetCoreTestWeb.Controllers.StringWrapper.
+2018-03-21 15:18:37.009 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (8c7bfabfb99c4db68c6c2f442c4e24f4_ServiceWrapper) in 30.1117ms
+2018-03-21 15:18:37.013 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 38.9652ms 200 application/json; charset=utf-8
+2018-03-21 15:18:37.126 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/asdffff  
+2018-03-21 15:18:37.149 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executing action method TempModule.Controllers.MyServiesController.Echo2Async (8c7bfabfb99c4db68c6c2f442c4e24f4_ServiceWrapper) with arguments (asdffff) - ModelState is Valid
+2018-03-21 15:18:37.153 +01:00 [Debug] NetCoreTestWeb.Startup: 
+2018-03-21 15:18:37.156 +01:00 [Information] Microsoft.AspNetCore.Mvc.Formatters.Json.Internal.JsonResultExecutor: Executing JsonResult, writing value NetCoreTestWeb.Controllers.StringWrapper.
+2018-03-21 15:18:37.158 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (8c7bfabfb99c4db68c6c2f442c4e24f4_ServiceWrapper) in 28.3117ms
+2018-03-21 15:18:37.161 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 34.9266ms 200 application/json; charset=utf-8
+2018-03-21 15:18:37.262 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/asdffff  
+2018-03-21 15:18:37.293 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executing action method TempModule.Controllers.MyServiesController.Echo2Async (8c7bfabfb99c4db68c6c2f442c4e24f4_ServiceWrapper) with arguments (asdffff) - ModelState is Valid
+2018-03-21 15:18:37.296 +01:00 [Debug] NetCoreTestWeb.Startup: 
+2018-03-21 15:18:37.299 +01:00 [Information] Microsoft.AspNetCore.Mvc.Formatters.Json.Internal.JsonResultExecutor: Executing JsonResult, writing value NetCoreTestWeb.Controllers.StringWrapper.
+2018-03-21 15:18:37.302 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (8c7bfabfb99c4db68c6c2f442c4e24f4_ServiceWrapper) in 37.2075ms
+2018-03-21 15:18:37.305 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 42.6171ms 200 application/json; charset=utf-8
+2018-03-21 15:43:03.621 +01:00 [Debug] NetCoreTestWeb.Startup: Generating webapi controller for NetCoreTestWeb.Controllers.IMyServies
+2018-03-21 15:43:04.127 +01:00 [Debug] NetCoreTestWeb.Startup: configured!
+2018-03-21 15:43:03.889 +01:00 [Information] Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager: User profile is available. Using 'C:\Users\jonsyr\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2018-03-21 15:43:04.874 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/  
+2018-03-21 15:43:05.514 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 663.9354ms 200 text/html
+2018-03-21 15:43:05.848 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/swagger/v1/swagger.json  
+2018-03-21 15:43:06.098 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 250.1565ms 200 application/json
+2018-03-21 15:43:10.524 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:19083/api/test/Echo2/wasdf  
+2018-03-21 15:43:10.763 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executing action method TempModule.Controllers.MyServiesController.Echo2Async (36567aac62e7454e8ae7e5d5dcbaf4da_ServiceWrapper) with arguments (wasdf) - ModelState is Valid
+2018-03-21 15:43:10.810 +01:00 [Debug] NetCoreTestWeb.Startup: 
+2018-03-21 15:43:10.831 +01:00 [Information] Microsoft.AspNetCore.Mvc.Formatters.Json.Internal.JsonResultExecutor: Executing JsonResult, writing value NetCoreTestWeb.Controllers.StringWrapper.
+2018-03-21 15:43:10.845 +01:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (36567aac62e7454e8ae7e5d5dcbaf4da_ServiceWrapper) in 251.9216ms
+2018-03-21 15:43:10.851 +01:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 326.4059ms 200 application/json; charset=utf-8

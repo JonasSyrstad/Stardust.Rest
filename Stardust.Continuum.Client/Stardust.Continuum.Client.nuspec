@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <metadata>
+    <id>Stardust.Continuum.Client</id>
+    <version>1.2.5.0</version>
+    <title>Stardust.Continuum.Client</title>
+    <authors>Stardust</authors>
+    <description>Client for the continuum live log stream service
+</description>
+    <summary>
+      Download and install the Contunuum service:
+      https://github.com/JonasSyrstad/Stardust.Interstellar.Rest/tree/master/ContinuumInstall
+    </summary>
+    <licenseUrl>http://stardustframework.com/license</licenseUrl>
+    <projectUrl>https://github.com/JonasSyrstad/Stardust.Interstellar.Rest/blob/master/Stardust.Interstellar.Rest/continuum.md</projectUrl>
+    <iconUrl>http://stardustframework.wdfiles.com/local--files/blog%3A_start/logo_smal.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
+    <releaseNotes>Added buffered streaming to reduce http request to the service.</releaseNotes>
+    <copyright>Copyright ©  2017</copyright>
+    <tags>logging real-time stream </tags>
+    <frameworkAssemblies />
+    <dependencies>
+      <group>
+        <dependency id="Microsoft.AspNet.WebApi.Client" version="5.2.3" />
+        <dependency id="Microsoft.AspNet.WebApi.Core" version="5.2.3" />
+        <dependency id="Newtonsoft.Json" version="9.0.1" />
+        <dependency id="Stardust.Interstellar.Rest" version="2.9.1" />
+        <dependency id="Stardust.Interstellar.Rest.Annotations" version="1.4.1" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="C:\Users\jonsyr\Source\Repos\Stardust.Interstellar.Rest\Stardust.Interstellar.Rest\Stardust.Interstellar.Continuum.Client\bin\Release\Stardust.Continuum.Client.dll" target="lib\net45" />
+  </files>
+</package>

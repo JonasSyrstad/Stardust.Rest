@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>Annotations for the rest generator tool</Description>
+    <Version>2.1.0-pre004</Version>
+    <Company>Stardust</Company>
+    <Authors>Stardust</Authors>
+    <Copyright>Copyright © Stardust 2018</Copyright>
+    <PackageLicenseUrl>http://stardustframework.com/license</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/JonasSyrstad/Stardust.Interstellar.Rest</PackageProjectUrl>
+    <PackageIconUrl>http://stardustframework.wdfiles.com/local--files/blog%3A_start/logo_smal.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/JonasSyrstad/Stardust.Interstellar.Rest</RepositoryUrl>
+    <RepositoryType>github</RepositoryType>
+    <PackageTags>rest webapi client proxy generator</PackageTags>
+    <PackageReleaseNotes>updated to netstandard2.0</PackageReleaseNotes>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="2.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Stardust.Particles" Version="4.1.0-pre001" />
+    <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.Emit.ILGeneration" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
+      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.2.0.0\lib\netstandard2.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Primitives">
+      <HintPath>..\..\..\..\Users\jonsyr\.nuget\packages\microsoft.extensions.primitives\2.0.0\lib\netstandard2.0\Microsoft.Extensions.Primitives.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
