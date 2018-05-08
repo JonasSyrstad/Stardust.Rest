@@ -29,9 +29,10 @@ namespace Stardust.Aadb2c.AuthenticationFilter.Core
                 //   return new
                 //} //GetSigningCertificates(string.Format("https://login.microsoftonline.com/{0}/federationmetadata/2007-06/federationmetadata.xml", B2CGlobalConfiguration.AadTenant))
             };
+            SecurityToken validatedToken;
             try
             {
-                SecurityToken validatedToken;
+
                 var securityToken = handler.ValidateToken(accessToken, validationParameters, out validatedToken);
 
                 ((ClaimsIdentity)securityToken.Identity).AddClaim(new Claim("token", accessToken));
@@ -41,7 +42,7 @@ namespace Stardust.Aadb2c.AuthenticationFilter.Core
                 var identity = principal.Identity as ClaimsIdentity;
                 //Logging.DebugMessage($"User: {Resolver.Activate<IIdentityLookup>().GetUserName(identity)} validated");
                 Thread.CurrentPrincipal = principal;
-                logger?.DebugMessage($"V1 token validation success: {identity?.Claims?.SingleOrDefault(c => c.Type == "appId")?.Value}");
+                logger?.DebugMessage($"V1 token validation success: {identity?.Claims?.SingleOrDefault(c => c.Type == "appid")?.Value}");
                 return principal;
                 // Logging.DebugMessage("Principal set on http context")
             }

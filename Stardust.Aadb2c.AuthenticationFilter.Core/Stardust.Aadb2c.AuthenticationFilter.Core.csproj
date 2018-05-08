@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0.5</Version>
+    <Version>1.0.0.6</Version>
     <Company>Stardust</Company>
     <Copyright>Copyright © Stardust 2018</Copyright>
     <PackageLicenseUrl>http://stardustframework.com/license</PackageLicenseUrl>

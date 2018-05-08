@@ -31,10 +31,10 @@ namespace Stardust.Interstellar.Rest.Service
 
         public Type CreateServiceImplementation<T>(IServiceLocator serviceLocator)
         {
-            return CreateServiceImplementation(typeof(T),serviceLocator);
+            return CreateServiceImplementation(typeof(T), serviceLocator);
         }
 
-        public Type CreateServiceImplementation(Type interfaceType,IServiceLocator serviceLocator)
+        public Type CreateServiceImplementation(Type interfaceType, IServiceLocator serviceLocator)
         {
             try
             {
@@ -47,14 +47,14 @@ namespace Stardust.Interstellar.Rest.Service
                     {
                         if (methodInfo.ReturnType.GetGenericArguments().Length == 0)
                         {
-                            BuildAsyncVoidMethod(type, methodInfo,serviceLocator);
+                            BuildAsyncVoidMethod(type, methodInfo, serviceLocator);
                         }
-                        else BuildAsyncMethod(type, methodInfo,serviceLocator);
+                        else BuildAsyncMethod(type, methodInfo, serviceLocator);
                     }
                     else
                     {
-                        if (methodInfo.ReturnType == typeof(void)) BuildVoidMethod(type, methodInfo,serviceLocator);
-                        else BuildMethod(type, methodInfo,serviceLocator);
+                        if (methodInfo.ReturnType == typeof(void)) BuildVoidMethod(type, methodInfo, serviceLocator);
+                        else BuildMethod(type, methodInfo, serviceLocator);
                     }
                 }
                 return type.CreateType();
@@ -67,17 +67,17 @@ namespace Stardust.Interstellar.Rest.Service
             }
         }
 
-        public MethodBuilder InternalMethodBuilder(TypeBuilder type, MethodInfo implementationMethod, Func<MethodInfo, MethodBuilder, Type[], List<ParameterWrapper>, MethodBuilder> bodyBuilder,IServiceLocator serviceLocator)
+        public MethodBuilder InternalMethodBuilder(TypeBuilder type, MethodInfo implementationMethod, Func<MethodInfo, MethodBuilder, Type[], List<ParameterWrapper>, MethodBuilder> bodyBuilder, IServiceLocator serviceLocator)
         {
             List<ParameterWrapper> methodParams;
             Type[] pTypes;
-            var method = DefineMethod(type, implementationMethod, out methodParams, out pTypes,serviceLocator);
+            var method = DefineMethod(type, implementationMethod, out methodParams, out pTypes, serviceLocator);
             return bodyBuilder(implementationMethod, method, pTypes, methodParams);
         }
 
-        public MethodBuilder BuildMethod(TypeBuilder type, MethodInfo implementationMethod,IServiceLocator serviceLocator)
+        public MethodBuilder BuildMethod(TypeBuilder type, MethodInfo implementationMethod, IServiceLocator serviceLocator)
         {
-            return InternalMethodBuilder(type, implementationMethod, BodyImplementer,serviceLocator);
+            return InternalMethodBuilder(type, implementationMethod, BodyImplementer, serviceLocator);
         }
 
         private static MethodBuilder BodyImplementer(MethodInfo implementationMethod, MethodBuilder method, Type[] pTypes, List<ParameterWrapper> methodParams)
@@ -168,7 +168,7 @@ namespace Stardust.Interstellar.Rest.Service
             return method;
         }
 
-        private static MethodBuilder DefineMethod(TypeBuilder type, MethodInfo implementationMethod, out List<ParameterWrapper> methodParams, out Type[] pTypes,IServiceLocator serviceLocator)
+        private static MethodBuilder DefineMethod(TypeBuilder type, MethodInfo implementationMethod, out List<ParameterWrapper> methodParams, out Type[] pTypes, IServiceLocator serviceLocator)
         {
             // Declaring method builder
             // Method attributes
@@ -178,19 +178,19 @@ namespace Stardust.Interstellar.Rest.Service
 
 
             var route = typeof(RouteAttribute).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { typeof(String) }, null);
-            var httpGet = httpMethodAttribute(implementationMethod,serviceLocator);
+            var httpGet = httpMethodAttribute(implementationMethod, serviceLocator);
             var uriAttrib = typeof(FromRouteAttribute).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { }, null);
             var queryAttib = typeof(FromQueryAttribute).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { }, null);
             var bodyAttrib = typeof(FromBodyAttribute).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { }, null);
 
             method.SetReturnType(typeof(Task).IsAssignableFrom(implementationMethod.ReturnType) ? typeof(Task<IActionResult>) : typeof(IActionResult));
             // Adding parameters
-            methodParams = GetMethodParams(implementationMethod,serviceLocator);
+            methodParams = GetMethodParams(implementationMethod, serviceLocator);
             pTypes = methodParams.Where(p => p.In != InclutionTypes.Header).Select(p => p.Type).ToArray();
             method.SetParameters(pTypes.ToArray());
             // Parameter id
-            var template = implementationMethod.GetCustomAttribute<RouteAttribute>()?.Template??implementationMethod.GetCustomAttribute<VerbAttribute>()?.Route;
-            if (template == null) template = ExtensionsFactory.GetServiceTemplate(implementationMethod,serviceLocator);
+            var template = implementationMethod.GetCustomAttribute<RouteAttribute>()?.Template ?? implementationMethod.GetCustomAttribute<VerbAttribute>()?.Route;
+            if (template == null) template = ExtensionsFactory.GetServiceTemplate(implementationMethod, serviceLocator);
             int pid = 1;
             foreach (var parameterWrapper in methodParams.Where(p => p.In != InclutionTypes.Header))
             {
@@ -251,7 +251,7 @@ namespace Stardust.Interstellar.Rest.Service
             return implementationMethod.ReturnType;
         }
 
-        private static List<ParameterWrapper> GetMethodParams(MethodInfo implementationMethod,IServiceLocator serviceLocator)
+        private static List<ParameterWrapper> GetMethodParams(MethodInfo implementationMethod, IServiceLocator serviceLocator)
         {
             var resolver = serviceLocator.GetService<IServiceParameterResolver>();
             var resolvedParams = resolver?.ResolveParameters(implementationMethod);
@@ -278,7 +278,7 @@ namespace Stardust.Interstellar.Rest.Service
         public MethodBuilder BuildVoidMethod(TypeBuilder type, MethodInfo implementationMethod, IServiceLocator serviceLocator)
         {
 
-            return InternalMethodBuilder(type, implementationMethod, VoidMethodBuilder,serviceLocator);
+            return InternalMethodBuilder(type, implementationMethod, VoidMethodBuilder, serviceLocator);
         }
 
         private MethodBuilder VoidMethodBuilder(MethodInfo implementationMethod, MethodBuilder method, Type[] pTypes, List<ParameterWrapper> methodParams)
@@ -392,7 +392,7 @@ namespace Stardust.Interstellar.Rest.Service
             return method;
         }
 
-        private static ConstructorInfo httpMethodAttribute(MethodInfo implementationMethod,IServiceLocator serviceLocator)
+        private static ConstructorInfo httpMethodAttribute(MethodInfo implementationMethod, IServiceLocator serviceLocator)
         {
             var httpMethod = serviceLocator.GetService<IWebMethodConverter>()?.GetHttpMethods(implementationMethod);
             if (httpMethod != null && httpMethod.Any())
@@ -438,7 +438,7 @@ namespace Stardust.Interstellar.Rest.Service
 
         public MethodBuilder BuildAsyncMethod(TypeBuilder type, MethodInfo implementationMethod, IServiceLocator serviceLocator)
         {
-            return InternalMethodBuilder(type, implementationMethod, (a, b, c, d) => BuildAsyncMethodBody(a, b, c, d, type),serviceLocator);
+            return InternalMethodBuilder(type, implementationMethod, (a, b, c, d) => BuildAsyncMethodBody(a, b, c, d, type), serviceLocator);
         }
         private static int typeCounter = 0;
 
@@ -565,7 +565,7 @@ namespace Stardust.Interstellar.Rest.Service
 
         public MethodBuilder BuildAsyncVoidMethod(TypeBuilder type, MethodInfo implementationMethod, IServiceLocator serviceLocator)
         {
-            return InternalMethodBuilder(type, implementationMethod, (a, b, c, d) => BuildAsyncVoidMethodBody(a, b, c, d, type),serviceLocator);
+            return InternalMethodBuilder(type, implementationMethod, (a, b, c, d) => BuildAsyncVoidMethodBody(a, b, c, d, type), serviceLocator);
         }
 
         private MethodBuilder BuildAsyncVoidMethodBody(MethodInfo implementationMethod, MethodBuilder method, Type[] pTypes, List<ParameterWrapper> methodParams, TypeBuilder parent)
@@ -690,10 +690,10 @@ namespace Stardust.Interstellar.Rest.Service
         {
             const MethodAttributes methodAttributes = MethodAttributes.Public | MethodAttributes.HideBySig;
 
-            var method = type.DefineConstructor(methodAttributes, CallingConventions.Standard | CallingConventions.HasThis, new[] { interfaceType ,typeof(IServiceLocator)});
+            var method = type.DefineConstructor(methodAttributes, CallingConventions.Standard | CallingConventions.HasThis, new[] { interfaceType, typeof(IServiceLocator) });
             var implementation = method.DefineParameter(1, ParameterAttributes.None, "implementation");
             var serviceLocator = method.DefineParameter(2, ParameterAttributes.None, "serviceLocator");
-            var ctor1 = typeof(ServiceWrapperBase<>).MakeGenericType(interfaceType).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new[] { interfaceType,typeof(IServiceLocator) }, null);
+            var ctor1 = typeof(ServiceWrapperBase<>).MakeGenericType(interfaceType).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new[] { interfaceType, typeof(IServiceLocator) }, null);
 
             var gen = method.GetILGenerator();
             // Writing body
@@ -714,7 +714,20 @@ namespace Stardust.Interstellar.Rest.Service
             var routePrefix = interfaceType.GetCustomAttribute<IRoutePrefixAttribute>()
                 ?? interfaceType.GetInterfaces().FirstOrDefault()?.GetCustomAttribute<IRoutePrefixAttribute>();
             var type = myModuleBuilder.DefineType("TempModule.Controllers." + interfaceType.Name.Remove(0, 1) + "Controller", TypeAttributes.Public | TypeAttributes.Class, typeof(ServiceWrapperBase<>).MakeGenericType(interfaceType));
-
+            var obsolete = interfaceType.GetCustomAttribute<ObsoleteAttribute>();
+            if (obsolete != null)
+            {
+                var obsoleteCtor = typeof(ObsoleteAttribute).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                    null,
+                    new Type[]{
+                        typeof(string),
+                        typeof(bool)
+                    },
+                    null
+                );
+                type.SetCustomAttribute(new CustomAttributeBuilder(obsoleteCtor, new object[] { obsolete.Message, obsolete.IsError }));
+            }
             if (routePrefix != null)
             {
                 var prefix = routePrefix.Prefix;
