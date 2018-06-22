@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0.5</Version>
+    <Version>1.0.0.6</Version>
     <Company>Stardust</Company>
     <Copyright>Copyright © Stardust 2018</Copyright>
     <PackageLicenseUrl>http://stardustframework.com/license</PackageLicenseUrl>
@@ -17,7 +17,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="5.2.1" />
     <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="5.2.1" />
-    <PackageReference Include="Stardust.Particles" Version="4.0.2.1" />
+    <PackageReference Include="Stardust.Particles" Version="5.0.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.2.1" />
   </ItemGroup>
 

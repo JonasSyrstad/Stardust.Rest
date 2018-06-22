@@ -23,8 +23,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="2.0.0" />
-    <PackageReference Include="Stardust.Interstellar.Rest.Annotations" Version="2.1.0-pre004" />
-    <PackageReference Include="Stardust.Particles" Version="4.1.0-pre001" />
+    <PackageReference Include="Stardust.Interstellar.Rest.Annotations" Version="2.1.0-pre005" />
+    <PackageReference Include="Stardust.Particles" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>

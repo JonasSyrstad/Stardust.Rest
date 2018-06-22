@@ -8,6 +8,7 @@ using System.Reflection.Emit;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
+using Microsoft.Web.Http;
 using Stardust.Interstellar.Rest.Annotations;
 using Stardust.Interstellar.Rest.Client;
 using Stardust.Interstellar.Rest.Common;
@@ -195,6 +196,7 @@ namespace Stardust.Interstellar.Rest.Service
 
         private static MethodBuilder DefineMethod(TypeBuilder type, MethodInfo implementationMethod, out List<ParameterWrapper> methodParams, out Type[] pTypes, IServiceLocator serviceLocator)
         {
+
             // Declaring method builder
             // Method attributes
             const MethodAttributes methodAttributes = MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot;
@@ -753,6 +755,33 @@ namespace Stardust.Interstellar.Rest.Service
             var routePrefix = interfaceType.GetCustomAttribute<IRoutePrefixAttribute>()
                 ?? interfaceType.GetInterfaces().FirstOrDefault()?.GetCustomAttribute<IRoutePrefixAttribute>();
             var type = myModuleBuilder.DefineType("TempModule.Controllers." + interfaceType.Name.Remove(0, 1) + "Controller", TypeAttributes.Public | TypeAttributes.Class, typeof(ServiceWrapperBase<>).MakeGenericType(interfaceType));
+            var version = interfaceType.GetCustomAttribute<VersionAttribute>();
+            if (version != null)
+            {
+                var versionCtor = typeof(ApiVersionAttribute).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                    null,
+                    new Type[]{
+                        typeof(string)
+                    },
+                    null
+                );
+                type.SetCustomAttribute(new CustomAttributeBuilder(versionCtor, new object[] { version.Version }, new[] { typeof(ApiVersionAttribute).GetProperty("Deprecated") }, new object[] { version.Deprecated }));
+            }
+            var obsolete = interfaceType.GetCustomAttribute<ObsoleteAttribute>();
+            if (obsolete != null)
+            {
+                var obsoleteCtor = typeof(ObsoleteAttribute).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                    null,
+                    new Type[]{
+                        typeof(string),
+                        typeof(bool)
+                    },
+                    null
+                );
+                type.SetCustomAttribute(new CustomAttributeBuilder(obsoleteCtor, new object[] { obsolete.Message, obsolete.IsError }));
+            }
 
             if (routePrefix != null)
             {

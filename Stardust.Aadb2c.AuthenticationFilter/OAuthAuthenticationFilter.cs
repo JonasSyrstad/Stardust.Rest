@@ -31,7 +31,7 @@ namespace Stardust.Aadb2c.AuthenticationFilter
             {
                 var auth = context?.Request.Headers.Authorization;
                 ClaimsPrincipal user;
-                if (auth != null && string.Equals(auth.Scheme, "Bearer", StringComparison.InvariantCultureIgnoreCase))
+                if (auth != null && string.Equals(auth.Scheme, "Bearer", StringComparison.InvariantCultureIgnoreCase) && !auth.Parameter.IsNullOrWhiteSpace())
                 {
 
                     var credentials = auth;

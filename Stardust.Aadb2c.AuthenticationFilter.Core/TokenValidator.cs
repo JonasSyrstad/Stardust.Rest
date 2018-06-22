@@ -6,7 +6,7 @@ using Stardust.Particles;
 
 namespace Stardust.Aadb2c.AuthenticationFilter.Core
 {
-    
+
     public static class TokenValidator
     {
         private static ILogging _logger;
@@ -20,12 +20,13 @@ namespace Stardust.Aadb2c.AuthenticationFilter.Core
         {
             _logger?.DebugMessage("Validating bearer token.");
             var jwt = new JwtSecurityToken(token);
-            if (jwt.Claims.SingleOrDefault(c => c.Type == "userId") != null)
+            var userIdClaim = jwt.Claims.SingleOrDefault(c => c.Type == "userId");
+            if (userIdClaim != null)
             {
-                _logger?.DebugMessage("Validating user token");
+                _logger?.DebugMessage($"Validating user token: {userIdClaim?.Value}");
                 try
                 {
-                    return TokenValidatorV2.ValidateToken(token,_logger);
+                    return TokenValidatorV2.ValidateToken(token, _logger);
                 }
                 catch (Exception ex)
                 {
@@ -38,8 +39,8 @@ namespace Stardust.Aadb2c.AuthenticationFilter.Core
             {
                 try
                 {
-                    _logger?.DebugMessage("Validating client token");
-                    return TokenValidatorV1.ValidateToken(token,_logger);
+                    _logger?.DebugMessage($"Validating client token {jwt.Claims.SingleOrDefault(c => c.Type == "appid")?.Value}");
+                    return TokenValidatorV1.ValidateToken(token, _logger);
                 }
                 catch (Exception ex)
                 {
