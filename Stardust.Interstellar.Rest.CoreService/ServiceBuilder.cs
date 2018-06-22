@@ -728,6 +728,20 @@ namespace Stardust.Interstellar.Rest.Service
                 );
                 type.SetCustomAttribute(new CustomAttributeBuilder(obsoleteCtor, new object[] { obsolete.Message, obsolete.IsError }));
             }
+
+            var version = interfaceType.GetCustomAttribute<VersionAttribute>();
+            if (version != null)
+            {
+                var versionCtor = typeof(ApiVersionAttribute).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                    null,
+                    new Type[]{
+                        typeof(string)
+                    },
+                    null
+                );
+                type.SetCustomAttribute(new CustomAttributeBuilder(versionCtor, new object[] { version.Version }, new[] { typeof(ApiVersionAttribute).GetProperty("Deprecated") }, new object[] { version.Deprecated }));
+            }
             if (routePrefix != null)
             {
                 var prefix = routePrefix.Prefix;

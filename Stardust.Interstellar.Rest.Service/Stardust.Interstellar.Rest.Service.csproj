@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.AspNet.WebApi.Versioning, Version=2.3.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Versioning.2.3.0\lib\net45\Microsoft.AspNet.WebApi.Versioning.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.2.0.0\lib\netstandard2.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
     </Reference>
@@ -44,10 +47,10 @@
       <HintPath>..\packages\Stardust.Interstellar.Rest.3.1.0-pre003\lib\netstandard2.0\Stardust.Interstellar.Rest.dll</HintPath>
     </Reference>
     <Reference Include="Stardust.Interstellar.Rest.Annotations, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Stardust.Interstellar.Rest.Annotations.2.1.0-pre004\lib\netstandard2.0\Stardust.Interstellar.Rest.Annotations.dll</HintPath>
+      <HintPath>..\packages\Stardust.Interstellar.Rest.Annotations.2.1.0-pre005\lib\netstandard2.0\Stardust.Interstellar.Rest.Annotations.dll</HintPath>
     </Reference>
-    <Reference Include="Stardust.Particles, Version=4.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Stardust.Particles.4.1.0-pre001\lib\netstandard2.0\Stardust.Particles.dll</HintPath>
+    <Reference Include="Stardust.Particles, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Stardust.Particles.5.0.0\lib\netstandard2.0\Stardust.Particles.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />

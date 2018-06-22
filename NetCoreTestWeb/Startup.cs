@@ -45,7 +45,7 @@ namespace NetCoreTestWeb
                 //.AddSingleton(s => new Stardust.Interstellar.Rest.Service.ServiceLocator(s))
                 .AddSingleton<ILogger, LogWrapper>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
+                . 
                 .AddB2CAuthentication("OAuth2", "Azure B2C authentication");
             ExtensionsFactory.SetServiceLocator(new Stardust.Interstellar.Rest.Service.ServiceLocator(services.BuildServiceProvider()));
             var builder = services.AddMvc().AddAsController<IMyServies, MyServies>().UseInterstellar();

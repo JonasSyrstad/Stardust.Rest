@@ -17,7 +17,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="5.2.1" />
     <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="5.2.1" />
-    <PackageReference Include="Stardust.Particles" Version="4.0.2.1" />
+    <PackageReference Include="Stardust.Particles" Version="5.0.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.2.1" />
   </ItemGroup>
 
