@@ -1,14 +1,11 @@
 using System;
 using System.Collections.Concurrent;
-using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 using Stardust.Interstellar.Rest.Client;
 using System.Threading;
-using Microsoft.Extensions.DependencyInjection;
-using Stardust.Interstellar.Rest.Common;
 using Stardust.Particles;
 using Timer = System.Timers.Timer;
 
@@ -327,12 +324,17 @@ namespace Stardust.Continuum.Client
             });
         }
 
+        public static ILogStream CreateLogStream(this IServiceProvider provider)
+        {
+            if (client == null)
+                client = provider.CreateRestClient<ILogStream>(BaseUrl);
+            return client;
+        }
         private static ILogStream LogStreamClient
         {
             get
             {
-                if (client == null)
-                    client = ExtensionsFactory.GetLocator().CreateRestClient<ILogStream>(BaseUrl);
+                
                 var c = client;
                 return c;
             }

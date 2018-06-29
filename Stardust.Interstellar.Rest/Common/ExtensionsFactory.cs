@@ -12,9 +12,6 @@ namespace Stardust.Interstellar.Rest.Common
 {
     public static class ExtensionsFactory
     {
-
-
-
         public static StateDictionary GetState(this ResultWrapper result)
         {
             var actionId = result.ActionId;
@@ -22,37 +19,14 @@ namespace Stardust.Interstellar.Rest.Common
         }
 
 
-        private static IServiceLocator locator;
-
         private static Type xmlSerializer;
+        
+        
 
-        public static void SetServiceLocator(IServiceLocator serviceLocator)
+       
+        public static string GetServiceTemplate(MethodInfo methodInfo, IServiceProvider serviceLocator)
         {
-            locator = serviceLocator;
-        }
-
-        public static IServiceLocator GetLocator()
-        {
-            return locator;
-        }
-
-        [Obsolete("Avoid this for aompabillity with netcore", true)]
-        public static T GetService<T>()
-        {
-            return locator != null ? locator.GetService<T>() : default(T);
-        }
-
-        public static ILogger Logger => locator.GetService<ILogger>();
-
-        public static IEnumerable<T> GetServices<T>()
-        {
-            if (xmlSerializer != null && typeof(ISerializer) == typeof(T)) return new[] { (T)Activator.CreateInstance(xmlSerializer) };
-            return locator?.GetServices<T>();
-        }
-
-        public static string GetServiceTemplate(MethodInfo methodInfo, IServiceLocator serviceLocator)
-        {
-            var template = serviceLocator.GetService<IRouteTemplateResolver>()?.GetTemplate(methodInfo);
+            var template = ServiceProviderExtensions.GetService<IRouteTemplateResolver>(serviceLocator)?.GetTemplate(methodInfo);
             if (!String.IsNullOrWhiteSpace(template)) return template;
             var verbAttribute = methodInfo.GetCustomAttribute<VerbAttribute>();
             var templateAttrib = methodInfo.GetCustomAttribute<IRouteAttribute>();
@@ -64,10 +38,10 @@ namespace Stardust.Interstellar.Rest.Common
             return template;
         }
 
-        public static string GetRouteTemplate(IRoutePrefixAttribute templatePrefix, IRouteAttribute template, MethodInfo methodInfo, IServiceLocator serviceLocator)
+        public static string GetRouteTemplate(IRoutePrefixAttribute templatePrefix, IRouteAttribute template, MethodInfo methodInfo, IServiceProvider serviceLocator)
         {
             var interfaceType = methodInfo.DeclaringType;
-            var templateResolver = serviceLocator.GetService<IRouteTemplateResolver>();
+            var templateResolver = ServiceProviderExtensions.GetService<IRouteTemplateResolver>(serviceLocator);
             var route = templateResolver?.GetTemplate(methodInfo);
             if (!String.IsNullOrWhiteSpace(route)) return route;
             string prefix = "";
@@ -80,10 +54,10 @@ namespace Stardust.Interstellar.Rest.Common
             return (templatePrefix == null ? "" : (prefix + "/") + template.Template).Replace("//", "/");
         }
 
-        public static void BuildParameterInfo(MethodInfo methodInfo, ActionWrapper action, IServiceLocator serviceLocator)
+        public static void BuildParameterInfo(MethodInfo methodInfo, ActionWrapper action, IServiceProvider serviceLocator)
         {
 
-            var parameterHandler = serviceLocator.GetService<IServiceParameterResolver>();
+            var parameterHandler = ServiceProviderExtensions.GetService<IServiceParameterResolver>(serviceLocator);
             if (parameterHandler != null)
             {
                 var parameters = parameterHandler.ResolveParameters(methodInfo);
@@ -122,17 +96,17 @@ namespace Stardust.Interstellar.Rest.Common
             }
         }
 
-        public static List<IHeaderHandler> GetHeaderInspectors(MethodInfo methodInfo, IServiceLocator serviceLocator)
+        public static List<IHeaderInspector> GetHeaderInspectors(MethodInfo methodInfo, IServiceProvider serviceLocator)
         {
             var inspectors = GetInspectors(methodInfo);
-            var headerInspectors = GetServices<IHeaderHandler>();
-            var handlers = new List<IHeaderHandler>();
+            var headerInspectors = new Locator(serviceLocator).GetServices<IHeaderInspector>();
+            var handlers = new List<IHeaderInspector>();
             if (headerInspectors != null) handlers.AddRange(headerInspectors);
             foreach (var inspector in inspectors)
             {
-                handlers.AddRange(inspector.GetHandlers(serviceLocator));
+                handlers.Add(inspector);
             }
-            return handlers;
+            return handlers.Where(i=>i!=null).ToList();
         }
 
         private static List<IHeaderInspector> GetInspectors(MethodInfo methodInfo)
@@ -146,9 +120,9 @@ namespace Stardust.Interstellar.Rest.Common
             return inspectors;
         }
 
-        public static List<HttpMethod> GetHttpMethods(List<VerbAttribute> actions, MethodInfo method, IServiceLocator serviceLocator)
+        public static List<HttpMethod> GetHttpMethods(List<VerbAttribute> actions, MethodInfo method, IServiceProvider serviceLocator)
         {
-            var methodResolver = serviceLocator.GetService<IWebMethodConverter>();
+            var methodResolver = ServiceProviderExtensions.GetService<IWebMethodConverter>(serviceLocator);
             var methods = new List<HttpMethod>();
             if (methodResolver != null) methods.AddRange(methodResolver.GetHttpMethods(method));
             foreach (var actionHttpMethodProvider in actions)
@@ -165,6 +139,21 @@ namespace Stardust.Interstellar.Rest.Common
         public static void SetXmlSerializer(Type type)
         {
             xmlSerializer = type;
+        }
+    }
+
+    public class HandlerWrapper : IHeaderInspector
+    {
+        private readonly IHeaderHandler _headerHandler;
+
+        public HandlerWrapper(IHeaderHandler headerHandler)
+        {
+            _headerHandler = headerHandler;
+        }
+
+        public IHeaderHandler[] GetHandlers(IServiceProvider serviceLocator)
+        {
+            return new IHeaderHandler[]{_headerHandler};
         }
     }
 }

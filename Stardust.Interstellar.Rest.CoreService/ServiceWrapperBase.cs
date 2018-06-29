@@ -15,6 +15,7 @@ using Newtonsoft.Json.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Stardust.Interstellar.Rest.Annotations;
 using Stardust.Interstellar.Rest.Annotations.Messaging;
 using Stardust.Interstellar.Rest.Annotations.Service;
@@ -25,9 +26,9 @@ namespace Stardust.Interstellar.Rest.Service
 {
     public abstract class ServiceWrapperBase : Controller
     {
-        protected internal readonly IServiceLocator _serviceLocator;
+        protected internal readonly IServiceProvider _serviceLocator;
 
-        protected ServiceWrapperBase(IServiceLocator serviceLocator)
+        protected ServiceWrapperBase(IServiceProvider serviceLocator)
         {
             _serviceLocator = serviceLocator;
         }
@@ -47,7 +48,7 @@ namespace Stardust.Interstellar.Rest.Service
             var action = GetAction();
             foreach (var interceptor in action.Interceptor)
             {
-                message = (TMessage)interceptor.GetInterceptor(ExtensionsFactory.GetLocator()).Intercept(message, Request.GetState());
+                message = (TMessage)interceptor.GetInterceptor(new Locator(_serviceLocator)).Intercept(message, Request.GetState());
             }
             if (message == null)
             {
@@ -73,7 +74,13 @@ namespace Stardust.Interstellar.Rest.Service
                     actionId = Request.HttpContext.Items[ActionId].ToString();
             }
             result.Headers.Add(ExtensionsFactory.ActionIdName, actionId);
+            var handler = new List<IHeaderHandler>();
             foreach (var customHandler in action.CustomHandlers)
+            {
+                handler.AddRange(customHandler.GetHandlers(_serviceLocator));
+            }
+
+            foreach (var customHandler in handler.OrderBy(f => f.ProcessingOrder))
             {
                 customHandler.SetServiceHeaders(result.Headers);
             }
@@ -100,7 +107,7 @@ namespace Stardust.Interstellar.Rest.Service
                         }
                         catch (Exception ex)
                         {
-                            _serviceLocator.GetService<ILogger>()?.Error(ex);
+                            ServiceProviderExtensions.GetService<ILogger>(_serviceLocator)?.Error(ex);
                         }
                     }
                 }
@@ -109,7 +116,7 @@ namespace Stardust.Interstellar.Rest.Service
             {
                 try
                 {
-                    _serviceLocator.GetService<ILogger>()?.Error(ex);
+                    ServiceProviderExtensions.GetService<ILogger>(_serviceLocator)?.Error(ex);
                 }
                 catch (Exception)
                 {
@@ -144,7 +151,7 @@ namespace Stardust.Interstellar.Rest.Service
                 if (result == null)
                 {
                     var message = messageTask.Result;
-                    result = CreateResponseMessage(statusCode, message, result);
+                    result = await CreateResponseMessage(statusCode, message, result);
                 }
                 SetHeaders(Response);
                 Request.EndState();
@@ -155,7 +162,7 @@ namespace Stardust.Interstellar.Rest.Service
                 if (messageTask.Status == TaskStatus.RanToCompletion)
                 {
                     var message = messageTask.Result;
-                    result = CreateResponseMessage(statusCode, message, result);
+                    result = await CreateResponseMessage(statusCode, message, result);
                     SetHeaders(Response);
                     Request.EndState();
                 }
@@ -165,8 +172,15 @@ namespace Stardust.Interstellar.Rest.Service
             }
         }
 
-        private IActionResult CreateResponseMessage<TMessage>(HttpStatusCode statusCode, TMessage message, IActionResult result)
+        private async Task<IActionResult> CreateResponseMessage<TMessage>(HttpStatusCode statusCode, TMessage message, IActionResult result)
         {
+
+            var action = GetAction();
+            foreach (var interceptor in action.Interceptor)
+            {
+                message = (TMessage)interceptor.GetInterceptor(new Locator(_serviceLocator)).Intercept(message, Request.GetState());
+                message = (TMessage)await interceptor.GetInterceptor(new Locator(_serviceLocator)).InterceptAsync(message, Request.GetState());
+            }
             if (message == null) result = new OkResult();
             else result = new OkObjectResult(message);
             return result;
@@ -224,7 +238,7 @@ namespace Stardust.Interstellar.Rest.Service
         private IErrorHandler GetErrorHandler()
         {
 
-            var errorHandler = _serviceLocator.GetService<IErrorHandler>();
+            var errorHandler = ServiceProviderExtensions.GetService<IErrorHandler>(_serviceLocator);
             if (errorHandler == null) return errorInterceptor;
             if (errorInterceptor != null) return new AggregateHandler(errorHandler, errorInterceptor);
 
@@ -253,7 +267,7 @@ namespace Stardust.Interstellar.Rest.Service
 
         private IErrorHandler errorInterceptor;
 
-        protected ServiceWrapperBase(T implementation, IServiceLocator serviceLocator) : base(serviceLocator)
+        protected ServiceWrapperBase(T implementation, IServiceProvider serviceLocator) : base(serviceLocator)
         {
             this.implementation = implementation;
             InitializeServiceApi(typeof(T));
@@ -262,6 +276,7 @@ namespace Stardust.Interstellar.Rest.Service
 
         protected ParameterWrapper[] GatherParameters(string name, object[] fromWebMethodParameters)
         {
+            _name = name;
             GetMessageExtensions();
             var serviceExtensions = implementation as IServiceExtensions;
             serviceExtensions?.SetControllerContext(ControllerContext);
@@ -291,9 +306,15 @@ namespace Stardust.Interstellar.Rest.Service
                     i++;
                 }
                 this.Request.Headers.Add(ActionWrapperName, GetActionName(name));
-                foreach (var headerHandler in action.CustomHandlers)
+                var handler = new List<IHeaderHandler>();
+                foreach (var customHandler in action.CustomHandlers)
                 {
-                    headerHandler.GetServiceHeader(Request.Headers);
+                    handler.AddRange(customHandler.GetHandlers(_serviceLocator));
+                }
+
+                foreach (var customHandler in handler.OrderBy(f => f.ProcessingOrder))
+                {
+                    customHandler.GetServiceHeader(Request.Headers);
                 }
                 ExecuteInterceptors(action, wrappers);
                 ExecuteInitializers(action, state, wrappers);
@@ -317,6 +338,7 @@ namespace Stardust.Interstellar.Rest.Service
                 throw new ParameterReflectionException(string.Format("Unable to gather parameters for {0}", name), ex);
             }
             if (!ModelState.IsValid) throw new InvalidDataException("Invalid input data");
+            _wrappers = wrappers;
             return wrappers.ToArray();
         }
 
@@ -362,8 +384,20 @@ namespace Stardust.Interstellar.Rest.Service
                     bool cancel;
                     string cancellationMessage;
                     HttpStatusCode statusCode;
-                    cancel = interceptor.GetInterceptor(ExtensionsFactory.GetLocator()).Intercept(wrappers.Select(p => p.value).ToArray(), Request.GetState(), out cancellationMessage, out statusCode);
+                    cancel = interceptor.GetInterceptor(new Locator(_serviceLocator)).Intercept(wrappers.Select(p => p.value).ToArray(), Request.GetState(), out cancellationMessage, out statusCode);
                     if (cancel) throw new OperationAbortedException(statusCode, cancellationMessage);
+                }
+            }
+        }
+
+        private async Task ExecuteInterceptorsAsync(ActionWrapper action, IEnumerable<ParameterWrapper> wrappers)
+        {
+            if (action.Interceptor != null)
+            {
+                foreach (var interceptor in action.Interceptor)
+                {
+                    var cancel = await interceptor.GetInterceptor(new Locator(_serviceLocator)).InterceptAsync(wrappers.Select(p => p.value).ToArray(), Request.GetState());
+                    if (cancel.Cancel) throw new OperationAbortedException(cancel.StatusCode, cancel.CancellationMessage);
                 }
             }
         }
@@ -415,7 +449,7 @@ namespace Stardust.Interstellar.Rest.Service
                 var actions = methodInfo.GetCustomAttributes(true).OfType<VerbAttribute>();
                 var methods = ExtensionsFactory.GetHttpMethods(actions.ToList(), methodInfo, _serviceLocator);
                 var handlers = ExtensionsFactory.GetHeaderInspectors(methodInfo, _serviceLocator);
-                action.CustomHandlers = handlers.OrderBy(i => i.ProcessingOrder).ToList();
+                action.CustomHandlers = handlers.ToList();
                 action.Actions = methods;
 
                 action.Interceptor = methodInfo.GetCustomAttributes().OfType<InputInterceptorAttribute>().ToArray();
@@ -442,16 +476,16 @@ namespace Stardust.Interstellar.Rest.Service
                 errorHanderInterceptor = interfaceType.GetCustomAttribute<ErrorHandlerAttribute>();
                 errorhanderCache.TryAdd(interfaceType, errorHanderInterceptor);
             }
-            if (errorHanderInterceptor != null) errorInterceptor = errorHanderInterceptor.ErrorHandler;
+            if (errorHanderInterceptor != null) errorInterceptor = errorHanderInterceptor.ErrorHandler(_serviceLocator);
         }
 
-        private static List<IHeaderHandler> GetHeaderInspectors(MethodInfo methodInfo)
+        private List<IHeaderHandler> GetHeaderInspectors(MethodInfo methodInfo)
         {
             var inspectors = methodInfo.GetCustomAttributes().OfType<IHeaderInspector>();
             var handlers = new List<IHeaderHandler>();
             foreach (var inspector in inspectors)
             {
-                handlers.AddRange(inspector.GetHandlers(ExtensionsFactory.GetLocator()));
+                handlers.AddRange(inspector.GetHandlers(new Locator(_serviceLocator)));
             }
             return handlers;
         }
@@ -504,6 +538,9 @@ namespace Stardust.Interstellar.Rest.Service
         {
             try
             {
+
+                var action = GetAction(_name);
+                await ExecuteInterceptorsAsync(action, _wrappers);
                 AggregateException error = null;
                 var result = await func().ContinueWith(a =>
                 {
@@ -525,12 +562,16 @@ namespace Stardust.Interstellar.Rest.Service
                 return CreateErrorResponse(ex);
             }
         }
+        private List<ParameterWrapper> _wrappers;
+        private string _name;
 
         protected async Task<IActionResult> ExecuteMethodVoidAsync(Func<Task> func)
         {
             try
             {
+                var action = GetAction(_name);
                 await func();
+                await ExecuteInterceptorsAsync(action, _wrappers);
                 return CreateResponse(HttpStatusCode.NoContent, (object)null);
             }
             catch (Exception ex)

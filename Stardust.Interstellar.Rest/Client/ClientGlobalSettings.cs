@@ -42,10 +42,10 @@ namespace Stardust.Interstellar.Rest.Client
             return new ServiceConfigurationContext<T>(RestWrapper.Cache()[typeof(T)]);
         }
 
-        public static ServiceConfigurationContext<T> ServiceSettings<T>()
-        {
-            return ServiceSettings<T>(ExtensionsFactory.GetLocator());
-        }
+        //public static ServiceConfigurationContext<T> ServiceSettings<T>(IServiceLocator locator)
+        //{
+        //    return ServiceSettings<T>(locator);
+        //}
     }
 
     public class ServiceConfigurationContext<T>
@@ -76,7 +76,7 @@ namespace Stardust.Interstellar.Rest.Client
         {
             foreach (var actionWrapper in _concurrentDictionary)
             {
-                actionWrapper.Value.ErrorHandler = errorHandler;
+                actionWrapper.Value.DefaultErrorHandler = errorHandler;
             }
             return this;
         }
@@ -92,20 +92,15 @@ namespace Stardust.Interstellar.Rest.Client
             _action = action;
         }
 
-        public IErrorHandler GetErrorHandlers() => _action.ErrorHandler;
 
-        public void SetErrorHandler(IErrorHandler handler)
-        {
-            _action.ErrorHandler = handler;
-        }
 
-        public ActionConfigurationContext<T> AddHeaderHandler(IHeaderHandler handler)
+        public ActionConfigurationContext<T> AddHeaderHandler(IHeaderInspector handler)
         {
             _action.CustomHandlers.Add(handler);
             return this;
         }
 
-        public ActionConfigurationContext<T> RemoveHandlers(Func<IHeaderHandler, bool> predicate)
+        public ActionConfigurationContext<T> RemoveHandlers(Func<IHeaderInspector, bool> predicate)
         {
             if (predicate == null) throw new ArgumentNullException("predicate", "Predicate cannot be NULL");
             var itemsToRemove = _action.CustomHandlers.Where(predicate).ToArray();

@@ -15,7 +15,7 @@ namespace Stardust.Interstellar.Rest.Extensions
             this.type = type;
         }
 
-        public IEnumerable<IHeaderHandler> GetHandlers(IServiceLocator serviceLocator)
+        public IEnumerable<IHeaderHandler> GetHandlers(IServiceProvider serviceLocator)
         {
             var inspectors = type.GetCustomAttributes().OfType<IHeaderInspector>();
             var handlers = new List<IHeaderHandler>();

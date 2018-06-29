@@ -7,27 +7,33 @@ namespace Stardust.Interstellar.Rest.Service
     [AttributeUsage(AttributeTargets.Interface)]
     public sealed class ErrorHandlerAttribute : Attribute
     {
+        private readonly Type _errorHandlerType;
+
         /// <summary>Initializes a new instance of the <see cref="T:System.Attribute" /> class.</summary>
-        public ErrorHandlerAttribute(IServiceLocator serviceLocator, Type errorHandlerType)
+        public ErrorHandlerAttribute(Type errorHandlerType)
         {
-            this.ErrorHandler = (IErrorHandler)serviceLocator?.CreateInstanceOf(errorHandlerType) ?? (IErrorHandler)ActivatorUtilities.CreateInstance(new InternalServiceProvider(serviceLocator),errorHandlerType);
+            _errorHandlerType = errorHandlerType;
+            //this.ErrorHandler = (IErrorHandler)serviceLocator?.CreateInstanceOf(errorHandlerType) ?? (IErrorHandler)ActivatorUtilities.CreateInstance(new InternalServiceProvider(serviceLocator),errorHandlerType);
         }
 
-        public IErrorHandler ErrorHandler { get; set; }
+        public IErrorHandler ErrorHandler(IServiceProvider locator)
+        {
+            return ActivatorUtilities.CreateInstance(locator, _errorHandlerType) as IErrorHandler;
+        }
     }
 
     internal class InternalServiceProvider : IServiceProvider
     {
-        private readonly IServiceLocator _serviceLocator;
+        private readonly IServiceProvider _serviceLocator;
 
-        public InternalServiceProvider(IServiceLocator serviceLocator)
+        public InternalServiceProvider(IServiceProvider serviceLocator)
         {
             _serviceLocator = serviceLocator;
         }
 
         public object GetService(Type serviceType)
         {
-            return _serviceLocator.GetService(serviceType);
+            return ActivatorUtilities.CreateInstance(_serviceLocator, serviceType);
         }
     }
 }

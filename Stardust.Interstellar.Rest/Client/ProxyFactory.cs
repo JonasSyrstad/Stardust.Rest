@@ -51,16 +51,6 @@ namespace Stardust.Interstellar.Rest.Client
 
     public static class ProxyFactory
     {
-        public static T CreateRestClient<T>(this IServiceLocator serviceLocator, string baseUrl)
-        {
-            return serviceLocator.GetService<IProxyFactory>().CreateInstance<T>(baseUrl);
-        }
-
-        public static T CreateRestClient<T>(this IServiceLocator serviceLocator, string baseUrl, Action<Dictionary<string, object>> extrasCollector)
-        {
-            return serviceLocator.GetService<IProxyFactory>().CreateInstance<T>(baseUrl, extrasCollector);
-        }
-
         public static T CreateRestClient<T>(this IServiceProvider serviceLocator, string baseUrl)
         {
             return serviceLocator.GetService<IProxyFactory>().CreateInstance<T>(baseUrl);
@@ -70,6 +60,8 @@ namespace Stardust.Interstellar.Rest.Client
         {
             return serviceLocator.GetService<IProxyFactory>().CreateInstance<T>(baseUrl, extrasCollector);
         }
+
+        
 
         static ConcurrentDictionary<Type, Type> proxyTypeCache = new ConcurrentDictionary<Type, Type>();
 
@@ -98,33 +90,33 @@ namespace Stardust.Interstellar.Rest.Client
             }
         }
 
-        internal static T CreateInstance<T>(string baseUrl, IServiceLocator serviceLocator)
+        internal static T CreateInstance<T>(string baseUrl, IServiceProvider serviceLocator)
         {
             return CreateInstance<T>(baseUrl, null, serviceLocator);
         }
 
-        internal static T CreateInstance<T>(string baseUrl, Action<Dictionary<string, object>> extrasCollector, IServiceLocator serviceLocator)
+        internal static T CreateInstance<T>(string baseUrl, Action<Dictionary<string, object>> extrasCollector, IServiceProvider serviceLocator)
         {
             return (T)CreateInstance(typeof(T), baseUrl, extrasCollector, serviceLocator);
         }
 
-        internal static object CreateInstance(Type interfaceType, string baseUrl, IServiceLocator serviceLocator)
+        internal static object CreateInstance(Type interfaceType, string baseUrl, IServiceProvider serviceLocator)
         {
             return CreateInstance(interfaceType, baseUrl, null, serviceLocator);
         }
-        internal static object CreateInstance(Type interfaceType, string baseUrl, Action<Dictionary<string, object>> extrasCollector, IServiceLocator serviceLocator)
+        internal static object CreateInstance(Type interfaceType, string baseUrl, Action<Dictionary<string, object>> extrasCollector, IServiceProvider serviceLocator)
         {
             var t = CreateProxy(interfaceType);
             var auth = interfaceType.GetCustomAttributes().SingleOrDefault(a => a is IAuthenticationInspector) as IAuthenticationInspector;
             var authHandler = GetAuthenticationHandler(auth, serviceLocator);
-            var instance = ActivatorUtilities.CreateInstance(new InternalServiceProvider(serviceLocator), t, authHandler, new HeaderHandlerFactory(interfaceType), TypeWrapper.Create(interfaceType));
+            var instance = ActivatorUtilities.CreateInstance(serviceLocator, t, authHandler, new HeaderHandlerFactory(interfaceType), TypeWrapper.Create(interfaceType));
             ((RestWrapper)instance).Extras = extrasCollector;
             var i = (RestWrapper)instance;
             i.SetBaseUrl(baseUrl);
             return instance;
         }
 
-        private static object GetAuthenticationHandler(IAuthenticationInspector auth, IServiceLocator serviceLocator)
+        private static object GetAuthenticationHandler(IAuthenticationInspector auth, IServiceProvider serviceLocator)
         {
             IAuthenticationHandler authHandler;
             if (auth == null)

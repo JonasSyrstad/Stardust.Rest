@@ -3,11 +3,9 @@ using System.Collections.Generic;
 
 namespace Stardust.Interstellar.Rest.Extensions
 {
-    public interface IServiceLocator
+    public interface IServiceLocator : IServiceProvider
     {
         T GetService<T>();
-
-        object GetService(Type serviceType);
 
         IEnumerable<T> GetServices<T>();
 

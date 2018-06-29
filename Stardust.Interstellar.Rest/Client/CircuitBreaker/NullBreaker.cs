@@ -9,9 +9,9 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 {
     internal class NullBreaker : ICircuitBreaker, ICircuitBreakerMonitor
     {
-        private readonly IServiceLocator _serviceLocator;
+        private readonly IServiceProvider _serviceLocator;
 
-        public NullBreaker(IServiceLocator serviceLocator)
+        public NullBreaker(IServiceProvider serviceLocator)
         {
             _serviceLocator = serviceLocator;
         }
@@ -78,9 +78,9 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 
         public void Trip(string circuitBreakerServiceName, Exception exception, ICircuitBreakerState state)
         {
-            _serviceLocator.GetService<ILogger>()?.Error(exception);
+            _serviceLocator?.GetService<ILogger>()?.Error(exception);
             var webEx = exception as WebException ?? (exception as AggregateException)?.InnerException as WebException;
-            _serviceLocator.GetService<ILogger>()?.Message($"Invocation of service {circuitBreakerServiceName} failed. Action url: {webEx?.Response?.ResponseUri}");
+            _serviceLocator?.GetService<ILogger>()?.Message($"Invocation of service {circuitBreakerServiceName} failed. Action url: {webEx?.Response?.ResponseUri}");
         }
 
         public bool IsExceptionIgnorable(Exception exception)
