@@ -5,8 +5,4 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Stardust.Aadb2c.AuthenticationFilter.Core\Stardust.Aadb2c.AuthenticationFilter.Core.csproj" />
-  </ItemGroup>
-
 </Project>

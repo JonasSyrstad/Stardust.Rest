@@ -63,7 +63,7 @@ namespace Stardust.Interstellar.Rest.Annotations.UserAgent
 
         }
 
-        IHeaderHandler[] IHeaderInspector.GetHandlers(IServiceLocator serviceLocator)
+        IHeaderHandler[] IHeaderInspector.GetHandlers(IServiceProvider locator)
         {
             return new IHeaderHandler[] { new FixedClientUserAgentAttribute(userAgentName) };
         }

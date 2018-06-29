@@ -41,13 +41,13 @@ namespace NetCoreTestWeb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddStardust()
-                //.AddSingleton(s => new Stardust.Interstellar.Rest.Service.ServiceLocator(s))
+            services.AddInterstellar().AddHttpContextAccessor()
+                .AddSingleton(s => new Locator(s))
                 .AddSingleton<ILogger, LogWrapper>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                . 
                 .AddB2CAuthentication("OAuth2", "Azure B2C authentication");
-            ExtensionsFactory.SetServiceLocator(new Stardust.Interstellar.Rest.Service.ServiceLocator(services.BuildServiceProvider()));
+
+
             var builder = services.AddMvc().AddAsController<IMyServies, MyServies>().UseInterstellar();
 
             services.AddSwaggerGen(c =>
@@ -68,7 +68,6 @@ namespace NetCoreTestWeb
             }
             app.AddConfigurationManager(new ConfigManager());
 
-            ExtensionsFactory.Logger?.Message("configured!");
             app.UseMvc();
             app.UseSwagger();
             app.UseSwaggerUI(c =>

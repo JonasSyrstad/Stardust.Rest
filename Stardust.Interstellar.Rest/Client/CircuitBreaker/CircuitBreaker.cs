@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Stardust.Interstellar.Rest.Annotations;
 using Stardust.Interstellar.Rest.Common;
 using Stardust.Interstellar.Rest.Extensions;
@@ -10,9 +9,9 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 {
     public class CircuitBreaker : ICircuitBreaker, ICircuit
     {
-        internal readonly IServiceLocator _serviceLocator;
+        internal readonly IServiceProvider _serviceLocator;
 
-        public CircuitBreaker(int threshold, TimeSpan timeout, TimeSpan resetTimeout, Type[] ignoredExceptions, HttpStatusCode[] ignoredStatusCodes, Type circuitBrakerMonitor,IServiceLocator serviceLocator)
+        public CircuitBreaker(int threshold, TimeSpan timeout, TimeSpan resetTimeout, Type[] ignoredExceptions, HttpStatusCode[] ignoredStatusCodes, Type circuitBrakerMonitor, IServiceProvider serviceLocator)
         {
             if (threshold < 1)
             {
@@ -33,7 +32,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
             IgnoredStatusCodes = ignoredStatusCodes;
             MoveToClosedState();
             if (circuitBrakerMonitor != null)
-                monitor = (ICircuitBreakerMonitor)ActivatorUtilities.CreateInstance(new InternalServiceProvider(_serviceLocator),circuitBrakerMonitor);
+                monitor = (ICircuitBreakerMonitor)Activator.CreateInstance(circuitBrakerMonitor, _serviceLocator);
         }
 
 
@@ -42,7 +41,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
         private Exception exceptionFromLastAttemptCall;
         private ICircuitBreakerMonitor monitor;
 
-        public CircuitBreaker(CircuitBreakerAttribute attribute,IServiceLocator serviceLocator) : this(attribute.Threshold, attribute.Timeout, attribute.ResetTimeout, attribute.IgnoredExceptionTypes, attribute.IgnoredStatusCodes, attribute.Monitor,serviceLocator)
+        public CircuitBreaker(CircuitBreakerAttribute attribute, IServiceProvider serviceLocator) : this(attribute.Threshold, attribute.Timeout, attribute.ResetTimeout, attribute.IgnoredExceptionTypes, attribute.IgnoredStatusCodes, attribute.Monitor, serviceLocator)
         {
         }
 
@@ -235,7 +234,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 
         public void Invoke(string actionUrl, Action func)
         {
-            
+
             PreCallProcessing(actionUrl);
             try
             {

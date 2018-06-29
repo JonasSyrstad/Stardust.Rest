@@ -22,7 +22,7 @@ namespace Stardust.Interstellar.Rest.Client
           {
               var myAssemblyName = new AssemblyName();
               myAssemblyName.Name = Guid.NewGuid().ToString().Replace("-", "") + "_RestWrapper";
-              ExtensionsFactory.Logger?.Message("Creating dynamic assembly {0}", myAssemblyName.FullName);
+              //ExtensionsFactory.Logger?.Message("Creating dynamic assembly {0}", myAssemblyName.FullName);
               var ab = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(myAssemblyName, AssemblyBuilderAccess.Run);
 
               var myModuleBuilder = ab.DefineDynamicModule(myAssemblyName.Name);
@@ -348,12 +348,12 @@ namespace Stardust.Interstellar.Rest.Client
         {
             const MethodAttributes methodAttributes = MethodAttributes.Public | MethodAttributes.HideBySig;
 
-            var method = type.DefineConstructor(methodAttributes, CallingConventions.Standard | CallingConventions.HasThis, new[] { typeof(IAuthenticationHandler), typeof(IHeaderHandlerFactory), typeof(TypeWrapper), typeof(IServiceLocator) });
+            var method = type.DefineConstructor(methodAttributes, CallingConventions.Standard | CallingConventions.HasThis, new[] { typeof(IAuthenticationHandler), typeof(IHeaderHandlerFactory), typeof(TypeWrapper), typeof(IServiceProvider) });
             var authenticationHandler = method.DefineParameter(1, ParameterAttributes.None, "authenticationHandler");
             var headerHandlers = method.DefineParameter(2, ParameterAttributes.None, "headerHandlers");
             var interfaceType = method.DefineParameter(3, ParameterAttributes.None, "interfaceType");
             var serviceLocator = method.DefineParameter(4, ParameterAttributes.None, "serviceLocator");
-            var ctor1 = typeof(RestWrapper).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new[] { typeof(IAuthenticationHandler), typeof(IHeaderHandlerFactory), typeof(TypeWrapper), typeof(IServiceLocator) }, null);
+            var ctor1 = typeof(RestWrapper).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new[] { typeof(IAuthenticationHandler), typeof(IHeaderHandlerFactory), typeof(TypeWrapper), typeof(IServiceProvider) }, null);
 
             var gen = method.GetILGenerator();
             // Writing body

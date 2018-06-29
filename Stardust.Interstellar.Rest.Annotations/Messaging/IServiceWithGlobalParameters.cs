@@ -1,4 +1,5 @@
-﻿using Stardust.Interstellar.Rest.Extensions;
+﻿using System;
+using Stardust.Interstellar.Rest.Extensions;
 
 namespace Stardust.Interstellar.Rest.Annotations.Messaging
 {
@@ -7,6 +8,6 @@ namespace Stardust.Interstellar.Rest.Annotations.Messaging
     /// </summary>
     public interface IServiceWithGlobalParameters
     {
-        IServiceLocator ServiceLocator { get; }
+        IServiceProvider ServiceLocator { get; }
     }
 }

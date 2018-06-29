@@ -10,6 +10,7 @@ using Newtonsoft.Json.Linq;
 using Stardust.Interstellar.Rest.Annotations.Messaging;
 using Stardust.Interstellar.Rest.Common;
 using Stardust.Interstellar.Rest.Extensions;
+using Stardust.Interstellar.Rest.Annotations;
 
 namespace Stardust.Interstellar.Rest.Service
 {
@@ -33,7 +34,7 @@ namespace Stardust.Interstellar.Rest.Service
             return state;
         }
 
-        public static IStateCache GetCache(IServiceLocator serviceLocator)
+        public static IStateCache GetCache(IServiceProvider serviceLocator)
         {
             var cache = serviceLocator.GetService<IStateCache>();
             if (cache == null) return new HttpContextMessageContainer();

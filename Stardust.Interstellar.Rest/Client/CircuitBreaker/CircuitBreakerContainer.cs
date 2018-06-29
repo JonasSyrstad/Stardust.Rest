@@ -11,11 +11,11 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
     public static class CircuitBreakerContainer
     {
         private static ConcurrentDictionary<Type, ICircuitBreaker> breakers = new ConcurrentDictionary<Type, ICircuitBreaker>();
-        internal static ICircuitBreaker GetCircuitBreaker(Type serviceType)
+        internal static ICircuitBreaker GetCircuitBreaker(Type serviceType,IServiceLocator locator=null)
         {
             ICircuitBreaker breaker;
             if (breakers.TryGetValue(serviceType, out breaker)) return breaker;
-            return new NullBreaker(ExtensionsFactory.GetLocator());
+            return new NullBreaker(locator);
         }
 
         internal static void Register(Type interfaceType, ICircuitBreaker circuitBreaker)

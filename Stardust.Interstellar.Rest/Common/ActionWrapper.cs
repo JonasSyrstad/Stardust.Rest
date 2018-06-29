@@ -21,7 +21,7 @@ namespace Stardust.Interstellar.Rest.Common
 
         public List<HttpMethod> Actions { get; set; }
 
-        public List<IHeaderHandler> CustomHandlers { get; set; }
+        public List<IHeaderInspector> CustomHandlers { get; set; }
 
         public InputInterceptorAttribute[] Interceptor { get; set; }
 
@@ -34,8 +34,10 @@ namespace Stardust.Interstellar.Rest.Common
         public bool IncrementalRetry { get; set; }
         public IErrorCategorizer ErrorCategorizer { get; set; }
         public List<ServiceInitializerAttribute> Initializers { get; set; }
-        public IErrorHandler ErrorHandler { get; set; }
+        //public IErrorHandler ErrorHandler { get; set; }
         public IThrottlingManager Throttler { get; set; }
+        public ErrorHandlerAttribute ErrorHandler { get; set; }
+        public IErrorHandler DefaultErrorHandler { get; set; }
     }
 
 

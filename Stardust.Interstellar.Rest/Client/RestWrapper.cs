@@ -8,7 +8,6 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
-using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Stardust.Interstellar.Rest.Annotations;
 using Stardust.Interstellar.Rest.Annotations.Messaging;
@@ -30,7 +29,7 @@ namespace Stardust.Interstellar.Rest.Client
 
         private ConcurrentDictionary<string, string> additionalHeaders = new ConcurrentDictionary<string, string>();
         private IAuthenticationHandler authenticationHandler;
-        private readonly IServiceLocator _serviceLocator;
+        private readonly IServiceProvider _serviceLocator;
 
         private readonly IEnumerable<IHeaderHandler> headerHandlers;
 
@@ -53,7 +52,7 @@ namespace Stardust.Interstellar.Rest.Client
 
         public Action<Dictionary<string, object>> Extras { get; internal set; }
 
-        protected RestWrapper(IAuthenticationHandler authenticationHandler, IHeaderHandlerFactory headerHandlers, TypeWrapper interfaceType, IServiceLocator serviceLocator)
+        protected RestWrapper(IAuthenticationHandler authenticationHandler, IHeaderHandlerFactory headerHandlers, TypeWrapper interfaceType, IServiceProvider serviceLocator)
         {
             this.authenticationHandler = authenticationHandler;
             _serviceLocator = serviceLocator;
@@ -93,8 +92,8 @@ namespace Stardust.Interstellar.Rest.Client
                 var handlers = ExtensionsFactory.GetHeaderInspectors(methodInfo, _serviceLocator);
 
                 action.UseXml = methodInfo.GetCustomAttributes().OfType<UseXmlAttribute>().Any();
-                action.CustomHandlers = handlers.Where(h => headerHandlers.All(parent => parent.GetType() != h.GetType())).OrderBy(i => i.ProcessingOrder).ToList();
-                action.ErrorHandler = _errorInterceptor?.ErrorHandler;
+                action.CustomHandlers = handlers.Where(h => headerHandlers.All(parent => parent.GetType() != h.GetType())).ToList();
+                action.ErrorHandler = _errorInterceptor;//?.ErrorHandler(_serviceLocator);
                 action.Actions = methods;
                 if (actionRetry != null)
                 {
@@ -103,7 +102,7 @@ namespace Stardust.Interstellar.Rest.Client
                     action.NumberOfRetries = actionRetry.NumberOfRetries;
                     action.IncrementalRetry = actionRetry.IncremetalWait;
                     if (actionRetry.ErrorCategorizer != null)
-                        action.ErrorCategorizer = (IErrorCategorizer)ActivatorUtilities.CreateInstance(new InternalServiceProvider(_serviceLocator), actionRetry.ErrorCategorizer);
+                        action.ErrorCategorizer = (IErrorCategorizer)Activator.CreateInstance(actionRetry.ErrorCategorizer, _serviceLocator);
                 }
                 ExtensionsFactory.BuildParameterInfo(methodInfo, action, _serviceLocator);
                 newWrapper.TryAdd(action.Name, action);
@@ -216,7 +215,13 @@ namespace Stardust.Interstellar.Rest.Client
             if (response == null) return;
             if (response.Cookies != null && response.Cookies.Count > 0)
                 cookieContainer.Add(response.Cookies);
+            var handler = new List<IHeaderHandler>();
             foreach (var customHandler in action.CustomHandlers)
+            {
+                handler.AddRange(customHandler.GetHandlers(_serviceLocator));
+            }
+
+            foreach (var customHandler in handler.OrderBy(f => f.ProcessingOrder))
             {
                 customHandler.GetHeader(response);
             }
@@ -426,7 +431,13 @@ namespace Stardust.Interstellar.Rest.Client
             }
             if (action.CustomHandlers != null)
             {
+                var handler = new List<IHeaderHandler>();
                 foreach (var customHandler in action.CustomHandlers)
+                {
+                    handler.AddRange(customHandler.GetHandlers(_serviceLocator));
+                }
+
+                foreach (var customHandler in handler.OrderBy(f => f.ProcessingOrder))
                 {
                     customHandler.SetHeader(req);
                 }
@@ -452,15 +463,15 @@ namespace Stardust.Interstellar.Rest.Client
             }
         }
 
-        private static void XmlBodySerializer(WebRequest req, object val)
+        private void XmlBodySerializer(WebRequest req, object val)
         {
             var xmlSerializer = GetSerializer();
             xmlSerializer.Serialize(req, val);
         }
 
-        private static ISerializer GetSerializer()
+        private ISerializer GetSerializer()
         {
-            var xmlSerializer = ExtensionsFactory.GetServices<ISerializer>().SingleOrDefault(s => string.Equals(s.SerializationType, "xml", StringComparison.InvariantCultureIgnoreCase));
+            var xmlSerializer = new Locator(_serviceLocator).GetServices<ISerializer>().SingleOrDefault(s => string.Equals(s.SerializationType, "xml", StringComparison.InvariantCultureIgnoreCase));
             if (xmlSerializer == null) throw new IndexOutOfRangeException("Could not find serializer");
             return xmlSerializer;
         }
@@ -636,7 +647,7 @@ namespace Stardust.Interstellar.Rest.Client
             var errorHandler = action?.ErrorHandler;
             if (globalErrorHandler != null && errorHandler != null)
             {
-                handler = new AggregateHandler(globalErrorHandler, errorHandler);
+                handler = new AggregateHandler(globalErrorHandler, errorHandler?.ErrorHandler(_serviceLocator));
             }
             else if (globalErrorHandler != null)
             {
@@ -644,7 +655,7 @@ namespace Stardust.Interstellar.Rest.Client
             }
             else
             {
-                handler = errorHandler;
+                handler = errorHandler?.ErrorHandler(_serviceLocator);
             }
             return handler;
         }
@@ -684,6 +695,6 @@ namespace Stardust.Interstellar.Rest.Client
             return wrappers.ToArray();
         }
 
-        public IServiceLocator ServiceLocator => _serviceLocator;
+        public IServiceProvider ServiceLocator => _serviceLocator;
     }
 }

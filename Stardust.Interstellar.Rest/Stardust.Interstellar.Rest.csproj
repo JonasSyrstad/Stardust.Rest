@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>3.1.0-pre005</Version>
+    <Version>3.1.3</Version>
     <Authors>Stardust</Authors>
     <Company>Stardust</Company>
     <PackageId>Stardust.Interstellar.Rest</PackageId>
@@ -11,26 +11,21 @@
     <Copyright>Copyright © Stardust 2018</Copyright>
     <PackageProjectUrl>https://github.com/JonasSyrstad/Stardust.Interstellar.Rest</PackageProjectUrl>
     <PackageIconUrl>http://stardustframework.wdfiles.com/local--files/blog%3A_start/logo_smal.png</PackageIconUrl>
-    <RepositoryUrl>https://github.com/JonasSyrstad/Stardust.Interstellar.Rest</RepositoryUrl>
+    <RepositoryUrl>https://github.com/JonasSyrstad/Stardust.Rest</RepositoryUrl>
     <RepositoryType>github</RepositoryType>
     <PackageTags>rest client proxy generator</PackageTags>
-    <PackageReleaseNotes>updated to netstandard2.0</PackageReleaseNotes>
+    <PackageReleaseNotes>Switching to use IServiceProvider as standard service locator for ease of integration in existing projects.
+Alligning version numbers of the packages related to the rest tool.</PackageReleaseNotes>
     <AssemblyVersion>3.1.0.0</AssemblyVersion>
     <FileVersion>3.1.0.0</FileVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="2.0.0" />
-    <PackageReference Include="Stardust.Interstellar.Rest.Annotations" Version="2.1.0-pre005" />
-    <PackageReference Include="Stardust.Particles" Version="5.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
-      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.2.0.0\lib\netstandard2.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
-    </Reference>
+    <PackageReference Include="Stardust.Interstellar.Rest.Annotations" Version="3.1.0" />
+    <PackageReference Include="Stardust.Particles" Version="5.0.1" />
   </ItemGroup>
 
 </Project>

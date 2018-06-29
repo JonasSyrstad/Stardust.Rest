@@ -259,3 +259,5 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/NetCoreTestWeb/LogFiles/diagnostics-20180627.txt
+/NetCoreTestWeb/LogFiles/diagnostics-20180626.txt

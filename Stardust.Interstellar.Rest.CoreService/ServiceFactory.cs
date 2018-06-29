@@ -17,21 +17,21 @@ namespace Stardust.Interstellar.Rest.Service
         public static IMvcBuilder AddAsController<TService, TImplementation>(this IMvcBuilder builder) where TService : class
             where TImplementation : class, TService
         {
-            var service = CreateServiceImplementation<TService>(new ServiceLocator(builder.Services.BuildServiceProvider()));
+            var service = CreateServiceImplementation<TService>(new Locator(builder.Services.BuildServiceProvider()));
             builder.Services.AddScoped<TService, TImplementation>();
             return builder;
         }
 
         public static IMvcBuilder AddAsController<TService>(this IMvcBuilder builder, Type implementationType) where TService : class
         {
-            var service = CreateServiceImplementation<TService>(new ServiceLocator(builder.Services.BuildServiceProvider()));
+            var service = CreateServiceImplementation<TService>(new Locator(builder.Services.BuildServiceProvider()));
             builder.Services.AddScoped(typeof(TService), implementationType);
             return builder;
         }
 
         public static IMvcBuilder AddProxyController<TService>(this IMvcBuilder builder, string baseUrl) where TService : class
         {
-            var service = CreateServiceImplementation<TService>(new ServiceLocator(builder.Services.BuildServiceProvider()));
+            var service = CreateServiceImplementation<TService>(new Locator(builder.Services.BuildServiceProvider()));
             builder.Services.AddScoped(s => s.CreateRestClient<TService>(baseUrl));
             return builder;
         }
@@ -39,13 +39,13 @@ namespace Stardust.Interstellar.Rest.Service
         public static IMvcBuilder AddAsController<TService>(this IMvcBuilder builder) where TService : class
 
         {
-            var service = CreateServiceImplementation<TService>(new ServiceLocator(builder.Services.BuildServiceProvider()));
+            var service = CreateServiceImplementation<TService>(new Locator(builder.Services.BuildServiceProvider()));
             return builder;
         }
 
         public static IMvcBuilder AddAsController<TService>(this IMvcBuilder builder, Func<IServiceProvider, TService> func) where TService : class
         {
-            var service = CreateServiceImplementation<TService>(new ServiceLocator(builder.Services.BuildServiceProvider()));
+            var service = CreateServiceImplementation<TService>(new Locator(builder.Services.BuildServiceProvider()));
             builder.Services.AddScoped(func);
             return builder;
         }
@@ -90,7 +90,7 @@ namespace Stardust.Interstellar.Rest.Service
         public static IEnumerable<Type> CreateServiceImplementationForAllInCotainingAssembly<T>(IApplicationBuilder builder)
         {
             var assembly = typeof(T).Assembly;
-            return CreateServiceImplementations(assembly, new ServiceLocator(builder.ApplicationServices));
+            return CreateServiceImplementations(assembly, new Locator(builder.ApplicationServices));
         }
 
         public static IEnumerable<Type> CreateServiceImplementations(Assembly assembly, IServiceLocator serviceLocator)

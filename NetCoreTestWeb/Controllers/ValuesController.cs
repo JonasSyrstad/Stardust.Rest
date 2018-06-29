@@ -30,7 +30,7 @@ namespace NetCoreTestWeb.Controllers
 
     public class ServiceInformationAttribute : HeaderInspectorAttributeBase, IHeaderHandler
     {
-        public override IHeaderHandler[] GetHandlers(IServiceLocator serviceLocator)
+        public override IHeaderHandler[] GetHandlers(IServiceProvider serviceLocator)
         {
             return new[] { this };
         }

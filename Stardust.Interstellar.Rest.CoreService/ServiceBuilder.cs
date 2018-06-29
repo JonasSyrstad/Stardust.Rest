@@ -38,7 +38,7 @@ namespace Stardust.Interstellar.Rest.Service
         {
             try
             {
-                ExtensionsFactory.Logger?.Message("Generating webapi controller for {0}", interfaceType.FullName);
+                serviceLocator?.GetService<ILogger>().Message("Generating webapi controller for {0}", interfaceType.FullName);
                 var type = CreateServiceType(interfaceType);
                 ctor(type, interfaceType);
                 foreach (var methodInfo in interfaceType.GetMethods().Length == 0 ? interfaceType.GetInterfaces().First().GetMethods() : interfaceType.GetMethods())
@@ -61,8 +61,8 @@ namespace Stardust.Interstellar.Rest.Service
             }
             catch (Exception ex)
             {
-                ExtensionsFactory.Logger?.Error(ex);
-                ExtensionsFactory.Logger?.Message("Skipping type: {0}", interfaceType.FullName);
+                serviceLocator?.GetService<ILogger>()?.Error(ex);
+                serviceLocator?.GetService<ILogger>()?.Message("Skipping type: {0}", interfaceType.FullName);
                 return null;
             }
         }

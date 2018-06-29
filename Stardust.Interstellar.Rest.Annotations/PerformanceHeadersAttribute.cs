@@ -9,7 +9,7 @@ namespace Stardust.Interstellar.Rest.Annotations
     [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Method|AttributeTargets.Assembly)]
     public class PerformanceHeadersAttribute : HeaderInspectorAttributeBase
     {
-        public override IHeaderHandler[] GetHandlers(IServiceLocator serviceLocator)
+        public override IHeaderHandler[] GetHandlers(IServiceProvider serviceLocator)
         {
             return new IHeaderHandler[] { new PerformanceHeadersHandler() };
         }

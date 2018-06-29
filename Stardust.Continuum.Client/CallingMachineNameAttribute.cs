@@ -7,7 +7,7 @@ namespace Stardust.Continuum.Client
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Interface)]
     public sealed class CallingMachineNameAttribute : HeaderInspectorAttributeBase
     {
-        public override IHeaderHandler[] GetHandlers(IServiceLocator serviceLocator)
+        public override IHeaderHandler[] GetHandlers(IServiceProvider serviceLocator)
         {
             return new IHeaderHandler[] { new CallingMachineNameHandler() };
         }
