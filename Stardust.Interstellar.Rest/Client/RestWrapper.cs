@@ -59,7 +59,7 @@ namespace Stardust.Interstellar.Rest.Client
             this.headerHandlers = headerHandlers?.GetHandlers(_serviceLocator) ?? new List<IHeaderHandler>();
             this.interfaceType = interfaceType.Type;
             InitializeClient(this.interfaceType);
-            cookieContainer = new CookieContainer();
+            cookieContainer = _serviceLocator.GetService<CookieContainer>() ?? new CookieContainer();
         }
 
         public void InitializeClient(Type interfaceType)
@@ -376,7 +376,7 @@ namespace Stardust.Interstellar.Rest.Client
             req.Accept = contentType;
             req.ContentType = contentType;
             req.Headers.Add("Accept-Language", "en-us");
-            req.UserAgent = "stardust/1.0";
+            req.UserAgent = "stardust/3.1";
             req.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
             req.CookieContainer = cookieContainer;
             SetExtraHeaderValues(req);
