@@ -13,7 +13,7 @@ namespace Stardust.Continuum.Client
         private static long receivedTotal = 0;
         private static long receivedLastHour = 0;
         private static DateTime resetTime;
-
+        private static string Version { get; } = $"{typeof(CallingMachineNameHandler).Assembly.GetName().Version.Major}.{typeof(CallingMachineNameHandler).Assembly.GetName().Version.Minor}";
         /// <summary>
         /// The order of execution. Lower numbers will be processed first
         /// </summary>
@@ -26,6 +26,7 @@ namespace Stardust.Continuum.Client
         public void SetHeader(HttpWebRequest req)
         {
             req.Headers.Add("x-callingMachine", Environment.MachineName);
+            req.UserAgent += $"(continuum/{Version})";
         }
 
         public void GetHeader(HttpWebResponse response)

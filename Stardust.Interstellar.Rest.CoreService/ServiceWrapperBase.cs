@@ -61,12 +61,14 @@ namespace Stardust.Interstellar.Rest.Service
             Request.EndState();
             return result;
         }
+        private static string Version { get; } = $"{typeof(GetAttribute).Assembly.GetName().Version.Major}.{typeof(GetAttribute).Assembly.GetName().Version.Minor}";
 
         private void SetHeaders(HttpResponse result)
         {
             SetServiceHeaders(result);
             var action = GetAction();
-
+            if (ServiceFactory._includeStardustVersion)
+                result.Headers.Add("x-interstellarVersion", Version);
             var actionId = Request.ActionId();
             if (string.IsNullOrWhiteSpace(actionId))
             {
@@ -247,20 +249,28 @@ namespace Stardust.Interstellar.Rest.Service
 
         private IActionResult ConvertExceptionToErrorResult(Exception ex, HttpResponse result, IErrorHandler errorHandler)
         {
-            IActionResult response;
-            //if (errorHandler != null && errorHandler.OverrideDefaults)
-            //{
-            //    response = //errorHandler.ConvertToErrorResponse(ex, null);
-
-            //    if (result != null) return response;
-            //}
-            if (ex is UnauthorizedAccessException) response = new UnauthorizedResult();
-            else if (ex is IndexOutOfRangeException || ex is KeyNotFoundException) response = new ObjectResult(new ErrorDescriptor { Message = ex.Message }) { StatusCode = (int)HttpStatusCode.NotFound };
+            IActionResult response = null;
+            var handler = ServiceProviderExtensions.GetService<IExceptionToResponseHandler>(_serviceLocator);
+            if (handler != null && handler.OverrideDefault)
+                return handler.ConvertToErrorResponse(ex, result, this);
+            if (ex is UnauthorizedAccessException)
+            {
+                response = new UnauthorizedResult();
+            }
+            else if (ex is IndexOutOfRangeException || ex is KeyNotFoundException)
+            {
+                response = new ObjectResult(new ErrorDescriptor { Message = ex.Message }) { StatusCode = (int)HttpStatusCode.NotFound };
+            }
             else if (ex is NotImplementedException)
-                response = new StatusCodeResult((int)HttpStatusCode.NotImplemented);// Request.CreateErrorResponse(HttpStatusCode.NotImplemented, ex.Message);
-            // else if (errorHandler != null) result = errorHandler.ConvertToErrorResponse(ex, Request);
-            else response = StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
-            return response;
+            {
+                response = new StatusCodeResult((int)HttpStatusCode.NotImplemented);
+            }
+            else if (handler != null)
+            {
+                response = handler.ConvertToErrorResponse(ex, result, this);
+            }
+
+            return response ?? StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
 
         private static ConcurrentDictionary<Type, ConcurrentDictionary<string, ActionWrapper>> cache = new ConcurrentDictionary<Type, ConcurrentDictionary<string, ActionWrapper>>();

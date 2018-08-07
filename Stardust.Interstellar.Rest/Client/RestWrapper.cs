@@ -369,14 +369,16 @@ namespace Stardust.Interstellar.Rest.Client
             return action;
         }
 
+        private static string Version { get; } = $"{typeof(GetAttribute).Assembly.GetName().Version.Major}.{typeof(GetAttribute).Assembly.GetName().Version.Minor}";
+
         private HttpWebRequest CreateRequest(string path, string contentType = "application/json")
         {
-            var req = WebRequest.Create(new Uri(string.Format("{0}/{1}", baseUri, path))) as HttpWebRequest;
+            var req = WebRequest.Create(new Uri($"{baseUri}/{path}")) as HttpWebRequest;
             req.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
             req.Accept = contentType;
             req.ContentType = contentType;
             req.Headers.Add("Accept-Language", "en-us");
-            req.UserAgent = "stardust/3.1";
+            req.UserAgent = $"stardust/{Version}";
             req.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
             req.CookieContainer = cookieContainer;
             SetExtraHeaderValues(req);

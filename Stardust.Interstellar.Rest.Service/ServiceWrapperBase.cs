@@ -59,12 +59,14 @@ namespace Stardust.Interstellar.Rest.Service
             Request.EndState();
             return result;
         }
+        private static string Version { get; } = $"{typeof(GetAttribute).Assembly.GetName().Version.Major}.{typeof(GetAttribute).Assembly.GetName().Version.Minor}";
 
         private void SetHeaders(HttpResponseMessage result)
         {
             SetServiceHeaders(result);
             var action = GetAction();
-
+            if (ServiceFactory._includeStardustVersion)
+                result.Headers.Add("x-interstellarVersion", Version);
             var actionId = Request.ActionId();
             if (string.IsNullOrWhiteSpace(actionId))
             {

@@ -11,6 +11,10 @@ namespace Stardust.Interstellar.Rest.Service
 {
     public static class ServiceFactory
     {
+        public static void DisableStardustVersion()
+        {
+            _includeStardustVersion = false;
+        }
         static ServiceFactory()
         {
             AuthorizeWrapperAttribute.SetAttributeCreator(a => new AuthorizeAttribute { Roles = a.Roles, Users = a.Users });
@@ -18,6 +22,7 @@ namespace Stardust.Interstellar.Rest.Service
         static ServiceBuilder Builder = new ServiceBuilder();
 
         private static List<Type> ServiceTypes = new List<Type>();
+        internal static bool _includeStardustVersion=true;
 
         public static Type CreateServiceImplementation<T>(IServiceLocator serviceLocator)
         {
