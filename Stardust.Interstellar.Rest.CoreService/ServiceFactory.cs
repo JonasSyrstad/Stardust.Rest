@@ -14,6 +14,11 @@ namespace Stardust.Interstellar.Rest.Service
 {
     public static class ServiceFactory
     {
+        internal static bool _includeStardustVersion = true;
+        public static void DisableStardustVersion()
+        {
+            _includeStardustVersion = false;
+        }
         public static IMvcBuilder AddAsController<TService, TImplementation>(this IMvcBuilder builder) where TService : class
             where TImplementation : class, TService
         {

@@ -1,55 +1,56 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 using Stardust.Interstellar.Rest.Common;
 
 namespace Stardust.Interstellar.Rest.Service
 {
-    class VoidDelegateBuilder
+    public class DelegateBuilder
     {
         private readonly ModuleBuilder myModuleBuilder;
 
-        public VoidDelegateBuilder(ModuleBuilder myModuleBuilder)
+        public DelegateBuilder(ModuleBuilder myModuleBuilder)
         {
             this.myModuleBuilder = myModuleBuilder;
         }
 
-        private  static int typeCounter;
+        private static int typeCounter;
 
-        internal Type CreateVoidDelegate(MethodInfo targetMethod, TypeBuilder parent, List<ParameterWrapper> methodParams)
+        public Type CreateDelegate(MethodInfo targetMethod, TypeBuilder parent, List<ParameterWrapper> methodParams)
         {
             typeCounter++;
-            var typeBuilder = myModuleBuilder.DefineType(string.Format("TempModule.Controllers.{0}{1}{2}VoidDelegate{3}", targetMethod.DeclaringType.Name, targetMethod.Name, targetMethod.GetParameters().Length, typeCounter),
+            var typeBuilder = myModuleBuilder.DefineType(string.Format("TempModule.Controllers.{0}{1}{2}Delegate{3}", targetMethod.DeclaringType.Name, targetMethod.Name, targetMethod.GetParameters().Length, typeCounter),
                 TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.AnsiClass | TypeAttributes.AutoClass,
                 typeof(object));
+            //var typeBuilder = myModuleBuilder.DefineType(string.Format("{0}{1}{2}Delegate", targetMethod.DeclaringType.Name, targetMethod.Name, targetMethod.GetParameters().Length), TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.AnsiClass | TypeAttributes.AutoClass, typeof(object));
             var imp = typeBuilder.DefineField("implementation", parent, FieldAttributes.Public);
             var baseController = typeof(ServiceWrapperBase<>).MakeGenericType(targetMethod.DeclaringType).GetField("implementation", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
             var param = typeBuilder.DefineField("parameters", typeof(ParameterWrapper[]), FieldAttributes.Public);
-            CreateVoidDelegateCtor(typeBuilder);
+            CreateDelegateCtor(typeBuilder);
 
             // Declaring method builder
             // Method attributes
-            var methodAttributes =
-                  MethodAttributes.Assembly
-                | MethodAttributes.HideBySig;
+            System.Reflection.MethodAttributes methodAttributes =
+                System.Reflection.MethodAttributes.Assembly
+                | System.Reflection.MethodAttributes.HideBySig;
             MethodBuilder method = typeBuilder.DefineMethod(targetMethod.Name, methodAttributes);
             // Preparing Reflection instances
+            //FieldInfo field1 = typeof(<> c__DisplayClass2_0).GetField("<>4__this", BindingFlags.Public | BindingFlags.NonPublic);
+            //FieldInfo field2 = typeof(Stardust.Interstellar.Rest.Service.ServiceWrapperBase<>).MakeGenericType(typeof(ITestApi)).GetField("implementation", BindingFlags.Public | BindingFlags.NonPublic);
+            //FieldInfo field3 = typeof(<> c__DisplayClass2_0).GetField("serviceParameters", BindingFlags.Public | BindingFlags.NonPublic);
             MethodInfo method4 = typeof(ParameterWrapper).GetMethod(
                 "get_value",
                 BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
                 null,
                 new Type[]{
-                    },
+                },
                 null
-                );
+            );
             MethodInfo method5 = targetMethod;
             // Setting return type
-            method.SetReturnType(typeof(Task));
+            method.SetReturnType(targetMethod.ReturnType);
             // Adding parameters
             ILGenerator gen = method.GetILGenerator();
 
@@ -79,7 +80,7 @@ namespace Stardust.Interstellar.Rest.Service
             return t;
         }
 
-        private static void CreateVoidDelegateCtor(TypeBuilder typeBuilder)
+        private static void CreateDelegateCtor(TypeBuilder typeBuilder)
         {
             var ctor = typeBuilder.DefineConstructor(MethodAttributes.Public | MethodAttributes.HideBySig, CallingConventions.Standard | CallingConventions.HasThis, new Type[] { });
             var baseCtor = typeof(object).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { }, null);
@@ -88,5 +89,6 @@ namespace Stardust.Interstellar.Rest.Service
             gen.Emit(OpCodes.Call, baseCtor);
             gen.Emit(OpCodes.Ret);
         }
+
     }
 }
