@@ -1,0 +1,41 @@
+﻿<?xml version="1.0"?>
+<package>
+  <metadata>
+    <!--*-->
+    <id>Stardust.Interstellar.Rest.DependencyInjection</id>
+    <!--*-->
+    <version>1.0.0</version>
+    <title>Stardust.Interstellar.Rest.DependencyInjection</title>
+    <!--*-->
+    <authors>Stardust</authors>
+    <owners>Stardust</owners>
+
+    <licenseUrl>https://github.com/JonasSyrstad/Stardust.Rest/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/JonasSyrstad/Stardust.Rest</projectUrl>
+    <iconUrl>http://stardustframework.wdfiles.com/local--files/blog:_start/logo_smal.png</iconUrl>
+
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <!--*-->
+    <description>Use Microsoft.Extensions.DependencyInjection in asp.net mvc and webapi</description>
+    <!--*-->
+    <releaseNotes> </releaseNotes>
+    <copyright>Copyright Stardust © 2018</copyright>
+    <tags>Stardust Rest IoC DependencyInjection </tags>
+    <dependencies>
+      <dependency id="Microsoft.AspNet.WebApi.Client" version="5.2.3" />
+      <dependency id="Microsoft.AspNet.WebApi.Core" version="5.2.3" />
+      <dependency id="Microsoft.AspNet.WebApi.WebHost" version="5.2.3" />
+      <dependency id="Newtonsoft.Json" version="10.0.3" />
+      <dependency id="Stardust.Interstellar.Rest" version="3.2.0" />
+      <dependency id="Stardust.Interstellar.Rest.Annotations" version="3.2.0" />
+      <dependency id="Stardust.Particles" version="5.0.1"/>
+      <dependency id="Microsoft.AspNet.Mvc" version="5.2.3"/>
+      <dependency id="Microsoft.Extensions.DependencyInjection" version="2.1.1"/>
+      <dependency id="Owin" version="1.0.0"/>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src=".\bin\Release\Stardust.Interstellar.Rest.DependencyInjection.dll" target="lib\net471" />
+    <file src=".\bin\Release\Stardust.Interstellar.Rest.DependencyInjection.pdb" target="lib\net471" />
+   </files>
+</package>

@@ -14,7 +14,7 @@ namespace NetFxWithDITest
     {
         public void Configuration(IAppBuilder app)
         {
-            app.AddDependencyInjection<Services>();
+            app.AddDependencyInjection<Services>(ControllerTypes.Both);
             // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=316888
         }
     }

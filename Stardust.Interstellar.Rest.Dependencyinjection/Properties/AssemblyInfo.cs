@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Stardust.Interstellar.Rest.Dependencyinjection")]
+[assembly: AssemblyTitle("Stardust.Interstellar.Rest.DependencyInjection")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Stardust.Interstellar.Rest.Dependencyinjection")]
-[assembly: AssemblyCopyright("Copyright ©  2018")]
+[assembly: AssemblyCompany("Stardust")]
+[assembly: AssemblyProduct("Stardust.Interstellar.Rest.DependencyInjection")]
+[assembly: AssemblyCopyright("Copyright Stardust ©  2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -22,7 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NugetPublish", "NugetPublis
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Swashbuckle.Stardust.Interstellar", "Swashbuckle.Stardust.Interstellar\Swashbuckle.Stardust.Interstellar.csproj", "{9984CB92-BE24-452D-8DDD-001436E4AAC7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stardust.Interstellar.Rest.Dependencyinjection", "Stardust.Interstellar.Rest.Dependencyinjection\Stardust.Interstellar.Rest.Dependencyinjection.csproj", "{CE144E90-71B8-4498-BAA8-FD24CE921259}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stardust.Interstellar.Rest.DependencyInjection", "Stardust.Interstellar.Rest.Dependencyinjection\Stardust.Interstellar.Rest.DependencyInjection.csproj", "{CE144E90-71B8-4498-BAA8-FD24CE921259}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetFxWithDITest", "NetFxWithDITest\NetFxWithDITest.csproj", "{03E0CB81-BEDD-4E06-89AC-CB48557E1D2B}"
 EndProject

@@ -7,7 +7,7 @@
     <ProjectGuid>{CE144E90-71B8-4498-BAA8-FD24CE921259}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Stardust.Interstellar.Rest.Dependencyinjection</RootNamespace>
+    <RootNamespace>Stardust.Interstellar.Rest.DependencyInjection</RootNamespace>
     <AssemblyName>Stardust.Interstellar.Rest.Dependencyinjection</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -78,6 +78,10 @@
       <Project>{3A09F749-DCC7-4208-B113-68745211A6A5}</Project>
       <Name>Stardust.Interstellar.Rest</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="package.nuspec" />
+    <None Include="ReadMe.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
