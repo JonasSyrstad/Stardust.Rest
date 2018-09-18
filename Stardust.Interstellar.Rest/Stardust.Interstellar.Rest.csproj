@@ -2,12 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>3.1.4</Version>
+    <Version>3.2.0</Version>
     <Authors>Stardust</Authors>
     <Company>Stardust</Company>
     <PackageId>Stardust.Interstellar.Rest</PackageId>
     <Description>Create rest service proxies based on decorated interfaces.</Description>
-    <PackageLicenseUrl>http://stardustframework.com/license</PackageLicenseUrl>
+    <PackageLicenseUrl>https://github.com/JonasSyrstad/Stardust.Rest/blob/master/LICENSE</PackageLicenseUrl>
     <Copyright>Copyright © Stardust 2018</Copyright>
     <PackageProjectUrl>https://github.com/JonasSyrstad/Stardust.Interstellar.Rest</PackageProjectUrl>
     <PackageIconUrl>http://stardustframework.wdfiles.com/local--files/blog%3A_start/logo_smal.png</PackageIconUrl>

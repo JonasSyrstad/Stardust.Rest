@@ -1,4 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using Stardust.Interstellar.Rest.Annotations;
+using Stardust.Interstellar.Rest.Annotations.Messaging;
+using Stardust.Interstellar.Rest.Annotations.Service;
+using Stardust.Interstellar.Rest.Common;
+using Stardust.Interstellar.Rest.Extensions;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -11,15 +17,6 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Controllers;
-using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Stardust.Interstellar.Rest.Annotations;
-using Stardust.Interstellar.Rest.Annotations.Messaging;
-using Stardust.Interstellar.Rest.Annotations.Service;
-using Stardust.Interstellar.Rest.Client;
-using Stardust.Interstellar.Rest.Common;
-using Stardust.Interstellar.Rest.Extensions;
 
 namespace Stardust.Interstellar.Rest.Service
 {
@@ -327,7 +324,7 @@ namespace Stardust.Interstellar.Rest.Service
 
                 throw new ParameterReflectionException(string.Format("Unable to gather parameters for {0}", name), ex);
             }
-            if (!ModelState.IsValid) throw new InvalidDataException("Invalid input data");
+            if (!ModelState.IsValid) throw new InvalidDataException($"Invalid input data: {string.Join("\n", ModelState.Where(k => k.Value?.Errors != null).Select(k => $"{k.Key}:{string.Join(",", k.Value.Errors.Select(e => e.ErrorMessage))}"))}");
             _wrappers = wrappers;
             return wrappers.ToArray();
         }
@@ -382,9 +379,7 @@ namespace Stardust.Interstellar.Rest.Service
                 foreach (var interceptor in action.Interceptor)
                 {
                     bool cancel;
-                    string cancellationMessage;
-                    HttpStatusCode statusCode;
-                    cancel = interceptor.GetInterceptor(new Locator(_serviceLocator)).Intercept(wrappers.Select(p => p.value).ToArray(), Request.GetState(), out cancellationMessage, out statusCode);
+                    cancel = interceptor.GetInterceptor(new Locator(_serviceLocator)).Intercept(wrappers.Select(p => p.value).ToArray(), Request.GetState(), out string cancellationMessage, out HttpStatusCode statusCode);
                     if (cancel) throw new OperationAbortedException(statusCode, cancellationMessage);
                 }
             }
@@ -398,10 +393,8 @@ namespace Stardust.Interstellar.Rest.Service
 
         private static ActionWrapper GetActionWrapper(string actionName)
         {
-            ConcurrentDictionary<string, ActionWrapper> item;
-            if (!cache.TryGetValue(typeof(T), out item)) throw new InvalidOperationException("Invalid interface type");
-            ActionWrapper action;
-            if (!item.TryGetValue(actionName, out action)) throw new InvalidOperationException("Invalid action");
+            if (!cache.TryGetValue(typeof(T), out ConcurrentDictionary<string, ActionWrapper> item)) throw new InvalidOperationException("Invalid interface type");
+            if (!item.TryGetValue(actionName, out ActionWrapper action)) throw new InvalidOperationException("Invalid action");
             return action;
         }
 
@@ -424,8 +417,7 @@ namespace Stardust.Interstellar.Rest.Service
             var classInitializers = interfaceType.GetCustomAttributes<ServiceInitializerAttribute>();
             var serviceInitializerAttributes = classInitializers as ServiceInitializerAttribute[] ?? classInitializers.ToArray();
             GetErrorInterceptor(interfaceType);
-            ConcurrentDictionary<string, ActionWrapper> wrapper;
-            if (cache.TryGetValue(interfaceType, out wrapper)) return;
+            if (cache.TryGetValue(interfaceType, out ConcurrentDictionary<string, ActionWrapper> wrapper)) return;
             var newWrapper = new ConcurrentDictionary<string, ActionWrapper>();
             foreach (var methodInfo in interfaceType.GetMethods().Length == 0 ? interfaceType.GetInterfaces().First().GetMethods() : interfaceType.GetMethods())
             {
@@ -459,8 +451,7 @@ namespace Stardust.Interstellar.Rest.Service
 
         private void GetErrorInterceptor(Type interfaceType)
         {
-            ErrorHandlerAttribute errorHanderInterceptor;
-            if (!errorhanderCache.TryGetValue(interfaceType, out errorHanderInterceptor))
+            if (!errorhanderCache.TryGetValue(interfaceType, out ErrorHandlerAttribute errorHanderInterceptor))
             {
                 errorHanderInterceptor = interfaceType.GetCustomAttribute<ErrorHandlerAttribute>();
                 errorhanderCache.TryAdd(interfaceType, errorHanderInterceptor);
@@ -589,5 +580,5 @@ namespace Stardust.Interstellar.Rest.Service
         }
     }
 
-    
+
 }
