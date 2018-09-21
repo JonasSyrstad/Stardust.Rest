@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
 
@@ -25,7 +26,20 @@ namespace Stardust.Interstellar.Rest.Dependencyinjection
         {
             return services.AddAllControllersFrom(typeof(T).Assembly);
         }
-        public static IAppBuilder AddDependencyInjection<T>(this IAppBuilder app, ControllerTypes addFor=ControllerTypes.Both) where T : ServicesConfiguration, new()
+
+        public static HttpApplication AddDependencyInjection<T>(this HttpApplication app,
+            ControllerTypes addFor = ControllerTypes.Both) where T : ServicesConfiguration, new()
+        {
+            return app.AddDependencyInjectionInternal<T>(addFor) as HttpApplication;
+        }
+
+        public static IAppBuilder AddDependencyInjection<T>(this IAppBuilder app,
+            ControllerTypes addFor = ControllerTypes.Both) where T : ServicesConfiguration, new()
+        {
+            return app.AddDependencyInjectionInternal<T>(addFor) as IAppBuilder;
+        }
+
+        private static object AddDependencyInjectionInternal<T>(this object app, ControllerTypes addFor = ControllerTypes.Both) where T : ServicesConfiguration, new()
         {
             var services = new T().ConfigureInterstellar(new ServiceCollection());
             var appAssembly = app.GetType().Assembly;
