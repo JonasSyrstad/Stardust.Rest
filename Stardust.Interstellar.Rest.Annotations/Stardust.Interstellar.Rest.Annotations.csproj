@@ -3,18 +3,17 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Annotations for the rest generator tool</Description>
-    <Version>3.1.0</Version>
+    <Version>3.4.1</Version>
     <Company>Stardust</Company>
     <Authors>Stardust</Authors>
     <Copyright>Copyright © Stardust 2018</Copyright>
-    <PackageLicenseUrl>http://stardustframework.com/license</PackageLicenseUrl>
+    <PackageLicenseUrl>https://github.com/JonasSyrstad/Stardust.Rest/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/JonasSyrstad/Stardust.Interstellar.Rest</PackageProjectUrl>
     <PackageIconUrl>http://stardustframework.wdfiles.com/local--files/blog%3A_start/logo_smal.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/JonasSyrstad/Stardust.Rest</RepositoryUrl>
     <RepositoryType>github</RepositoryType>
     <PackageTags>rest webapi client proxy generator</PackageTags>
-    <PackageReleaseNotes>Switching to use IServiceProvider as standard service locator for ease of integration in existing projects.
-Alligning version numbers of the packages related to the rest tool.</PackageReleaseNotes>
+    <PackageReleaseNotes>Improving support for IoC frameworks by using IServiceCollection and IServiceProvider</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
@@ -22,7 +21,7 @@ Alligning version numbers of the packages related to the rest tool.</PackageRele
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="2.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="Stardust.Particles" Version="5.0.1" />
+    <PackageReference Include="Stardust.Particles" Version="5.0.2" />
     <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
     <PackageReference Include="System.Reflection.Emit.ILGeneration" Version="4.3.0" />
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />

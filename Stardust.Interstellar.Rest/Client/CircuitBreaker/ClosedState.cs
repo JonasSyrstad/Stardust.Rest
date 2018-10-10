@@ -12,19 +12,19 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
             circuitBreaker.ResetFailureCount();
         }
 
-        public override bool ActUponException(string path, Exception e)
+        public override bool ActUponException(string path, Exception e, IServiceProvider provider)
         {
-            base.ActUponException(path, e);
+            base.ActUponException(path, e,provider);
             if (circuitBreaker.IsThresholdReached())
             {
                 circuitBreaker.MoveToOpenState();
                 try
                 {
-                    circuitBreaker.Monitor?.Trip(path, e, this);
+                    circuitBreaker.Monitor(provider)?.Trip(path, e, this,provider);
                 }
                 catch (Exception ex)
                 {
-                    base.circuitBreaker._serviceLocator.GetService<ILogger>()?.Error(ex);
+                    provider.GetService<ILogger>()?.Error(ex);
                 }
             }
             return true;

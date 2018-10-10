@@ -68,6 +68,7 @@ namespace Stardust.Interstellar.Rest.Client
         public static bool EnableExpectContinue100ForPost { get; set; }
 
         public static bool EnableExpectContinue100ForAll { get; set; }
+        public static bool RunAuthProviderBeforeAppendingBody { get; set; }
 
         public static Type CreateProxy<T>()
         {
@@ -125,7 +126,7 @@ namespace Stardust.Interstellar.Rest.Client
             }
             else
             {
-                authHandler = auth.GetHandler();
+                authHandler = auth.GetHandler(serviceLocator);
             }
             return authHandler;
         }

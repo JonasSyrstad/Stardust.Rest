@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Stardust.Interstellar.Rest.Annotations;
 using Stardust.Interstellar.Rest.Common;
 using Stardust.Interstellar.Rest.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
 namespace NetCoreTestWeb.Controllers
 {
@@ -22,6 +22,7 @@ namespace NetCoreTestWeb.Controllers
         [IRoute("Echo/{value}")]
         string Echo([In(InclutionTypes.Path)] string value);
 
+        [Obsolete("test")]
         [Get]
         [IRoute("Echo2/{value}")]
         Task<StringWrapper> Echo2Async([In(InclutionTypes.Path)] string value);
@@ -71,7 +72,7 @@ namespace NetCoreTestWeb.Controllers
         public string User { get; set; }
     }
 
-    class MyServies : IMyServies
+    internal class MyServies : IMyServies
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger _logger;

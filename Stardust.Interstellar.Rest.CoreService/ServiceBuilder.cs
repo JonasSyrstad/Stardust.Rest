@@ -1,20 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Net.Http;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Stardust.Interstellar.Rest.Annotations;
 using Stardust.Interstellar.Rest.Common;
 using Stardust.Interstellar.Rest.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
+using System.Threading.Tasks;
 
 namespace Stardust.Interstellar.Rest.Service
 {
-    class ServiceBuilder
+    internal class ServiceBuilder
     {
         private AssemblyBuilder myAssemblyBuilder;
 
@@ -69,9 +67,7 @@ namespace Stardust.Interstellar.Rest.Service
 
         public MethodBuilder InternalMethodBuilder(TypeBuilder type, MethodInfo implementationMethod, Func<MethodInfo, MethodBuilder, Type[], List<ParameterWrapper>, MethodBuilder> bodyBuilder, IServiceLocator serviceLocator)
         {
-            List<ParameterWrapper> methodParams;
-            Type[] pTypes;
-            var method = DefineMethod(type, implementationMethod, out methodParams, out pTypes, serviceLocator);
+            var method = DefineMethod(type, implementationMethod, out List<ParameterWrapper> methodParams, out Type[] pTypes, serviceLocator);
             return bodyBuilder(implementationMethod, method, pTypes, methodParams);
         }
 
@@ -188,6 +184,9 @@ namespace Stardust.Interstellar.Rest.Service
             methodParams = GetMethodParams(implementationMethod, serviceLocator);
             pTypes = methodParams.Where(p => p.In != InclutionTypes.Header).Select(p => p.Type).ToArray();
             method.SetParameters(pTypes.ToArray());
+            var obsolete = implementationMethod.GetCustomAttribute<ObsoleteAttribute>();
+            if (obsolete != null)
+                method.SetCustomAttribute(new CustomAttributeBuilder(obsolete.GetType().GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { typeof(string), typeof(bool) }, null), new object[] { obsolete.Message, obsolete.IsError }));
             // Parameter id
             var template = implementationMethod.GetCustomAttribute<RouteAttribute>()?.Template ?? implementationMethod.GetCustomAttribute<VerbAttribute>()?.Route;
             if (template == null) template = ExtensionsFactory.GetServiceTemplate(implementationMethod, serviceLocator);
@@ -440,7 +439,7 @@ namespace Stardust.Interstellar.Rest.Service
         {
             return InternalMethodBuilder(type, implementationMethod, (a, b, c, d) => BuildAsyncMethodBody(a, b, c, d, type), serviceLocator);
         }
-        private static int typeCounter = 0;
+        private static readonly int typeCounter = 0;
 
 
 
