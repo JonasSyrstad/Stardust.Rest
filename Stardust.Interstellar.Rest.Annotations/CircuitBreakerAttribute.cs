@@ -18,7 +18,7 @@ namespace Stardust.Interstellar.Rest.Annotations
         public ThrottlingAttribute(Type throttlingManager)
         {
             if (!typeof(IThrottlingManager).IsAssignableFrom(throttlingManager)) throw new InvalidCastException($"Unable to cast {throttlingManager.FullName} to {nameof(IThrottlingManager)}");
-                _throttlingManager = throttlingManager;
+            _throttlingManager = throttlingManager;
         }
 
         public IThrottlingManager GetManager(AppliesToTypes appliesTo)
@@ -42,7 +42,7 @@ namespace Stardust.Interstellar.Rest.Annotations
         }
 
         private static ConcurrentDictionary<string, CounterItem> reqPerSecCounter = new ConcurrentDictionary<string, CounterItem>();
-        private long _waitTime;
+        private readonly long _waitTime;
 
         public long? IsThrottled(string method, string service, string host)
         {
@@ -83,7 +83,7 @@ namespace Stardust.Interstellar.Rest.Annotations
     {
         private DateTime CounterSecound = NowTruncated;
         private long _counter = 0;
-        private long _maxLimit;
+        private readonly long _maxLimit;
         private readonly long _waitTime = 1000;
 
         public CounterItem(long maxLimit)
@@ -108,7 +108,7 @@ namespace Stardust.Interstellar.Rest.Annotations
             if (CounterSecound == NowTruncated)
             {
                 _counter++;
-                return _counter < _maxLimit ? (long?) null : _waitTime;
+                return _counter < _maxLimit ? (long?)null : _waitTime;
             }
             else
             {
@@ -172,14 +172,27 @@ namespace Stardust.Interstellar.Rest.Annotations
             Timeout = TimeSpan.FromMinutes(timeoutInMinutes);
             ResetTimeout = TimeSpan.FromMinutes(resetTimeout);
             IgnoredExceptionTypes = new[] { typeof(UnauthorizedAccessException), typeof(NullReferenceException) };
-            IgnoredStatusCodes = new[]
-            {
-                HttpStatusCode.Forbidden,
-                HttpStatusCode.Unauthorized,
-                HttpStatusCode.PreconditionFailed,
-                HttpStatusCode.Ambiguous
-            };
+            IgnoredStatusCodes = DefaultIgnoredHttpStatusCodes;
         }
+
+        public static HttpStatusCode[] DefaultIgnoredHttpStatusCodes => new[]
+        {
+            HttpStatusCode.Forbidden,
+            HttpStatusCode.Unauthorized,
+            HttpStatusCode.PreconditionFailed,
+            HttpStatusCode.Ambiguous,
+            HttpStatusCode.BadRequest,
+            HttpStatusCode.Conflict,
+            HttpStatusCode.NotFound,
+            HttpStatusCode.Gone,
+            HttpStatusCode.RequestEntityTooLarge,
+            HttpStatusCode.RequestedRangeNotSatisfiable,
+            HttpStatusCode.NotImplemented,
+            HttpStatusCode.UnsupportedMediaType,
+            HttpStatusCode.UseProxy,
+
+        };
+
         public int Threshold { get; set; }
         public TimeSpan Timeout { get; set; }
         public Type[] IgnoredExceptionTypes { get; set; }
@@ -206,7 +219,7 @@ namespace Stardust.Interstellar.Rest.Annotations
         /// <param name="circuitBreakerServiceName"></param>
         /// <param name="exception"></param>
         /// <param name="state"></param>
-        void Trip(string circuitBreakerServiceName, Exception exception, ICircuitBreakerState state);
+        void Trip(string circuitBreakerServiceName, Exception exception, ICircuitBreakerState state, IServiceProvider provider);
 
         /// <summary>
         /// Programatically determine if an exception is a part of the application flow of control or if it is broken and should be suspended

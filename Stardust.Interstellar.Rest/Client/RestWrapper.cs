@@ -1,4 +1,11 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Stardust.Interstellar.Rest.Annotations;
+using Stardust.Interstellar.Rest.Annotations.Messaging;
+using Stardust.Interstellar.Rest.Client.CircuitBreaker;
+using Stardust.Interstellar.Rest.Common;
+using Stardust.Interstellar.Rest.Extensions;
+using Stardust.Interstellar.Rest.Service;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -8,13 +15,6 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
-using Newtonsoft.Json;
-using Stardust.Interstellar.Rest.Annotations;
-using Stardust.Interstellar.Rest.Annotations.Messaging;
-using Stardust.Interstellar.Rest.Client.CircuitBreaker;
-using Stardust.Interstellar.Rest.Common;
-using Stardust.Interstellar.Rest.Extensions;
-using Stardust.Interstellar.Rest.Service;
 
 namespace Stardust.Interstellar.Rest.Client
 {
@@ -42,6 +42,7 @@ namespace Stardust.Interstellar.Rest.Client
         private readonly CookieContainer cookieContainer;
 
         private ErrorHandlerAttribute _errorInterceptor;
+        private readonly ILogger _logger;
 
         internal static ConcurrentDictionary<Type, ConcurrentDictionary<string, ActionWrapper>> Cache() => cache;
 
@@ -60,12 +61,12 @@ namespace Stardust.Interstellar.Rest.Client
             this.interfaceType = interfaceType.Type;
             InitializeClient(this.interfaceType);
             cookieContainer = _serviceLocator.GetService<CookieContainer>() ?? new CookieContainer();
+            _logger = serviceLocator.GetService<ILogger>();
         }
 
         public void InitializeClient(Type interfaceType)
         {
-            ConcurrentDictionary<string, ActionWrapper> wrapper;
-            if (cache.TryGetValue(interfaceType, out wrapper)) return;
+            if (cache.TryGetValue(interfaceType, out ConcurrentDictionary<string, ActionWrapper> wrapper)) return;
             var newWrapper = new ConcurrentDictionary<string, ActionWrapper>();
             var templatePrefix = interfaceType.GetCustomAttribute<IRoutePrefixAttribute>()
                 ?? interfaceType.GetInterfaces().FirstOrDefault()?.GetCustomAttribute<IRoutePrefixAttribute>();
@@ -78,34 +79,42 @@ namespace Stardust.Interstellar.Rest.Client
             }
             else
             {
-                CircuitBreakerContainer.Register(interfaceType, new NullBreaker(_serviceLocator));
+                CircuitBreakerContainer.Register(interfaceType, new NullBreaker());
             }
             foreach (var methodInfo in interfaceType.GetMethods().Length == 0 ? interfaceType.GetInterfaces().First().GetMethods() : interfaceType.GetMethods())
             {
-                var actionRetry = methodInfo.GetCustomAttribute<RetryAttribute>() ?? retry;
-                _serviceLocator.GetService<ILogger>()?.Message($"Initializing client action {interfaceType.Name}.{methodInfo.Name}");
-                var template = methodInfo.GetCustomAttribute<IRouteAttribute>();
-                var actionName = GetActionName(methodInfo);
-                var action = new ActionWrapper { Name = actionName, ReturnType = methodInfo.ReturnType, RouteTemplate = ExtensionsFactory.GetRouteTemplate(templatePrefix, template, methodInfo, _serviceLocator), Parameters = new List<ParameterWrapper>() };
-                var actions = methodInfo.GetCustomAttributes(true).OfType<VerbAttribute>().ToList();
-                var methods = ExtensionsFactory.GetHttpMethods(actions, methodInfo, _serviceLocator);
-                var handlers = ExtensionsFactory.GetHeaderInspectors(methodInfo, _serviceLocator);
-
-                action.UseXml = methodInfo.GetCustomAttributes().OfType<UseXmlAttribute>().Any();
-                action.CustomHandlers = handlers.Where(h => headerHandlers.All(parent => parent.GetType() != h.GetType())).ToList();
-                action.ErrorHandler = _errorInterceptor;//?.ErrorHandler(_serviceLocator);
-                action.Actions = methods;
-                if (actionRetry != null)
+                try
                 {
-                    action.Retry = true;
-                    action.Interval = actionRetry.RetryInterval;
-                    action.NumberOfRetries = actionRetry.NumberOfRetries;
-                    action.IncrementalRetry = actionRetry.IncremetalWait;
-                    if (actionRetry.ErrorCategorizer != null)
-                        action.ErrorCategorizer = (IErrorCategorizer)Activator.CreateInstance(actionRetry.ErrorCategorizer, _serviceLocator);
+                    var actionRetry = methodInfo.GetCustomAttribute<RetryAttribute>() ?? retry;
+                    _serviceLocator.GetService<ILogger>()?.Message($"Initializing client action {interfaceType.Name}.{methodInfo.Name}");
+                    var template = methodInfo.GetCustomAttribute<IRouteAttribute>();
+                    var actionName = GetActionName(methodInfo);
+                    var action = new ActionWrapper { Name = actionName, ReturnType = methodInfo.ReturnType, RouteTemplate = ExtensionsFactory.GetRouteTemplate(templatePrefix, template, methodInfo, _serviceLocator), Parameters = new List<ParameterWrapper>() };
+                    var actions = methodInfo.GetCustomAttributes(true).OfType<VerbAttribute>().ToList();
+                    var methods = ExtensionsFactory.GetHttpMethods(actions, methodInfo, _serviceLocator);
+                    var handlers = ExtensionsFactory.GetHeaderInspectors(methodInfo, _serviceLocator);
+
+                    action.UseXml = methodInfo.GetCustomAttributes().OfType<UseXmlAttribute>().Any();
+                    action.CustomHandlers = handlers.Where(h => headerHandlers.All(parent => parent.GetType() != h.GetType())).ToList();
+                    action.ErrorHandler = _errorInterceptor;//?.ErrorHandler(_serviceLocator);
+                    action.Actions = methods;
+                    if (actionRetry != null)
+                    {
+                        action.Retry = true;
+                        action.Interval = actionRetry.RetryInterval;
+                        action.NumberOfRetries = actionRetry.NumberOfRetries;
+                        action.IncrementalRetry = actionRetry.IncremetalWait;
+                        if (actionRetry.ErrorCategorizer != null)
+                            action.ErrorCategorizer = (IErrorCategorizer)Activator.CreateInstance(actionRetry.ErrorCategorizer, _serviceLocator);
+                    }
+                    ExtensionsFactory.BuildParameterInfo(methodInfo, action, _serviceLocator);
+                    newWrapper.TryAdd(action.Name, action);
                 }
-                ExtensionsFactory.BuildParameterInfo(methodInfo, action, _serviceLocator);
-                newWrapper.TryAdd(action.Name, action);
+                catch (Exception ex)
+                {
+                    _logger?.Error(ex);
+                    throw;
+                }
             }
             if (cache.TryGetValue(interfaceType, out wrapper)) return;
             cache.TryAdd(interfaceType, newWrapper);
@@ -135,7 +144,7 @@ namespace Stardust.Interstellar.Rest.Client
                 cnt++;
                 try
                 {
-                    var result = CircuitBreakerContainer.GetCircuitBreaker(interfaceType).Execute($"{baseUri}{path}", () => InvokeAction(name, parameters, action, path));
+                    var result = CircuitBreakerContainer.GetCircuitBreaker(interfaceType).Execute($"{baseUri}{path}", () => InvokeAction(name, parameters, action, path), _serviceLocator);
                     if (result.Error != null)
                     {
                         if (result.Error is SuspendedDependencyException) return result;
@@ -154,6 +163,7 @@ namespace Stardust.Interstellar.Rest.Client
                 }
                 catch (Exception ex)
                 {
+                    _logger?.Error(ex);
                     if (!action.Retry || cnt > action.NumberOfRetries || !IsTransient(action, ex)) throw;
                     Thread.Sleep(action.IncrementalRetry ? cnt : 1 * action.Interval);
                 }
@@ -178,6 +188,7 @@ namespace Stardust.Interstellar.Rest.Client
             }
             catch (WebException webError)
             {
+                _logger?.Error(webError);
                 EnsureActionId(webError, req);
 
                 GetHeaderValues(action, webError.Response as HttpWebResponse);
@@ -193,6 +204,7 @@ namespace Stardust.Interstellar.Rest.Client
             }
             catch (Exception ex)
             {
+                _logger?.Error(ex);
                 errorResult = HandleGenericException(ex);
             }
             finally
@@ -202,8 +214,9 @@ namespace Stardust.Interstellar.Rest.Client
                     response?.Close();
                     response?.Dispose();
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    _logger?.Error(ex);
                 }
             }
             errorResult.ActionId = req.ActionId();
@@ -311,7 +324,11 @@ namespace Stardust.Interstellar.Rest.Client
         {
             var req = CreateActionRequestBase(parameters, action, path);
             if (authenticationHandler == null) authenticationHandler = _serviceLocator.GetService<IAuthenticationHandler>();
-            authenticationHandler?.Apply(req);
+            if (ProxyFactory.RunAuthProviderBeforeAppendingBody)
+                authenticationHandler?.Apply(req);
+            AppendBody(parameters, req, action);
+            if (!ProxyFactory.RunAuthProviderBeforeAppendingBody)
+                authenticationHandler?.Apply(req);
             return req;
         }
 
@@ -319,7 +336,11 @@ namespace Stardust.Interstellar.Rest.Client
         {
             var req = CreateActionRequestBase(parameters, action, path);
             if (authenticationHandler == null) authenticationHandler = _serviceLocator.GetService<IAuthenticationHandler>();
-            if (authenticationHandler != null) await authenticationHandler.ApplyAsync(req);
+            if (ProxyFactory.RunAuthProviderBeforeAppendingBody)
+                if (authenticationHandler != null) await authenticationHandler.ApplyAsync(req);
+            req = await AppendBodyAsync(parameters, req, action);
+            if (!ProxyFactory.RunAuthProviderBeforeAppendingBody)
+                if (authenticationHandler != null) await authenticationHandler.ApplyAsync(req);
             return req;
         }
 
@@ -333,7 +354,6 @@ namespace Stardust.Interstellar.Rest.Client
             req.Method = action.Actions.First().ToString();
             req.GetState().Extras.Add("serviceRoot", baseUri);
             AppendHeaders(parameters, req, action);
-            AppendBody(parameters, req, action);
 
             return req;
         }
@@ -361,11 +381,9 @@ namespace Stardust.Interstellar.Rest.Client
 
         private ActionWrapper GetAction(string name)
         {
-            ConcurrentDictionary<string, ActionWrapper> @interface;
-            if (!cache.TryGetValue(interfaceType, out @interface)) throw new InvalidOperationException("Unknown interface type");
+            if (!cache.TryGetValue(interfaceType, out ConcurrentDictionary<string, ActionWrapper> @interface)) throw new InvalidOperationException("Unknown interface type");
 
-            ActionWrapper action;
-            if (!@interface.TryGetValue(GetActionName(name), out action)) throw new InvalidOperationException("Unknown method");
+            if (!@interface.TryGetValue(GetActionName(name), out ActionWrapper action)) throw new InvalidOperationException("Unknown method");
             return action;
         }
 
@@ -422,7 +440,34 @@ namespace Stardust.Interstellar.Rest.Client
                     SerializeBody(req, val.value, action);
                 }
             }
-            else if (req.ContentType.Contains("xml")) req.ContentType = null;
+            else
+            {
+                req.ContentLength = 0;
+            }
+            if (req.ContentType.Contains("xml")) req.ContentType = null;
+        }
+
+        private async Task<HttpWebRequest> AppendBodyAsync(ParameterWrapper[] parameters, HttpWebRequest req, ActionWrapper action)
+        {
+            if (parameters.Any(p => p.In == InclutionTypes.Body))
+            {
+                if (parameters.Count(p => p.In == InclutionTypes.Body) > 1)
+                {
+                    return await SerializeBodyAsync(req, parameters.Where(p => p.In == InclutionTypes.Body).Select(p => p.value).ToList(), action);
+                }
+                else
+                {
+                    var val = parameters.Single(p => p.In == InclutionTypes.Body);
+                    return await SerializeBodyAsync(req, val.value, action);
+                }
+            }
+            else
+            {
+                req.ContentLength = 0;
+            }
+            if (req.ContentType.Contains("xml")) req.ContentType = null;
+
+            return req;
         }
 
         private void AppendHeaders(ParameterWrapper[] parameters, HttpWebRequest req, ActionWrapper action)
@@ -465,6 +510,27 @@ namespace Stardust.Interstellar.Rest.Client
             }
         }
 
+        private async Task<HttpWebRequest> SerializeBodyAsync(HttpWebRequest req, object val, ActionWrapper action)
+        {
+            if (val == null)
+            {
+                req.ContentLength = 0;
+                return req;
+            }
+            if (action.UseXml)
+            {
+                XmlBodySerializer(req, val);
+                return req;
+            }
+            else
+            {
+                if (typeof(IServiceWithGlobalParameters).IsAssignableFrom(interfaceType))
+                    return await JsonBodySerializerAsync(req, GlobalParameterExtensions.AppendGlobalParameters(interfaceType.FullName, val, action.MessageExtesionLevel));
+                else
+                    return await JsonBodySerializerAsync(req, val);
+            }
+        }
+
         private void XmlBodySerializer(WebRequest req, object val)
         {
             var xmlSerializer = GetSerializer();
@@ -482,10 +548,43 @@ namespace Stardust.Interstellar.Rest.Client
         {
 
             var serializer = CreateJsonSerializer(val?.GetType());
-            using (var writer = new JsonTextWriter(new StreamWriter(req.GetRequestStream())))
+            byte[] buffer;
+            using (var memStream = new MemoryStream())
             {
-                serializer.Serialize(writer, val);
+                using (var stream = new StreamWriter(memStream))
+                {
+                    using (var writer = new JsonTextWriter(stream))
+                    {
+                        serializer.Serialize(writer, val);
+                    }
+                }
+                buffer = memStream.ToArray();
             }
+            req.ContentLength = buffer.Length;
+            var requestStream = req.GetRequestStream();
+            requestStream.Write(buffer, 0, buffer.Length);
+        }
+
+        private async Task<HttpWebRequest> JsonBodySerializerAsync(HttpWebRequest req, object val)
+        {
+
+            var serializer = CreateJsonSerializer(val?.GetType());
+            byte[] buffer;
+            using (var memStream = new MemoryStream())
+            {
+                using (var stream = new StreamWriter(memStream))
+                {
+                    using (var writer = new JsonTextWriter(stream))
+                    {
+                        serializer.Serialize(writer, val);
+                    }
+                }
+                buffer = memStream.ToArray();
+            }
+            req.ContentLength = buffer.Length;
+            var requestStream = await req.GetRequestStreamAsync();
+            await requestStream.WriteAsync(buffer, 0, buffer.Length);
+            return req;
         }
 
         public async Task<ResultWrapper> ExecuteAsync(string name, ParameterWrapper[] parameters)
@@ -499,7 +598,7 @@ namespace Stardust.Interstellar.Rest.Client
                 cnt++;
                 try
                 {
-                    var result = await CircuitBreakerContainer.GetCircuitBreaker(interfaceType).ExecuteAsync($"{baseUri}{path}", async () => await InvokeActionAsync(parameters, action, path));
+                    var result = await CircuitBreakerContainer.GetCircuitBreaker(interfaceType).ExecuteAsync($"{baseUri}{path}", async () => await InvokeActionAsync(parameters, action, path), _serviceLocator);
                     if (result.Error != null)
                     {
                         if (result.Error is SuspendedDependencyException)
@@ -519,6 +618,7 @@ namespace Stardust.Interstellar.Rest.Client
                 }
                 catch (Exception ex)
                 {
+
                     if (!action.Retry || cnt > action.NumberOfRetries || !IsTransient(action, ex)) throw;
                     await Task.Delay(action.IncrementalRetry ? cnt : 1 * action.Interval);
                 }
@@ -632,14 +732,13 @@ namespace Stardust.Interstellar.Rest.Client
 
         private void CreateException(string name, ResultWrapper result)
         {
-
             var action = GetAction(name);
-            if (result.Status == (HttpStatusCode)429)
-                throw new RestWrapperException(result.StatusMessage, result.Status, new ThrottledRequestException(result.Error));
+            if (result?.Status == (HttpStatusCode)429)
+                throw new RestWrapperException(result?.StatusMessage, (HttpStatusCode)429, new ThrottledRequestException(result?.Error));
             var handler = GetErrorHandler(action);
             if (handler != null) throw handler.ProduceClientException(result.StatusMessage, result.Status, result.Error, result.Value as string);
-            if (result.Value != null) throw new RestWrapperException(result.StatusMessage, result.Status, result.Value, result.Error);
-            throw new RestWrapperException(result.StatusMessage, result.Status, result.Error);
+            if (result?.Value != null) throw new RestWrapperException(result.StatusMessage, result.Status, result.Value, result.Error);
+            throw new RestWrapperException(result?.StatusMessage, result?.Status ?? HttpStatusCode.Unused, result?.Error);
         }
 
         private IErrorHandler GetErrorHandler(ActionWrapper action)
@@ -682,10 +781,8 @@ namespace Stardust.Interstellar.Rest.Client
 
         protected ParameterWrapper[] GetParameters(string name, params object[] parameters)
         {
-            ConcurrentDictionary<string, ActionWrapper> item;
-            if (!cache.TryGetValue(interfaceType, out item)) throw new InvalidOperationException("Invalid interface type");
-            ActionWrapper action;
-            if (!item.TryGetValue(GetActionName(name), out action)) throw new InvalidOperationException("Invalid action");
+            if (!cache.TryGetValue(interfaceType, out ConcurrentDictionary<string, ActionWrapper> item)) throw new InvalidOperationException("Invalid interface type");
+            if (!item.TryGetValue(GetActionName(name), out ActionWrapper action)) throw new InvalidOperationException("Invalid action");
             var i = 0;
             var wrappers = new List<ParameterWrapper>();
             foreach (var parameter in parameters)

@@ -9,7 +9,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 {
     public class CircuitBreaker : ICircuitBreaker, ICircuit
     {
-        internal readonly IServiceProvider _serviceLocator;
+        //internal readonly IServiceProvider _serviceLocator;
 
         public CircuitBreaker(int threshold, TimeSpan timeout, TimeSpan resetTimeout, Type[] ignoredExceptions, HttpStatusCode[] ignoredStatusCodes, Type circuitBrakerMonitor, IServiceProvider serviceLocator)
         {
@@ -23,7 +23,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
                 throw new ArgumentOutOfRangeException("timeout", "Timeout should be greater than 0");
             }
 
-            _serviceLocator = serviceLocator;
+            
 
             Threshold = threshold;
             Timeout = timeout;
@@ -32,7 +32,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
             IgnoredStatusCodes = ignoredStatusCodes;
             MoveToClosedState();
             if (circuitBrakerMonitor != null)
-                monitor = (ICircuitBreakerMonitor)Activator.CreateInstance(circuitBrakerMonitor, _serviceLocator);
+                monitor = (ICircuitBreakerMonitor)Activator.CreateInstance(circuitBrakerMonitor, serviceLocator);
         }
 
 
@@ -80,15 +80,11 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
         public DateTime? LastErrorTime { get; set; }
         public string ServiceName { get; set; }
 
-        public ICircuitBreakerMonitor Monitor
+        public ICircuitBreakerMonitor Monitor(IServiceProvider _serviceLocator)
         {
-            get
-            {
-                if (monitor == null)
-                    monitor = _serviceLocator.GetService<ICircuitBreakerMonitor>() ?? new NullBreaker(_serviceLocator);
-                return monitor;
-
-            }
+            if (monitor == null)
+                monitor = _serviceLocator.GetService<ICircuitBreakerMonitor>() ?? new NullBreaker();
+            return monitor;
         }
 
         internal CircuitBreakerStateBase MoveToClosedState()
@@ -114,7 +110,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
             return exceptionFromLastAttemptCall;
         }
 
-        public virtual ResultWrapper Execute(string path, Func<ResultWrapper> func)
+        public virtual ResultWrapper Execute(string path, Func<ResultWrapper> func, IServiceProvider provider)
         {
             ResultWrapper result;
             if (PreCallProcessing(path, out result)) return result;
@@ -123,7 +119,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
                 result = func();
                 if (result.Error != null)
                 {
-                    PostProcessing(path, result);
+                    PostProcessing(path, result,provider);
                     var exception = result.Error as WebException;
                     if (exception != null)
                     {
@@ -142,14 +138,14 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
             }
             catch (Exception e)
             {
-                return PostProcessing(path, e);
+                return PostProcessing(path, e,provider);
             }
 
             PostProcessing();
             return result;
         }
 
-        public virtual async Task<ResultWrapper> ExecuteAsync(string path, Func<Task<ResultWrapper>> func)
+        public virtual async Task<ResultWrapper> ExecuteAsync(string path, Func<Task<ResultWrapper>> func,IServiceProvider provider)
         {
             ResultWrapper result;
             if (PreCallProcessing(path, out result)) return result;
@@ -158,7 +154,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
                 result = await func();
                 if (result.Error != null)
                 {
-                    PostProcessing(path, result);
+                    PostProcessing(path, result,provider);
                     var exception = result.Error as WebException;
                     if (exception != null)
                     {
@@ -177,7 +173,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
             }
             catch (Exception e)
             {
-                return PostProcessing(path, e);
+                return PostProcessing(path, e,provider);
             }
 
 
@@ -185,7 +181,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
             return result;
         }
 
-        public T Invoke<T>(string actionUrl, Func<T> func)
+        public T Invoke<T>(string actionUrl, Func<T> func, IServiceProvider provider)
         {
             T result;
             PreCallProcessing(actionUrl);
@@ -199,7 +195,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
                 this.exceptionFromLastAttemptCall = e;
                 lock (triowing)
                 {
-                    state.ActUponException(actionUrl, e);
+                    state.ActUponException(actionUrl, e,provider);
                 }
                 throw;
             }
@@ -209,7 +205,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
         }
 
 
-        public async Task<T> InvokeAsync<T>(string actionUrl, Func<Task<T>> func)
+        public async Task<T> InvokeAsync<T>(string actionUrl, Func<Task<T>> func, IServiceProvider provider)
         {
             T result;
             PreCallProcessing(actionUrl);
@@ -223,7 +219,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
                 this.exceptionFromLastAttemptCall = e;
                 lock (triowing)
                 {
-                    state.ActUponException(actionUrl, e);
+                    state.ActUponException(actionUrl, e,provider);
                 }
                 throw;
             }
@@ -232,7 +228,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
             return result;
         }
 
-        public void Invoke(string actionUrl, Action func)
+        public void Invoke(string actionUrl, Action func, IServiceProvider provider)
         {
 
             PreCallProcessing(actionUrl);
@@ -246,7 +242,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
                 this.exceptionFromLastAttemptCall = e;
                 lock (triowing)
                 {
-                    state.ActUponException(actionUrl, e);
+                    state.ActUponException(actionUrl, e,provider);
                 }
                 throw;
             }
@@ -254,7 +250,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
             PostProcessing();
         }
 
-        public async Task InvokeAsync(string actionUrl, Func<Task> func)
+        public async Task InvokeAsync(string actionUrl, Func<Task> func, IServiceProvider provider)
         {
             PreCallProcessing(actionUrl);
             try
@@ -267,7 +263,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
                 this.exceptionFromLastAttemptCall = e;
                 lock (triowing)
                 {
-                    state.ActUponException(actionUrl, e);
+                    state.ActUponException(actionUrl, e,provider);
                 }
                 throw;
             }
@@ -292,22 +288,22 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
             return false;
         }
 
-        private ResultWrapper PostProcessing(string path, Exception e)
+        private ResultWrapper PostProcessing(string path, Exception e, IServiceProvider provider)
         {
             this.exceptionFromLastAttemptCall = e;
             lock (triowing)
             {
-                state.ActUponException(path, e);
+                state.ActUponException(path, e,provider);
             }
             return new ResultWrapper { Error = e, ActionId = Guid.NewGuid().ToString() };
         }
 
-        private void PostProcessing(string path, ResultWrapper result)
+        private void PostProcessing(string path, ResultWrapper result, IServiceProvider provider)
         {
             exceptionFromLastAttemptCall = result.Error;
             lock (triowing)
             {
-                state.ActUponException(path, result.Error);
+                state.ActUponException(path, result.Error,provider);
             }
         }
 

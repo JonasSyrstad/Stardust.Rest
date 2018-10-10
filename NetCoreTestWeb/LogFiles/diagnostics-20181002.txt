@@ -1,0 +1,21 @@
+2018-10-02 16:06:27.617 +02:00 [Debug] NetCoreTestWeb.Startup: Generating webapi controller for NetCoreTestWeb.Controllers.IMyServies
+2018-10-02 16:06:28.183 +02:00 [Information] Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager: User profile is available. Using 'C:\Users\jonsyr\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2018-10-02 16:06:29.395 +02:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:44348/swagger/  
+2018-10-02 16:06:30.255 +02:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 860.4304ms 200 text/html
+2018-10-02 16:06:31.221 +02:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:44348/swagger/v1/swagger.json  
+2018-10-02 16:06:31.657 +02:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 435.7477ms 200 application/json
+2018-10-02 16:06:36.454 +02:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:44348/api/test/Echo2/asdf  
+2018-10-02 16:06:36.722 +02:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executing action method TempModule.Controllers.MyServiesController.Echo2Async (175c30154f554127b4af9adaeb2b24dd_ServiceWrapper) with arguments (asdf) - ModelState is Valid
+2018-10-02 16:06:36.773 +02:00 [Debug] NetCoreTestWeb.Startup: 
+2018-10-02 16:06:36.818 +02:00 [Information] Microsoft.AspNetCore.Mvc.Formatters.Json.Internal.JsonResultExecutor: Executing JsonResult, writing value NetCoreTestWeb.Controllers.StringWrapper.
+2018-10-02 16:06:36.838 +02:00 [Information] Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker: Executed action TempModule.Controllers.MyServiesController.Echo2Async (175c30154f554127b4af9adaeb2b24dd_ServiceWrapper) in 264.8816ms
+2018-10-02 16:06:36.846 +02:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 391.7187ms 200 application/json; charset=utf-8
+2018-10-02 16:07:48.862 +02:00 [Debug] NetCoreTestWeb.Startup: Generating webapi controller for NetCoreTestWeb.Controllers.IMyServies
+2018-10-02 16:07:49.229 +02:00 [Information] Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager: User profile is available. Using 'C:\Users\jonsyr\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2018-10-02 16:07:50.205 +02:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:44348/swagger/  
+2018-10-02 16:07:50.848 +02:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 641.4472ms 200 text/html
+2018-10-02 16:07:51.021 +02:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:44348/swagger/v1/swagger.json  
+2018-10-02 16:07:51.129 +02:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request starting HTTP/1.1 GET http://localhost:44348/swagger/images/favicon-32x32.png  
+2018-10-02 16:07:51.171 +02:00 [Information] Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware: Sending file. Request path: '/images/favicon-32x32.png'. Physical path: 'N/A'
+2018-10-02 16:07:51.204 +02:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 75.6952ms 200 image/png
+2018-10-02 16:07:51.378 +02:00 [Information] Microsoft.AspNetCore.Hosting.Internal.WebHost: Request finished in 356.5523ms 200 application/json

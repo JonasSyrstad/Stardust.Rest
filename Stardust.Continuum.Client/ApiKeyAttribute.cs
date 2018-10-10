@@ -1,13 +1,14 @@
-﻿using System.Net;
-using System.Threading.Tasks;
-using Stardust.Interstellar.Rest.Annotations;
+﻿using Stardust.Interstellar.Rest.Annotations;
 using Stardust.Interstellar.Rest.Extensions;
+using System;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace Stardust.Continuum.Client
 {
     public class ApiKeyAttribute : AuthenticationInspectorAttributeBase, IAuthenticationHandler
     {
-        public override IAuthenticationHandler GetHandler()
+        public override IAuthenticationHandler GetHandler(IServiceProvider provider)
         {
             return this;
         }

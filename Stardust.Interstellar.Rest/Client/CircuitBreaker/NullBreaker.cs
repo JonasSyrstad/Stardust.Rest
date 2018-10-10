@@ -9,13 +9,13 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 {
     internal class NullBreaker : ICircuitBreaker, ICircuitBreakerMonitor
     {
-        private readonly IServiceProvider _serviceLocator;
+        
 
-        public NullBreaker(IServiceProvider serviceLocator)
+        public NullBreaker()
         {
-            _serviceLocator = serviceLocator;
+            
         }
-        public ResultWrapper Execute(string path, Func<ResultWrapper> func)
+        public ResultWrapper Execute(string path, Func<ResultWrapper> func, IServiceProvider provider)
         {
             var result = func();
 
@@ -35,7 +35,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
             return result;
         }
 
-        public async Task<ResultWrapper> ExecuteAsync(string path,Func<Task<ResultWrapper>> func)
+        public async Task<ResultWrapper> ExecuteAsync(string path,Func<Task<ResultWrapper>> func, IServiceProvider provider)
         {
             var result= await func();
 
@@ -56,31 +56,31 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 
         }
 
-        public T Invoke<T>(string actionUrl, Func<T> func)
+        public T Invoke<T>(string actionUrl, Func<T> func, IServiceProvider provider)
         {
             return func();
         }
 
-        public async Task<T> InvokeAsync<T>(string actionUrl, Func<Task<T>> func)
+        public async Task<T> InvokeAsync<T>(string actionUrl, Func<Task<T>> func, IServiceProvider provider)
         {
             return await func();
         }
 
-        public void Invoke(string actionUrl, Action func)
+        public void Invoke(string actionUrl, Action func, IServiceProvider provider)
         {
             func();
         }
 
-        public async Task InvokeAsync(string actionUrl, Func<Task> func)
+        public async Task InvokeAsync(string actionUrl, Func<Task> func, IServiceProvider provider)
         {
             await func();
         }
 
-        public void Trip(string circuitBreakerServiceName, Exception exception, ICircuitBreakerState state)
+        public void Trip(string circuitBreakerServiceName, Exception exception, ICircuitBreakerState state, IServiceProvider provider)
         {
-            _serviceLocator?.GetService<ILogger>()?.Error(exception);
+            provider?.GetService<ILogger>()?.Error(exception);
             var webEx = exception as WebException ?? (exception as AggregateException)?.InnerException as WebException;
-            _serviceLocator?.GetService<ILogger>()?.Message($"Invocation of service {circuitBreakerServiceName} failed. Action url: {webEx?.Response?.ResponseUri}");
+            provider?.GetService<ILogger>()?.Message($"Invocation of service {circuitBreakerServiceName} failed. Action url: {webEx?.Response?.ResponseUri}");
         }
 
         public bool IsExceptionIgnorable(Exception exception)

@@ -20,9 +20,9 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
         }
         public virtual void ProtectedCodeHasBeenCalled() { }
 
-        public virtual bool ActUponException(string path, Exception e)
+        public virtual bool ActUponException(string path, Exception e, IServiceProvider provider)
         {
-            if (circuitBreaker.Monitor.IsExceptionIgnorable(e)) return false;
+            if (circuitBreaker.Monitor(provider).IsExceptionIgnorable(e)) return false;
             var webEx = e as WebException;
             if (e is AggregateException)
             {

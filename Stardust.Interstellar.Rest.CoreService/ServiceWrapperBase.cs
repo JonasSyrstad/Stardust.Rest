@@ -295,7 +295,7 @@ namespace Stardust.Interstellar.Rest.Service
             List<AuthorizeAttribute> auth = null;
             try
             {
-
+                
                 Request.InitializeState();
                 var action = GetAction(name);
                 var state = Request.GetState();
