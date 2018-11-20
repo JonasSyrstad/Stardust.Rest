@@ -360,17 +360,19 @@ namespace Stardust.Interstellar.Rest.Client
 
         private static string BuildActionUrl(ParameterWrapper[] parameters, ActionWrapper action)
         {
-            var path = action.RouteTemplate;
-            List<string> queryStrings = new List<string>();
+            if (action == null) Console.WriteLine($"no action definition found ?!?!");
+            var path = action?.RouteTemplate ?? "";
+            var queryStrings = new List<string>();
+            if (parameters == null) return path;
             foreach (var source in parameters.Where(p => p.In == InclutionTypes.Path))
             {
                 if (path.Contains($"{{{source.Name}}}"))
                 {
-                    path = path.Replace($"{{{source.Name}}}", Uri.EscapeDataString(source.value.ToString()));
+                    path = path.Replace($"{{{source.Name}}}", Uri.EscapeDataString(source?.value?.ToString() ?? ""));
                 }
                 else
                 {
-                    queryStrings.Add($"{source.Name}={HttpUtility.UrlEncode(source.value.ToString())}");
+                    queryStrings.Add($"{source.Name}={HttpUtility.UrlEncode(source?.value?.ToString() ?? "")}");
                 }
             }
             if (queryStrings.Any()) path = path + "?" + string.Join("&", queryStrings);

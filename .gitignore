@@ -261,3 +261,4 @@ __pycache__/
 *.pyc
 /NetCoreTestWeb/LogFiles/diagnostics-20180627.txt
 /NetCoreTestWeb/LogFiles/diagnostics-20180626.txt
+/NetCoreTestWeb/LogFiles
