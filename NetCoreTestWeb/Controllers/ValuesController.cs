@@ -18,8 +18,10 @@ namespace NetCoreTestWeb.Controllers
     [ServiceInformation]
     public interface IMyServies
     {
+
         [Get]
         [IRoute("Echo/{value}")]
+        [ServiceDescription("test")]
         string Echo([In(InclutionTypes.Path)] string value);
 
         [Obsolete("test")]
@@ -97,10 +99,17 @@ namespace NetCoreTestWeb.Controllers
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
+        private readonly IDummyClient _client;
+
+        public ValuesController(IDummyClient client)
+        {
+            _client = client;
+        }
         // GET api/values
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<IEnumerable<string>> Get()
         {
+            var value = await _client.Echo("test");
             return new string[] { "value1", "value2" };
         }
 

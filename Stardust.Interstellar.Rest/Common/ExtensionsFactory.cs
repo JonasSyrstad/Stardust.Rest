@@ -1,12 +1,12 @@
+using Stardust.Interstellar.Rest.Annotations;
+using Stardust.Interstellar.Rest.Annotations.Messaging;
+using Stardust.Interstellar.Rest.Client;
+using Stardust.Interstellar.Rest.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
-using Stardust.Interstellar.Rest.Annotations;
-using Stardust.Interstellar.Rest.Annotations.Messaging;
-using Stardust.Interstellar.Rest.Client;
-using Stardust.Interstellar.Rest.Extensions;
 
 namespace Stardust.Interstellar.Rest.Common
 {
@@ -20,10 +20,10 @@ namespace Stardust.Interstellar.Rest.Common
 
 
         private static Type xmlSerializer;
-        
-        
 
-       
+
+
+
         public static string GetServiceTemplate(MethodInfo methodInfo, IServiceProvider serviceLocator)
         {
             var template = ServiceProviderExtensions.GetService<IRouteTemplateResolver>(serviceLocator)?.GetTemplate(methodInfo);
@@ -38,7 +38,7 @@ namespace Stardust.Interstellar.Rest.Common
             return template;
         }
 
-        public static string GetRouteTemplate(IRoutePrefixAttribute templatePrefix, IRouteAttribute template, MethodInfo methodInfo, IServiceProvider serviceLocator)
+        public static string GetRouteTemplate(IRoutePrefix templatePrefix, IRoute template, MethodInfo methodInfo, IServiceProvider serviceLocator)
         {
             var interfaceType = methodInfo.DeclaringType;
             var templateResolver = ServiceProviderExtensions.GetService<IRouteTemplateResolver>(serviceLocator);
@@ -106,7 +106,7 @@ namespace Stardust.Interstellar.Rest.Common
             {
                 handlers.Add(inspector);
             }
-            return handlers.Where(i=>i!=null).ToList();
+            return handlers.Where(i => i != null).ToList();
         }
 
         private static List<IHeaderInspector> GetInspectors(MethodInfo methodInfo)
@@ -153,7 +153,7 @@ namespace Stardust.Interstellar.Rest.Common
 
         public IHeaderHandler[] GetHandlers(IServiceProvider serviceLocator)
         {
-            return new IHeaderHandler[]{_headerHandler};
+            return new IHeaderHandler[] { _headerHandler };
         }
     }
 }

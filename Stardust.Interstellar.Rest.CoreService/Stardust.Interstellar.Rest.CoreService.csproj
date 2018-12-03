@@ -4,9 +4,9 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <AssemblyName>Stardust.Interstellar.Rest.Service</AssemblyName>
     <RootNamespace>Stardust.Interstellar.Rest.Service</RootNamespace>
-    <AssemblyVersion>3.1.9.0</AssemblyVersion>
-    <FileVersion>3.1.9.0</FileVersion>
-    <Version>3.1.9</Version>
+    <AssemblyVersion>3.4.2.0</AssemblyVersion>
+    <FileVersion>3.4.2.0</FileVersion>
+    <Version>3.4.2</Version>
     <Company>Stardust</Company>
     <Authors>Stardust</Authors>
   </PropertyGroup>
@@ -14,11 +14,15 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore" Version="2.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="2.3.0" />
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="2.0.0" />
-    <PackageReference Include="Stardust.Interstellar.Rest" Version="3.4.1" />
-    <PackageReference Include="Stardust.Interstellar.Rest.Annotations" Version="3.4.1" />
     <PackageReference Include="Stardust.Particles" Version="5.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Stardust.Interstellar.Rest.Annotations\Stardust.Interstellar.Rest.Annotations.csproj" />
+    <ProjectReference Include="..\Stardust.Interstellar.Rest\Stardust.Interstellar.Rest.csproj" />
   </ItemGroup>
 
 </Project>

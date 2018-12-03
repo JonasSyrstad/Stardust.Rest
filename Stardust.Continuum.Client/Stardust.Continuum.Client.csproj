@@ -1,9 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>Stardust.Continuum.Client</PackageId>
-    <Version>2.2.1</Version>
+    <Version>2.2.2</Version>
     <Authors>Stardust</Authors>
     <Company>Stardust</Company>
     <Description>Client for the continuum live log stream service</Description>
@@ -13,17 +13,20 @@
     <PackageIconUrl>http://stardustframework.wdfiles.com/local--files/blog%3A_start/logo_smal.png</PackageIconUrl>
     <RepositoryType>github</RepositoryType>
     <PackageProjectUrl>https://github.com/JonasSyrstad/Stardust.Rest/blob/master/Stardust.Interstellar.Rest/continuum.md</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/JonasSyrstad/Stardust.Rest/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseUrl>https://licenses.nuget.org/Apache-2.0</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/JonasSyrstad/Stardust.Interstellar.Rest</RepositoryUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <ApplicationIcon>logo_smal_Ug4_icon.ico</ApplicationIcon>
+    <IncludeSource>True</IncludeSource>
+    <IncludeSymbols>True</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="2.0.0" />
-    <PackageReference Include="Stardust.Interstellar.Rest" Version="3.4.1" />
-    <PackageReference Include="Stardust.Interstellar.Rest.Annotations" Version="3.4.1" />
+    <PackageReference Include="Stardust.Interstellar.Rest" Version="3.4.6" />
+    <PackageReference Include="Stardust.Interstellar.Rest.Annotations" Version="3.4.3" />
     <PackageReference Include="Stardust.Particles" Version="5.0.2" />
   </ItemGroup>
 

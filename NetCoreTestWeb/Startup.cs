@@ -9,6 +9,8 @@ using Microsoft.Extensions.Logging;
 using NetCoreTestWeb.Controllers;
 using Stardust.Aadb2c.AuthenticationFilter;
 using Stardust.Aadb2c.AuthenticationFilter.Core;
+using Stardust.Interstellar.Rest.Annotations;
+using Stardust.Interstellar.Rest.Client;
 using Stardust.Interstellar.Rest.Common;
 using Stardust.Interstellar.Rest.Extensions;
 using Stardust.Interstellar.Rest.Service;
@@ -18,6 +20,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
 using ILogger = Stardust.Interstellar.Rest.Common.ILogger;
 
 namespace NetCoreTestWeb
@@ -41,7 +45,7 @@ namespace NetCoreTestWeb
                 .AddSingleton<ILogger, LogWrapper>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddB2CAuthentication("OAuth2", "Azure B2C authentication");
-
+            services.AddScoped<IDummyClient>(s => s.CreateRestClient<IDummyClient>("https://localhost:44305/jonas.syrstad%40dnvgl.com/ledger"));
 
             var builder = services.AddMvc().AddAsController<IMyServies, MyServies>().UseInterstellar();
 
@@ -71,6 +75,44 @@ namespace NetCoreTestWeb
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });
 
+        }
+    }
+
+    [Api("test")]
+    [DummyAuth]
+    public interface IDummyClient
+    {
+        [Get("action")]
+        [ServiceDescription("test")]
+        Task<string> Echo([InQuery] string message);
+    }
+
+    public class DummyAuthAttribute : Attribute, IAuthenticationInspector, IAuthenticationHandler
+    {
+        private readonly IServiceProvider _provider;
+
+        public DummyAuthAttribute(IServiceProvider provider)
+        {
+            _provider = provider;
+        }
+
+        public DummyAuthAttribute()
+        {
+        }
+
+        public IAuthenticationHandler GetHandler(IServiceProvider provider)
+        {
+            return new DummyAuthAttribute(provider);
+        }
+
+        public void Apply(HttpWebRequest req)
+        {
+
+        }
+
+        public Task ApplyAsync(HttpWebRequest req)
+        {
+            return Task.CompletedTask; ;
         }
     }
 
@@ -148,7 +190,7 @@ namespace NetCoreTestWeb
 
         public T GetService<T>()
         {
-            return _serviceProvider.GetService<T>();
+            return ServiceProviderServiceExtensions.GetService<T>(_serviceProvider);
         }
 
         public object GetService(Type serviceType)

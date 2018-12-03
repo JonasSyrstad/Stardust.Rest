@@ -230,6 +230,10 @@
     <Content Include="Scripts\jquery-3.3.1.min.map" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Stardust.Interstellar.Rest.Annotations\Stardust.Interstellar.Rest.Annotations.csproj">
+      <Project>{03F62A57-E6B3-4F9D-977D-5BEF0D188C6C}</Project>
+      <Name>Stardust.Interstellar.Rest.Annotations</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Stardust.Interstellar.Rest.Dependencyinjection\Stardust.Interstellar.Rest.DependencyInjection.csproj">
       <Project>{CE144E90-71B8-4498-BAA8-FD24CE921259}</Project>
       <Name>Stardust.Interstellar.Rest.DependencyInjection</Name>

@@ -4,6 +4,12 @@ using Stardust.Interstellar.Rest.Extensions;
 
 namespace Stardust.Interstellar.Rest.Client
 {
+    internal class RequestWrapper
+    {
+        public HttpWebRequest Request { get; set; }
+
+        public byte[] BodyPayload { get; set; }
+    }
     public class ResultWrapper
     {
         public bool IsVoid { get; set; }

@@ -1,3 +1,8 @@
+using Stardust.Interstellar.Rest.Annotations;
+using Stardust.Interstellar.Rest.Annotations.Messaging;
+using Stardust.Interstellar.Rest.Common;
+using Stardust.Interstellar.Rest.Service;
+using Swashbuckle.Swagger;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -6,13 +11,6 @@ using System.Linq;
 using System.Reflection;
 using System.Web.Http;
 using System.Web.Http.Description;
-using Newtonsoft.Json;
-using Stardust.Interstellar;
-using Stardust.Interstellar.Rest.Annotations;
-using Stardust.Interstellar.Rest.Annotations.Messaging;
-using Stardust.Interstellar.Rest.Common;
-using Stardust.Interstellar.Rest.Service;
-using Swashbuckle.Swagger;
 
 namespace Swashbuckle.Stardust.Interstellar
 {
@@ -153,8 +151,7 @@ namespace Swashbuckle.Stardust.Interstellar
         private static Type GetImplementation(ApiDescription apiDescription)
         {
             var controllerType = apiDescription.ActionDescriptor.ControllerDescriptor.ControllerType;
-            Type implementationType;
-            if (controllerCache.TryGetValue(controllerType, out implementationType)) return implementationType;
+            if (controllerCache.TryGetValue(controllerType, out Type implementationType)) return implementationType;
             if (stardustControllers == null)
                 stardustControllers = ServiceFactory.GetTypes();
             var t = stardustControllers.SingleOrDefault(c => c == controllerType);

@@ -64,12 +64,21 @@ namespace Stardust.Interstellar.Rest.Client
             _logger = serviceLocator.GetService<ILogger>();
         }
 
+        private static IRoutePrefix GetRoutePrefix(Type interfaceType)
+        {
+            IRoutePrefix routePrefix = interfaceType.GetCustomAttribute<ApiAttribute>()
+                                       ?? interfaceType.GetInterfaces().FirstOrDefault()?.GetCustomAttribute<ApiAttribute>();
+            if (routePrefix == null)
+                routePrefix = interfaceType.GetCustomAttribute<IRoutePrefixAttribute>()
+                              ?? interfaceType.GetInterfaces().FirstOrDefault()?.GetCustomAttribute<IRoutePrefixAttribute>();
+            return routePrefix;
+        }
+
         public void InitializeClient(Type interfaceType)
         {
             if (cache.TryGetValue(interfaceType, out ConcurrentDictionary<string, ActionWrapper> wrapper)) return;
             var newWrapper = new ConcurrentDictionary<string, ActionWrapper>();
-            var templatePrefix = interfaceType.GetCustomAttribute<IRoutePrefixAttribute>()
-                ?? interfaceType.GetInterfaces().FirstOrDefault()?.GetCustomAttribute<IRoutePrefixAttribute>();
+            var templatePrefix = GetRoutePrefix(interfaceType);
             _errorInterceptor = interfaceType.GetCustomAttribute<ErrorHandlerAttribute>();
             _serviceLocator.GetService<ILogger>()?.Message($"Initializing client {interfaceType.Name}");
             var retry = interfaceType.GetCustomAttribute<RetryAttribute>();
@@ -87,10 +96,11 @@ namespace Stardust.Interstellar.Rest.Client
                 {
                     var actionRetry = methodInfo.GetCustomAttribute<RetryAttribute>() ?? retry;
                     _serviceLocator.GetService<ILogger>()?.Message($"Initializing client action {interfaceType.Name}.{methodInfo.Name}");
-                    var template = methodInfo.GetCustomAttribute<IRouteAttribute>();
+                    var template = methodInfo.GetCustomAttribute<IRouteAttribute>() ?? methodInfo.GetCustomAttribute<VerbAttribute>() as IRoute;
                     var actionName = GetActionName(methodInfo);
-                    var action = new ActionWrapper { Name = actionName, ReturnType = methodInfo.ReturnType, RouteTemplate = ExtensionsFactory.GetRouteTemplate(templatePrefix, template, methodInfo, _serviceLocator), Parameters = new List<ParameterWrapper>() };
                     var actions = methodInfo.GetCustomAttributes(true).OfType<VerbAttribute>().ToList();
+                    var action = new ActionWrapper { Name = actionName, ReturnType = methodInfo.ReturnType, RouteTemplate = ExtensionsFactory.GetRouteTemplate(templatePrefix, template, methodInfo, _serviceLocator), Parameters = new List<ParameterWrapper>() };
+
                     var methods = ExtensionsFactory.GetHttpMethods(actions, methodInfo, _serviceLocator);
                     var handlers = ExtensionsFactory.GetHeaderInspectors(methodInfo, _serviceLocator);
 
@@ -360,17 +370,19 @@ namespace Stardust.Interstellar.Rest.Client
 
         private static string BuildActionUrl(ParameterWrapper[] parameters, ActionWrapper action)
         {
-            var path = action.RouteTemplate;
-            List<string> queryStrings = new List<string>();
+            if (action == null) Console.WriteLine($"no action definition found ?!?!");
+            var path = action?.RouteTemplate ?? "";
+            var queryStrings = new List<string>();
+            if (parameters == null) return path;
             foreach (var source in parameters.Where(p => p.In == InclutionTypes.Path))
             {
                 if (path.Contains($"{{{source.Name}}}"))
                 {
-                    path = path.Replace($"{{{source.Name}}}", Uri.EscapeDataString(source.value.ToString()));
+                    path = path.Replace($"{{{source.Name}}}", Uri.EscapeDataString(source?.value?.ToString() ?? ""));
                 }
                 else
                 {
-                    queryStrings.Add($"{source.Name}={HttpUtility.UrlEncode(source.value.ToString())}");
+                    queryStrings.Add($"{source.Name}={HttpUtility.UrlEncode(source?.value?.ToString() ?? "")}");
                 }
             }
             if (queryStrings.Any()) path = path + "?" + string.Join("&", queryStrings);

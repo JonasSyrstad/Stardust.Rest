@@ -1,3 +1,8 @@
+using Microsoft.Web.Http;
+using Stardust.Interstellar.Rest.Annotations;
+using Stardust.Interstellar.Rest.Client;
+using Stardust.Interstellar.Rest.Common;
+using Stardust.Interstellar.Rest.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -8,15 +13,10 @@ using System.Reflection.Emit;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
-using Microsoft.Web.Http;
-using Stardust.Interstellar.Rest.Annotations;
-using Stardust.Interstellar.Rest.Client;
-using Stardust.Interstellar.Rest.Common;
-using Stardust.Interstellar.Rest.Extensions;
 
 namespace Stardust.Interstellar.Rest.Service
 {
-    class ServiceBuilder
+    internal class ServiceBuilder
     {
         private AssemblyBuilder myAssemblyBuilder;
 
@@ -95,9 +95,7 @@ namespace Stardust.Interstellar.Rest.Service
 
         public MethodBuilder InternalMethodBuilder(TypeBuilder type, MethodInfo implementationMethod, Func<MethodInfo, MethodBuilder, Type[], List<ParameterWrapper>, MethodBuilder> bodyBuilder, IServiceLocator serviceLocator)
         {
-            List<ParameterWrapper> methodParams;
-            Type[] pTypes;
-            var method = DefineMethod(type, implementationMethod, out methodParams, out pTypes, serviceLocator);
+            var method = DefineMethod(type, implementationMethod, out List<ParameterWrapper> methodParams, out Type[] pTypes, serviceLocator);
             return bodyBuilder(implementationMethod, method, pTypes, methodParams);
         }
 
@@ -236,11 +234,39 @@ namespace Stardust.Interstellar.Rest.Service
             var template = implementationMethod.GetCustomAttribute<RouteAttribute>()?.Template ?? implementationMethod.GetCustomAttribute<VerbAttribute>()?.Route;
             if (template == null) template = ExtensionsFactory.GetServiceTemplate(implementationMethod, serviceLocator);
             method.SetCustomAttribute(new CustomAttributeBuilder(route, new[] { template }));
+            BuildServiceDescriptionAttribute(implementationMethod, method);
             // [HttpGetAttribute]
             method.SetCustomAttribute(new CustomAttributeBuilder(httpGet, new Type[] { }));
             ConstructorInfo ctor5 = typeof(ResponseTypeAttribute).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { typeof(Type) }, null);
             method.SetCustomAttribute(new CustomAttributeBuilder(ctor5, new object[] { GetReturnType(implementationMethod) }));
             return method;
+        }
+
+        private static void BuildServiceDescriptionAttribute(MethodInfo implementationMethod, MethodBuilder method)
+        {
+            var descriptionAttribute = implementationMethod.GetCustomAttribute<ServiceDescriptionAttribute>();
+            if (descriptionAttribute != null)
+            {
+                var ctor = typeof(ServiceDescriptionAttribute).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null,
+                    new Type[] { typeof(string) }, null);
+                var props = new[]
+                {
+                    typeof(ServiceDescriptionAttribute).GetProperty("Tags"),
+                    typeof(ServiceDescriptionAttribute).GetProperty("Summary"),
+                    typeof(ServiceDescriptionAttribute).GetProperty("IsDeprecated"),
+                    typeof(ServiceDescriptionAttribute).GetProperty("Responses")
+                };
+                var values = new object[]
+                {
+                    descriptionAttribute.Tags,
+                    descriptionAttribute.Summary,
+                    descriptionAttribute.IsDeprecated,
+                    descriptionAttribute.Responses
+                };
+                method.SetCustomAttribute(new CustomAttributeBuilder(ctor, new[] { descriptionAttribute.Description }, props,
+                    values));
+            }
         }
 
         private static void DefineAuthorizeAttributes(MethodInfo implementationMethod, MethodBuilder method)
@@ -481,7 +507,7 @@ namespace Stardust.Interstellar.Rest.Service
         {
             return InternalMethodBuilder(type, implementationMethod, (a, b, c, d) => BuildAsyncMethodBody(a, b, c, d, type), serviceLocator);
         }
-        private static int typeCounter = 0;
+        private static readonly int typeCounter = 0;
 
 
 
@@ -752,8 +778,7 @@ namespace Stardust.Interstellar.Rest.Service
 
         private TypeBuilder CreateServiceType(Type interfaceType)
         {
-            var routePrefix = interfaceType.GetCustomAttribute<IRoutePrefixAttribute>()
-                ?? interfaceType.GetInterfaces().FirstOrDefault()?.GetCustomAttribute<IRoutePrefixAttribute>();
+            var routePrefix = GetRoutePrefix(interfaceType);
             var type = myModuleBuilder.DefineType("TempModule.Controllers." + interfaceType.Name.Remove(0, 1) + "Controller", TypeAttributes.Public | TypeAttributes.Class, typeof(ServiceWrapperBase<>).MakeGenericType(interfaceType));
             var version = interfaceType.GetCustomAttribute<VersionAttribute>();
             if (version != null)
@@ -798,7 +823,47 @@ namespace Stardust.Interstellar.Rest.Service
 
                 type.SetCustomAttribute(new CustomAttributeBuilder(routePrefixCtor, new object[] { prefix }));
             }
+
+            AddDescriptionAttribute(interfaceType, type);
+
             return type;
+        }
+
+        private static void AddDescriptionAttribute(Type interfaceType, TypeBuilder type)
+        {
+            var descriptionAttribute = interfaceType.GetCustomAttribute<ServiceDescriptionAttribute>();
+            if (descriptionAttribute != null)
+            {
+                var ctor = typeof(ServiceDescriptionAttribute).GetConstructor(
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null,
+                    new Type[] {typeof(string)}, null);
+                var props = new[]
+                {
+                    typeof(ServiceDescriptionAttribute).GetProperty("Tags"),
+                    typeof(ServiceDescriptionAttribute).GetProperty("Summary"),
+                    typeof(ServiceDescriptionAttribute).GetProperty("IsDeprecated"),
+                    typeof(ServiceDescriptionAttribute).GetProperty("Responses")
+                };
+                var values = new object[]
+                {
+                    descriptionAttribute.Tags,
+                    descriptionAttribute.Summary,
+                    descriptionAttribute.IsDeprecated,
+                    descriptionAttribute.Responses
+                };
+                type.SetCustomAttribute(new CustomAttributeBuilder(ctor, new[] {descriptionAttribute.Description}, props,
+                    values));
+            }
+        }
+
+        private static IRoutePrefix GetRoutePrefix(Type interfaceType)
+        {
+            IRoutePrefix routePrefix = interfaceType.GetCustomAttribute<ApiAttribute>()
+                                       ?? interfaceType.GetInterfaces().FirstOrDefault()?.GetCustomAttribute<ApiAttribute>();
+            if (routePrefix == null)
+                routePrefix = interfaceType.GetCustomAttribute<IRoutePrefixAttribute>()
+                              ?? interfaceType.GetInterfaces().FirstOrDefault()?.GetCustomAttribute<IRoutePrefixAttribute>();
+            return routePrefix;
         }
 
         public void Save()
