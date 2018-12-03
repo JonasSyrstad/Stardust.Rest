@@ -78,12 +78,12 @@ namespace NetCoreTestWeb
         }
     }
 
-    [IRoutePrefix("test")]
+    [Api("test")]
     [DummyAuth]
     public interface IDummyClient
     {
-        [Get]
-        [IRoute("action")]
+        [Get("action")]
+        [ServiceDescription("test")]
         Task<string> Echo([InQuery] string message);
     }
 

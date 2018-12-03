@@ -2,7 +2,7 @@ using System;
 
 namespace Stardust.Interstellar.Rest.Annotations
 {
-    public abstract class VerbAttribute : Attribute
+    public abstract class VerbAttribute : Attribute,IRoute
     {
         public string Route { get; set; }
 
@@ -22,5 +22,10 @@ namespace Stardust.Interstellar.Rest.Annotations
             Verb = verb;
         }
         public string Verb { get;  set; }
+        string IRoute.Template
+        {
+            get => Route;
+            set => Route=value;
+        }
     }
 }

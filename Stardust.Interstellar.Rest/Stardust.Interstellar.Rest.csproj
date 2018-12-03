@@ -2,12 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>3.4.5</Version>
+    <Version>3.4.6</Version>
     <Authors>Stardust</Authors>
     <Company>Stardust</Company>
     <PackageId>Stardust.Interstellar.Rest</PackageId>
     <Description>Create rest service proxies based on decorated interfaces.</Description>
-    <PackageLicenseUrl>https://github.com/JonasSyrstad/Stardust.Rest/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseUrl>https://licenses.nuget.org/Apache-2.0</PackageLicenseUrl>
+
     <Copyright>Copyright © Stardust 2018</Copyright>
     <PackageProjectUrl>https://github.com/JonasSyrstad/Stardust.Interstellar.Rest</PackageProjectUrl>
     <PackageIconUrl>http://stardustframework.wdfiles.com/local--files/blog%3A_start/logo_smal.png</PackageIconUrl>
@@ -15,8 +16,8 @@
     <RepositoryType>github</RepositoryType>
     <PackageTags>rest client proxy generator</PackageTags>
     <PackageReleaseNotes>Bugfix: nullreference when action parameters has null values</PackageReleaseNotes>
-    <AssemblyVersion>3.4.5.0</AssemblyVersion>
-    <FileVersion>3.4.5.0</FileVersion>
+    <AssemblyVersion>3.4.6.0</AssemblyVersion>
+    <FileVersion>3.4.6.0</FileVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSource>True</IncludeSource>
     <IncludeSymbols>True</IncludeSymbols>
@@ -26,8 +27,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="2.0.0" />
-    <PackageReference Include="Stardust.Interstellar.Rest.Annotations" Version="3.4.1" />
     <PackageReference Include="Stardust.Particles" Version="5.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Stardust.Interstellar.Rest.Annotations\Stardust.Interstellar.Rest.Annotations.csproj" />
   </ItemGroup>
 
 </Project>

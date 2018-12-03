@@ -21,6 +21,7 @@ namespace NetCoreTestWeb.Controllers
 
         [Get]
         [IRoute("Echo/{value}")]
+        [ServiceDescription("test")]
         string Echo([In(InclutionTypes.Path)] string value);
 
         [Obsolete("test")]
@@ -109,7 +110,7 @@ namespace NetCoreTestWeb.Controllers
         public async Task<IEnumerable<string>> Get()
         {
             var value = await _client.Echo("test");
-            return new string[] { "value1", "value2" }; 
+            return new string[] { "value1", "value2" };
         }
 
         // GET api/values/5
