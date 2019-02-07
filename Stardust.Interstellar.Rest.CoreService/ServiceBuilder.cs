@@ -202,6 +202,7 @@ namespace Stardust.Interstellar.Rest.Service
             // Parameter id
             var template = implementationMethod.GetCustomAttribute<RouteAttribute>()?.Template ?? implementationMethod.GetCustomAttribute<VerbAttribute>()?.Route;
             if (template == null) template = ExtensionsFactory.GetServiceTemplate(implementationMethod, serviceLocator);
+            if (template == null) template = "";
             int pid = 1;
             foreach (var parameterWrapper in methodParams.Where(p => p.In != InclutionTypes.Header))
             {

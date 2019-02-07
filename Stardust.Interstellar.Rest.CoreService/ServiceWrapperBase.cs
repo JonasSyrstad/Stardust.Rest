@@ -454,6 +454,7 @@ namespace Stardust.Interstellar.Rest.Service
                 var methodInitializers = methodInfo.GetCustomAttributes<ServiceInitializerAttribute>().ToList();
                 methodInitializers.AddRange(serviceInitializerAttributes);
                 var template = ExtensionsFactory.GetServiceTemplate(methodInfo, _serviceLocator);
+                if (template == null) template = "";    
                 var actionName = GetActionName(methodInfo);
                 var action = new ActionWrapper { Name = actionName, ReturnType = methodInfo.ReturnType, RouteTemplate = template, Parameters = new List<ParameterWrapper>() };
                 var actions = methodInfo.GetCustomAttributes(true).OfType<VerbAttribute>();

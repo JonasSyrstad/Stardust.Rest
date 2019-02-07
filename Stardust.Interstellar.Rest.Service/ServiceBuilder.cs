@@ -233,6 +233,7 @@ namespace Stardust.Interstellar.Rest.Service
             // [RouteAttribute]
             var template = implementationMethod.GetCustomAttribute<RouteAttribute>()?.Template ?? implementationMethod.GetCustomAttribute<VerbAttribute>()?.Route;
             if (template == null) template = ExtensionsFactory.GetServiceTemplate(implementationMethod, serviceLocator);
+            if (template == null) template = "";
             method.SetCustomAttribute(new CustomAttributeBuilder(route, new[] { template }));
             BuildServiceDescriptionAttribute(implementationMethod, method);
             // [HttpGetAttribute]
@@ -836,7 +837,7 @@ namespace Stardust.Interstellar.Rest.Service
             {
                 var ctor = typeof(ServiceDescriptionAttribute).GetConstructor(
                     BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null,
-                    new Type[] {typeof(string)}, null);
+                    new Type[] { typeof(string) }, null);
                 var props = new[]
                 {
                     typeof(ServiceDescriptionAttribute).GetProperty("Tags"),
@@ -851,7 +852,7 @@ namespace Stardust.Interstellar.Rest.Service
                     descriptionAttribute.IsDeprecated,
                     descriptionAttribute.Responses
                 };
-                type.SetCustomAttribute(new CustomAttributeBuilder(ctor, new[] {descriptionAttribute.Description}, props,
+                type.SetCustomAttribute(new CustomAttributeBuilder(ctor, new[] { descriptionAttribute.Description }, props,
                     values));
             }
         }

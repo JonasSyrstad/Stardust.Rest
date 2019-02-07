@@ -12,5 +12,9 @@ namespace Stardust.Interstellar.Rest.Annotations
         public OptionsAttribute(string route) : base("OPTIONS",route)
         {
         }
-    }
+
+	    public OptionsAttribute(string route, string serviceDescription) : base("OPTIONS", route, serviceDescription)
+	    {
+	    }
+	}
 }

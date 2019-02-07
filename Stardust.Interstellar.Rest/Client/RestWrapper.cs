@@ -302,6 +302,7 @@ namespace Stardust.Interstellar.Rest.Client
 
         private object GetResultFromResponse(ActionWrapper action, HttpWebResponse response, Type type)
         {
+	        
             object result;
             if (action.UseXml)
             {
@@ -449,7 +450,10 @@ namespace Stardust.Interstellar.Rest.Client
                 else
                 {
                     var val = parameters.Single(p => p.In == InclutionTypes.Body);
-                    SerializeBody(req, val.value, action);
+	                var v = val.value;
+	                if (val.value!=null && val.value?.GetType() == typeof(byte[]))
+		                v = Convert.ToBase64String((byte[]) val.value);
+                    SerializeBody(req, v, action);
                 }
             }
             else
@@ -469,8 +473,11 @@ namespace Stardust.Interstellar.Rest.Client
                 }
                 else
                 {
-                    var val = parameters.Single(p => p.In == InclutionTypes.Body);
-                    return await SerializeBodyAsync(req, val.value, action);
+					var val = parameters.Single(p => p.In == InclutionTypes.Body);
+	                var v = val.value;
+	                if (val.value != null && val.value?.GetType() == typeof(byte[]))
+		                v = Convert.ToBase64String((byte[])val.value);
+					return await SerializeBodyAsync(req, v, action);
                 }
             }
             else
@@ -558,8 +565,7 @@ namespace Stardust.Interstellar.Rest.Client
 
         private void JsonBodySerializer(WebRequest req, object val)
         {
-
-            var serializer = CreateJsonSerializer(val?.GetType());
+	        var serializer = CreateJsonSerializer(val?.GetType());
             byte[] buffer;
             using (var memStream = new MemoryStream())
             {

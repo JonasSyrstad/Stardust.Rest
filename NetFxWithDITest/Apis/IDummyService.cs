@@ -5,8 +5,8 @@ namespace NetFxWithDITest.Apis
     [IRoutePrefix("api/dummy")]
     public interface IDummyService
     {
-        [Get]
-        [IRoute("")]
+        [Get("","Test service.")]
+        
         string Test([InQuery]string message);
     }
 
