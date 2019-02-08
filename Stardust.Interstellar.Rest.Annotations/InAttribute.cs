@@ -18,39 +18,4 @@ namespace Stardust.Interstellar.Rest.Annotations
 
         public InclutionTypes InclutionType { get; set; }
     }
-
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-    public class InPathAttribute : InAttribute
-    {
-        public InPathAttribute():base(InclutionTypes.Path)
-        {
-            
-        }
-    }
-
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-    public class InQueryAttribute : InAttribute
-    {
-        public InQueryAttribute() : base(InclutionTypes.Query)
-        {
-
-        }
-    }
-
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-    public class InHeaderAttribute : InAttribute
-    {
-        public InHeaderAttribute() : base(InclutionTypes.Header)
-        {
-
-        }
-    }
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-    public class InBodyAttribute : InAttribute
-    {
-        public InBodyAttribute() : base(InclutionTypes.Body)
-        {
-
-        }
-    }
 }
