@@ -28,8 +28,8 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
             {
                 webEx = e.InnerException as WebException;
             }
-            var resp = webEx?.Response as HttpWebResponse;
-            if (resp != null && circuitBreaker.IgnoredStatusCodes.Contains(resp.StatusCode)) return false;
+
+            if (webEx?.Response is HttpWebResponse resp && ((int)resp.StatusCode > 501 || ((int)resp.StatusCode != 429 || (int)resp.StatusCode != 418))) return false;
             if (circuitBreaker.IgnoredExceptions.Contains(e.GetType())) return false;
             circuitBreaker.IncreaseFailureCount();
             return true;

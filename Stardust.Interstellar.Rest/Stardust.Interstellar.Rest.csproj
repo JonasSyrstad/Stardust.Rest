@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>3.4.6</Version>
+    <Version>3.4.7</Version>
     <Authors>Stardust</Authors>
     <Company>Stardust</Company>
     <PackageId>Stardust.Interstellar.Rest</PackageId>
@@ -15,9 +15,10 @@
     <RepositoryUrl>https://github.com/JonasSyrstad/Stardust.Rest</RepositoryUrl>
     <RepositoryType>github</RepositoryType>
     <PackageTags>rest client proxy generator</PackageTags>
-    <PackageReleaseNotes>Bugfix: nullreference when action parameters has null values</PackageReleaseNotes>
-    <AssemblyVersion>3.4.6.0</AssemblyVersion>
-    <FileVersion>3.4.6.0</FileVersion>
+    <PackageReleaseNotes>Bugfix: nullreference when action parameters has null values
+Bugfix: make the circiut breaker ignore all http status codes below 501 except 429</PackageReleaseNotes>
+    <AssemblyVersion>3.4.7.0</AssemblyVersion>
+    <FileVersion>3.4.7.0</FileVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSource>True</IncludeSource>
     <IncludeSymbols>True</IncludeSymbols>
