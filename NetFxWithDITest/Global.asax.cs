@@ -6,6 +6,7 @@ using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using Stardust.Interstellar.Rest.DependencyInjection;
 
 namespace NetFxWithDITest
 {
@@ -13,6 +14,7 @@ namespace NetFxWithDITest
     {
         protected void Application_Start()
         {
+            this.AddDependencyInjection<Services>();
             AreaRegistration.RegisterAllAreas();
             GlobalConfiguration.Configure(WebApiConfig.Register);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);

@@ -3,14 +3,7 @@ using System.Collections.Generic;
 
 namespace Stardust.Interstellar.Rest.Extensions
 {
-    public interface IExtrasContainer
-    {
-        T GetState<T>(string key);
-
-        Extras SetState<T>(string key, T value);
-    }
-
-    [Serializable]
+	[Serializable]
     public class Extras : Dictionary<string, object>,IExtrasContainer
     {
         public T GetState<T>(string key)

@@ -92,6 +92,8 @@ namespace Stardust.Interstellar.Rest.Service
         {
             return ServiceTypes;
         }
+
+        public static bool ThrowOnException { get; set; }
     }
 
     public class VerbResolver : IWebMethodConverter

@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Web.Http.Dependencies;
 using Microsoft.Extensions.DependencyInjection;
 using Stardust.Particles;
+using Stardust.Particles.Abstractions;
+using IDependencyResolver = System.Web.Http.Dependencies.IDependencyResolver;
 
 namespace Stardust.Interstellar.Rest.Dependencyinjection
 {
-    public class InterstellarDependencyResolver : IDependencyResolver, System.Web.Mvc.IDependencyResolver
+    public class InterstellarDependencyResolver : IDependencyResolver, System.Web.Mvc.IDependencyResolver,IServiceProvider
     {
         public IServiceCollection Services { get; }
         private readonly IServiceProvider _serviceProvider;

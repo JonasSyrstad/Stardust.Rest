@@ -12,6 +12,7 @@ namespace Stardust.Interstellar.Rest.Service
 {
     public static class MvcExtensions
     {
+
         public static IServiceCollection AddInterstellar(this IServiceCollection services)
         {
             return services.AddInterstellar(false);

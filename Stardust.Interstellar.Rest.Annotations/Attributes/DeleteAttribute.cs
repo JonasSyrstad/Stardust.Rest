@@ -12,5 +12,9 @@ namespace Stardust.Interstellar.Rest.Annotations
         public DeleteAttribute(string route) : base("DELETE",route)
         {
         }
-    }
+
+	    public DeleteAttribute(string route,string serviceDescription) : base("DELETE", route,serviceDescription)
+	    {
+	    }
+	}
 }

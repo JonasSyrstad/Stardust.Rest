@@ -32,10 +32,10 @@ namespace Stardust.Interstellar.Rest.Common
             var templateAttrib = methodInfo.GetCustomAttribute<IRouteAttribute>();
             if (templateAttrib == null)
             {
-                return verbAttribute?.Route ?? template;
+                return verbAttribute?.Route ?? template ?? "";
             }
             template = templateAttrib.Template;
-            return template;
+            return template ?? "";
         }
 
         public static string GetRouteTemplate(IRoutePrefix templatePrefix, IRoute template, MethodInfo methodInfo, IServiceProvider serviceLocator)

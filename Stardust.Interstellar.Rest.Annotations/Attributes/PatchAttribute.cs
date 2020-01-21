@@ -12,5 +12,9 @@ namespace Stardust.Interstellar.Rest.Annotations
         public PatchAttribute(string route) : base("PATCH", route)
         {
         }
-    }
+
+	    public PatchAttribute(string route, string serviceDescription) : base("PATCH", route, serviceDescription)
+	    {
+	    }
+	}
 }

@@ -1,4 +1,6 @@
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using Stardust.Interstellar.Rest.JsonPatch;
 using System.IO;
 using Xunit;
 
@@ -28,5 +30,48 @@ namespace MiscTests
             }
 
         }
+
+        [Fact]
+        public void PatchDocumentTest()
+        {
+            var d = new PatchDocument
+            {
+                Name = "test",
+                IsTrue = false
+            };
+            var services = new ServiceCollection();
+            services.BuildServiceProvider().SetRootProvider();
+            
+            var patch = d.ToPatchDocument<IPatchDocument>();
+            Assert.NotNull(patch);
+            Assert.Equal("test", patch.Name);
+            patch.Name = "test2";
+            patch.IsTrue = true;
+            var jsonPatch = patch.AsJsonPatch<IPatchDocument>();
+            Assert.Equal(2, jsonPatch.Operations.Count);
+        }
+    }
+
+    public interface IPatchDocument : IPatchableDocument
+    {
+        string Name { get; set; }
+        bool IsTrue { get; set; }
+    }
+
+    public class PatchDocument : IPatchDocument
+    {
+        public string Name
+        {
+            get;
+            set;
+        }
+
+        public bool IsTrue
+        {
+            get;
+            set;
+        }
+
+
     }
 }

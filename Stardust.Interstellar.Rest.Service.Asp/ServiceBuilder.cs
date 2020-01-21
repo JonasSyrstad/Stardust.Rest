@@ -13,6 +13,8 @@ using System.Reflection.Emit;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
+using Stardust.Interstellar.Rest.Annotations.Service;
+using Stardust.Particles;
 
 namespace Stardust.Interstellar.Rest.Service
 {
@@ -89,6 +91,7 @@ namespace Stardust.Interstellar.Rest.Service
             {
                 serviceLocator.GetService<ILogger>()?.Error(ex);
                 serviceLocator.GetService<ILogger>()?.Message("Skipping type: {0}", interfaceType.FullName);
+                if (ServiceFactory.ThrowOnException) throw;
                 return null;
             }
         }
@@ -200,7 +203,7 @@ namespace Stardust.Interstellar.Rest.Service
             const MethodAttributes methodAttributes = MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot;
             var method = type.DefineMethod(implementationMethod.Name, methodAttributes);
             // Preparing Reflection instances
-
+            
 
             var route = typeof(RouteAttribute).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { typeof(String) }, null);
             var httpGet = httpMethodAttribute(implementationMethod, serviceLocator);
@@ -233,12 +236,25 @@ namespace Stardust.Interstellar.Rest.Service
             // [RouteAttribute]
             var template = implementationMethod.GetCustomAttribute<RouteAttribute>()?.Template ?? implementationMethod.GetCustomAttribute<VerbAttribute>()?.Route;
             if (template == null) template = ExtensionsFactory.GetServiceTemplate(implementationMethod, serviceLocator);
+            if (template == null) template = "";
             method.SetCustomAttribute(new CustomAttributeBuilder(route, new[] { template }));
             BuildServiceDescriptionAttribute(implementationMethod, method);
             // [HttpGetAttribute]
             method.SetCustomAttribute(new CustomAttributeBuilder(httpGet, new Type[] { }));
             ConstructorInfo ctor5 = typeof(ResponseTypeAttribute).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { typeof(Type) }, null);
             method.SetCustomAttribute(new CustomAttributeBuilder(ctor5, new object[] { GetReturnType(implementationMethod) }));
+            try
+            {
+                var attributeCreators = implementationMethod.GetCustomAttributes().OfType<ICreateImplementationAttribute>();
+                foreach (var createImplementationAttribute in attributeCreators)
+                {
+                    method.SetCustomAttribute(createImplementationAttribute.CreateAttribute());
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Exception(ex);
+            }
             return method;
         }
 
@@ -780,6 +796,11 @@ namespace Stardust.Interstellar.Rest.Service
         {
             var routePrefix = GetRoutePrefix(interfaceType);
             var type = myModuleBuilder.DefineType("TempModule.Controllers." + interfaceType.Name.Remove(0, 1) + "Controller", TypeAttributes.Public | TypeAttributes.Class, typeof(ServiceWrapperBase<>).MakeGenericType(interfaceType));
+            var attributeCreators = interfaceType.GetCustomAttributes().OfType<ICreateImplementationAttribute>();
+            foreach (var createImplementationAttribute in attributeCreators)
+            {
+                type.SetCustomAttribute(createImplementationAttribute.CreateAttribute());
+            }
             var version = interfaceType.GetCustomAttribute<VersionAttribute>();
             if (version != null)
             {
@@ -836,7 +857,7 @@ namespace Stardust.Interstellar.Rest.Service
             {
                 var ctor = typeof(ServiceDescriptionAttribute).GetConstructor(
                     BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null,
-                    new Type[] {typeof(string)}, null);
+                    new Type[] { typeof(string) }, null);
                 var props = new[]
                 {
                     typeof(ServiceDescriptionAttribute).GetProperty("Tags"),
@@ -851,7 +872,7 @@ namespace Stardust.Interstellar.Rest.Service
                     descriptionAttribute.IsDeprecated,
                     descriptionAttribute.Responses
                 };
-                type.SetCustomAttribute(new CustomAttributeBuilder(ctor, new[] {descriptionAttribute.Description}, props,
+                type.SetCustomAttribute(new CustomAttributeBuilder(ctor, new[] { descriptionAttribute.Description }, props,
                     values));
             }
         }

@@ -15,6 +15,8 @@ namespace Stardust.Interstellar.Rest.Service
     public static class ServiceFactory
     {
         internal static bool _includeStardustVersion = true;
+        public static bool ThrowOnException { get; set; }
+
         public static void DisableStardustVersion()
         {
             _includeStardustVersion = false;
@@ -24,6 +26,7 @@ namespace Stardust.Interstellar.Rest.Service
         {
             var service = CreateServiceImplementation<TService>(new Locator(builder.Services.BuildServiceProvider()));
             builder.Services.AddScoped<TService, TImplementation>();
+            builder.Services.AddScoped(service);
             return builder;
         }
 
@@ -31,6 +34,7 @@ namespace Stardust.Interstellar.Rest.Service
         {
             var service = CreateServiceImplementation<TService>(new Locator(builder.Services.BuildServiceProvider()));
             builder.Services.AddScoped(typeof(TService), implementationType);
+            builder.Services.AddScoped(service);
             return builder;
         }
 
@@ -38,6 +42,7 @@ namespace Stardust.Interstellar.Rest.Service
         {
             var service = CreateServiceImplementation<TService>(new Locator(builder.Services.BuildServiceProvider()));
             builder.Services.AddScoped(s => s.CreateRestClient<TService>(baseUrl));
+            builder.Services.AddScoped(service);
             return builder;
         }
 
@@ -45,6 +50,7 @@ namespace Stardust.Interstellar.Rest.Service
 
         {
             var service = CreateServiceImplementation<TService>(new Locator(builder.Services.BuildServiceProvider()));
+            builder.Services.AddScoped(service);
             return builder;
         }
 
@@ -52,6 +58,7 @@ namespace Stardust.Interstellar.Rest.Service
         {
             var service = CreateServiceImplementation<TService>(new Locator(builder.Services.BuildServiceProvider()));
             builder.Services.AddScoped(func);
+            builder.Services.AddScoped(service);
             return builder;
         }
         public static IMvcBuilder UseInterstellar(this IMvcBuilder builder)
