@@ -14,5 +14,10 @@ namespace Stardust.Interstellar.Rest.Extensions
         {
             return Task.CompletedTask;
         }
+
+        public void BodyData(byte[] body)
+        {
+            
+        }
     }
 }

@@ -85,22 +85,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomAssebliesResolver.cs" />
-    <Compile Include="DelegateBuilder.cs" />
-    <Compile Include="HttpContextMessageContainer.cs" />
-    <Compile Include="IServiceExtensions.cs" />
-    <Compile Include="IStateCache.cs" />
-    <Compile Include="MessageExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServiceBuilder.cs" />
-    <Compile Include="ServiceFactory.cs" />
-    <Compile Include="ServiceWrapperBase.cs" />
-    <Compile Include="VoidDelegateBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
-    <None Include="nugetdeploy.config" />
-    <None Include="packages.config" />
     <None Include="Stardust.Interstellar.Rest.Service.nuspec">
       <SubType>Designer</SubType>
     </None>

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Annotations for the rest generator tool</Description>
-    <Version>3.4.8</Version>
+    <Version>4.1.1</Version>
     <Company>Stardust</Company>
     <Authors>Stardust</Authors>
     <Copyright>Copyright © Stardust 2019</Copyright>

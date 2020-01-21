@@ -23,5 +23,10 @@ namespace Stardust.Continuum.Client
             req.Headers.Add("Authorization", "ApiKey " + LogStreamConfig.ApiKey);
             return Task.CompletedTask;
         }
+
+        public void BodyData(byte[] body)
+        {
+            
+        }
     }
 }

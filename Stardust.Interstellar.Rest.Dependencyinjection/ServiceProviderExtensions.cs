@@ -4,14 +4,40 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
+using Stardust.Interstellar.Rest.Dependencyinjection;
+using Stardust.Particles;
 
-namespace Stardust.Interstellar.Rest.Dependencyinjection
+
+namespace Stardust.Interstellar.Rest.DependencyInjection
 {
     public static class ServiceProviderExtensions
     {
+        internal static Func<HttpContextBase> CurrentHttpContext = () => new HttpContextWrapper(HttpContext.Current);
+        public static IAppBuilder AddDependencyInjection(this IAppBuilder app, string apiPath = "/api", bool addMvcDi = true)
+        {
+            if (_addedToOwin) return app;
+            if (apiPath.ContainsCharacters())
+            {
+                app.Map(apiPath, api =>
+              {
+                  var config = new HttpConfiguration();
+                  config.MapHttpAttributeRoutes();
+                  config.DependencyResolver = _resolver;
+
+                  api.UseWebApi(config);
+              });
+            }
+
+            
+            return app;
+        }
+
+        private static InterstellarDependencyResolver _resolver;
+        private static bool _addedToOwin;
 
         public static IServiceCollection AddAllControllersFrom(this IServiceCollection services, Assembly assembly)
         {
@@ -47,11 +73,15 @@ namespace Stardust.Interstellar.Rest.Dependencyinjection
             services.AddAllControllersFrom(appAssembly);
             if (appAssembly != configurationAssembly)
                 services.AddAllControllersFrom(configurationAssembly);
-            var resolver = new InterstellarDependencyResolver(services);
+            _resolver = new InterstellarDependencyResolver(services);
             if (addFor == ControllerTypes.Both || addFor == ControllerTypes.Mvc)
-                DependencyResolver.SetResolver(resolver);
+                DependencyResolver.SetResolver(_resolver);
             if (addFor == ControllerTypes.Both || addFor == ControllerTypes.WebApi)
-                GlobalConfiguration.Configuration.DependencyResolver = resolver;
+                GlobalConfiguration.Configuration.DependencyResolver = _resolver;
+            if (app is IAppBuilder appBuilder)
+            {
+                appBuilder.AddDependencyInjection();
+            }
             return app;
         }
         public static IServiceCollection AddControllersAsServices(this IServiceCollection services,

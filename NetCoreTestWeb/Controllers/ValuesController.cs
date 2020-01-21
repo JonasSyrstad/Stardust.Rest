@@ -13,20 +13,17 @@ using System.Threading.Tasks;
 
 namespace NetCoreTestWeb.Controllers
 {
-    [IRoutePrefix("api/test")]
+    [Api("api/test")]
     //[AuthorizeWrapper]
     [ServiceInformation]
     public interface IMyServies
     {
 
-        [Get]
-        [IRoute("Echo/{value}")]
-        [ServiceDescription("test")]
+        [Get("Echo/{value}","test")]
         string Echo([In(InclutionTypes.Path)] string value);
 
         [Obsolete("test")]
-        [Get]
-        [IRoute("Echo2/{value}")]
+        [Get("Echo2/{value}")]
         Task<StringWrapper> Echo2Async([In(InclutionTypes.Path)] string value);
 
     }

@@ -41,6 +41,7 @@ namespace MiscTests
             };
             var services = new ServiceCollection();
             services.BuildServiceProvider().SetRootProvider();
+            
             var patch = d.ToPatchDocument<IPatchDocument>();
             Assert.NotNull(patch);
             Assert.Equal("test", patch.Name);

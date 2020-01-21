@@ -15,10 +15,13 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using Stardust.Interstellar.Rest.Annotations.Rest.Extensions;
+using Stardust.Particles;
+using Stardust.Particles.Collection.Arrays;
 
 namespace Stardust.Interstellar.Rest.Client
 {
-    public class RestWrapper : IServiceWithGlobalParameters
+    public class RestWrapper : IServiceWithGlobalParameters, IConfigurableService
     {
 
 
@@ -43,6 +46,10 @@ namespace Stardust.Interstellar.Rest.Client
 
         private ErrorHandlerAttribute _errorInterceptor;
         private readonly ILogger _logger;
+        private string _trailingQueryString;
+        private bool _pathVersionSet;
+        private bool? _runAuthProviderBeforeAppendingBody;
+        private Func<string, IWebProxy> _proxyFunc;
 
         internal static ConcurrentDictionary<Type, ConcurrentDictionary<string, ActionWrapper>> Cache() => cache;
 
@@ -257,20 +264,24 @@ namespace Stardust.Interstellar.Rest.Client
 
         private static ResultWrapper HandleWebException(WebException webError, ActionWrapper action)
         {
-            var resp = webError.Response as HttpWebResponse;
-            if (resp != null)
+            using (webError.Response)
             {
-                var result = TryGetErrorBody(action, resp);
-                return new ResultWrapper
-                {
-                    Status = resp.StatusCode,
 
-                    StatusMessage = resp.StatusDescription,
-                    Error = webError,
-                    Value = result
-                };
+                var resp = webError.Response as HttpWebResponse;
+                if (resp != null)
+                {
+                    var result = TryGetErrorBody(action, resp);
+                    return new ResultWrapper
+                    {
+                        Status = resp.StatusCode,
+
+                        StatusMessage = resp.StatusDescription,
+                        Error = new WebException(webError.Message,webError.Status),
+                        Value = result
+                    };
+                }
+                return new ResultWrapper { Status = HttpStatusCode.BadGateway, StatusMessage = webError.Message, Error = new WebException(webError.Message)}; 
             }
-            return new ResultWrapper { Status = HttpStatusCode.BadGateway, StatusMessage = webError.Message, Error = webError };
         }
 
         private static string TryGetErrorBody(ActionWrapper action, HttpWebResponse resp)
@@ -302,7 +313,7 @@ namespace Stardust.Interstellar.Rest.Client
 
         private object GetResultFromResponse(ActionWrapper action, HttpWebResponse response, Type type)
         {
-	        
+
             object result;
             if (action.UseXml)
             {
@@ -334,31 +345,90 @@ namespace Stardust.Interstellar.Rest.Client
         private HttpWebRequest CreateActionRequest(ParameterWrapper[] parameters, ActionWrapper action, string path)
         {
             var req = CreateActionRequestBase(parameters, action, path);
+            byte[] body = PrepareBody(parameters, req, action);
             if (authenticationHandler == null) authenticationHandler = _serviceLocator.GetService<IAuthenticationHandler>();
-            if (ProxyFactory.RunAuthProviderBeforeAppendingBody)
+            authenticationHandler?.BodyData(body);
+            if (RunAuthProviderBeforeAppendingBody)
                 authenticationHandler?.Apply(req);
-            AppendBody(parameters, req, action);
-            if (!ProxyFactory.RunAuthProviderBeforeAppendingBody)
+            AppendBody(body, req, action);
+            if (!RunAuthProviderBeforeAppendingBody)
                 authenticationHandler?.Apply(req);
             return req;
+        }
+
+        public bool RunAuthProviderBeforeAppendingBody
+        {
+            get => _runAuthProviderBeforeAppendingBody ?? ProxyFactory.RunAuthProviderBeforeAppendingBody;
+            set => _runAuthProviderBeforeAppendingBody = value;
         }
 
         private async Task<HttpWebRequest> CreateActionRequestAsync(ParameterWrapper[] parameters, ActionWrapper action, string path)
         {
             var req = CreateActionRequestBase(parameters, action, path);
+            byte[] body = PrepareBody(parameters, req, action);
             if (authenticationHandler == null) authenticationHandler = _serviceLocator.GetService<IAuthenticationHandler>();
-            if (ProxyFactory.RunAuthProviderBeforeAppendingBody)
+            authenticationHandler?.BodyData(body);
+            if (RunAuthProviderBeforeAppendingBody)
                 if (authenticationHandler != null) await authenticationHandler.ApplyAsync(req);
-            req = await AppendBodyAsync(parameters, req, action);
-            if (!ProxyFactory.RunAuthProviderBeforeAppendingBody)
+            req = await AppendBodyAsync(body, req, action);
+            if (!RunAuthProviderBeforeAppendingBody)
                 if (authenticationHandler != null) await authenticationHandler.ApplyAsync(req);
             return req;
+        }
+
+        private byte[] PrepareBody(ParameterWrapper[] parameters, HttpWebRequest req, ActionWrapper action)
+        {
+            if (parameters.Any(p => p.In == InclutionTypes.Body))
+            {
+                if (parameters.Count(p => p.In == InclutionTypes.Body) > 1)
+                {
+                    return Serialize(parameters.Where(p => p.In == InclutionTypes.Body).Select(p => p.value).ToList(), action);
+                }
+                else
+                {
+                    var val = parameters.Single(p => p.In == InclutionTypes.Body);
+                    var v = val.value;
+                    if (val.value != null && val.value?.GetType() == typeof(byte[]))
+                        v = Convert.ToBase64String((byte[])val.value);
+                    return Serialize(v, action);
+                }
+            }
+            else
+            {
+                req.ContentLength = 0;
+            }
+            if (req.ContentType.Contains("xml")) req.ContentType = null;
+
+            return null;
+        }
+
+        private byte[] Serialize(object value, ActionWrapper action)
+        {
+            if (action.UseXml)
+            {
+                var xmlSerializer = GetSerializer();
+                return xmlSerializer.Serialize(value);
+            }
+            var serializer = CreateJsonSerializer(value?.GetType());
+            byte[] buffer;
+            using (var memStream = new MemoryStream())
+            {
+                using (var stream = new StreamWriter(memStream))
+                {
+                    using (var writer = new JsonTextWriter(stream))
+                    {
+                        serializer.Serialize(writer, value);
+                    }
+                }
+                buffer = memStream.ToArray();
+            }
+
+            return buffer;
         }
 
         private HttpWebRequest CreateActionRequestBase(ParameterWrapper[] parameters, ActionWrapper action, string path)
         {
             var req = action.UseXml ? CreateRequest(path, "application/xml") : CreateRequest(path);
-
             if (DisableProxy) req.Proxy = null;
             req.Headers.Add(ExtensionsFactory.ActionIdName, Guid.NewGuid().ToString());
             req.InitializeState();
@@ -375,9 +445,9 @@ namespace Stardust.Interstellar.Rest.Client
             var path = action?.RouteTemplate ?? "";
             var queryStrings = new List<string>();
             if (parameters == null) return path;
-            foreach (var source in parameters.Where(p => p.In == InclutionTypes.Path))
+            foreach (var source in parameters.Where(p => p.In == InclutionTypes.Path || p.In == InclutionTypes.Query))
             {
-                if (path.Contains($"{{{source.Name}}}"))
+                if (path.Contains($"{{{source.Name}}}") && source.In == InclutionTypes.Path)
                 {
                     path = path.Replace($"{{{source.Name}}}", Uri.EscapeDataString(source?.value?.ToString() ?? ""));
                 }
@@ -402,9 +472,16 @@ namespace Stardust.Interstellar.Rest.Client
 
         private static string Version { get; } = $"{typeof(GetAttribute).Assembly.GetName().Version.Major}.{typeof(GetAttribute).Assembly.GetName().Version.Minor}";
 
+        public void SetProxyHandler(Func<string,IWebProxy> proxyFunc)
+        {
+            _proxyFunc = proxyFunc;
+        }
+
         private HttpWebRequest CreateRequest(string path, string contentType = "application/json")
         {
-            var req = WebRequest.Create(new Uri($"{baseUri}/{path}")) as HttpWebRequest;
+            var req = WebRequest.Create(new Uri(CreateUrl(path))) as HttpWebRequest;
+            if (_proxyFunc != null) 
+                req.Proxy = _proxyFunc($"{req.RequestUri.Scheme}://{req.RequestUri.DnsSafeHost}");
             req.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
             req.Accept = contentType;
             req.ContentType = contentType;
@@ -415,6 +492,13 @@ namespace Stardust.Interstellar.Rest.Client
             SetExtraHeaderValues(req);
             SetTimeoutValues(req);
             return req;
+        }
+
+        private string CreateUrl(string path)
+        {
+            return _trailingQueryString.IsNullOrWhiteSpace()
+                ? $"{baseUri}/{path}"
+                : $"{baseUri}/{path}{(path.Contains("?") ? "&" : "?")}{_trailingQueryString}";
         }
 
         private void SetExtraHeaderValues(HttpWebRequest req)
@@ -434,58 +518,26 @@ namespace Stardust.Interstellar.Rest.Client
 
         private static void SetTimeoutValues(HttpWebRequest req)
         {
+            if (ClientGlobalSettings.KeepAlive != null)
+                req.KeepAlive = ClientGlobalSettings.KeepAlive.Value;
             if (ClientGlobalSettings.Timeout != null) req.Timeout = ClientGlobalSettings.Timeout.Value;
             if (ClientGlobalSettings.ReadWriteTimeout != null) req.ReadWriteTimeout = ClientGlobalSettings.ReadWriteTimeout.Value;
             if (ClientGlobalSettings.ContinueTimeout != null) req.ContinueTimeout = ClientGlobalSettings.ContinueTimeout.Value;
         }
 
-        private void AppendBody(ParameterWrapper[] parameters, HttpWebRequest req, ActionWrapper action)
+        private HttpWebRequest AppendBody(byte[] buffer, HttpWebRequest req, ActionWrapper action)
         {
-            if (parameters.Any(p => p.In == InclutionTypes.Body))
-            {
-                if (parameters.Count(p => p.In == InclutionTypes.Body) > 1)
-                {
-                    SerializeBody(req, parameters.Where(p => p.In == InclutionTypes.Body).Select(p => p.value).ToList(), action);
-                }
-                else
-                {
-                    var val = parameters.Single(p => p.In == InclutionTypes.Body);
-	                var v = val.value;
-	                if (val.value!=null && val.value?.GetType() == typeof(byte[]))
-		                v = Convert.ToBase64String((byte[]) val.value);
-                    SerializeBody(req, v, action);
-                }
-            }
-            else
-            {
-                req.ContentLength = 0;
-            }
-            if (req.ContentType.Contains("xml")) req.ContentType = null;
+            if (buffer.IsEmpty()) return req;
+            var requestStream = req.GetRequestStream();
+            requestStream.Write(buffer, 0, buffer.Length);
+            return req;
         }
 
-        private async Task<HttpWebRequest> AppendBodyAsync(ParameterWrapper[] parameters, HttpWebRequest req, ActionWrapper action)
+        private async Task<HttpWebRequest> AppendBodyAsync(byte[] buffer, HttpWebRequest req, ActionWrapper action)
         {
-            if (parameters.Any(p => p.In == InclutionTypes.Body))
-            {
-                if (parameters.Count(p => p.In == InclutionTypes.Body) > 1)
-                {
-                    return await SerializeBodyAsync(req, parameters.Where(p => p.In == InclutionTypes.Body).Select(p => p.value).ToList(), action);
-                }
-                else
-                {
-					var val = parameters.Single(p => p.In == InclutionTypes.Body);
-	                var v = val.value;
-	                if (val.value != null && val.value?.GetType() == typeof(byte[]))
-		                v = Convert.ToBase64String((byte[])val.value);
-					return await SerializeBodyAsync(req, v, action);
-                }
-            }
-            else
-            {
-                req.ContentLength = 0;
-            }
-            if (req.ContentType.Contains("xml")) req.ContentType = null;
-
+            if (buffer.IsEmpty()) return req;
+            var requestStream = await req.GetRequestStreamAsync();
+            await requestStream.WriteAsync(buffer, 0, buffer.Length);
             return req;
         }
 
@@ -516,40 +568,7 @@ namespace Stardust.Interstellar.Rest.Client
 
 
         }
-
-        private void SerializeBody(WebRequest req, object val, ActionWrapper action)
-        {
-            if (action.UseXml) XmlBodySerializer(req, val);
-            else
-            {
-                if (typeof(IServiceWithGlobalParameters).IsAssignableFrom(interfaceType))
-                    JsonBodySerializer(req, GlobalParameterExtensions.AppendGlobalParameters(interfaceType.FullName, val, action.MessageExtesionLevel));
-                else
-                    JsonBodySerializer(req, val);
-            }
-        }
-
-        private async Task<HttpWebRequest> SerializeBodyAsync(HttpWebRequest req, object val, ActionWrapper action)
-        {
-            if (val == null)
-            {
-                req.ContentLength = 0;
-                return req;
-            }
-            if (action.UseXml)
-            {
-                XmlBodySerializer(req, val);
-                return req;
-            }
-            else
-            {
-                if (typeof(IServiceWithGlobalParameters).IsAssignableFrom(interfaceType))
-                    return await JsonBodySerializerAsync(req, GlobalParameterExtensions.AppendGlobalParameters(interfaceType.FullName, val, action.MessageExtesionLevel));
-                else
-                    return await JsonBodySerializerAsync(req, val);
-            }
-        }
-
+        
         private void XmlBodySerializer(WebRequest req, object val)
         {
             var xmlSerializer = GetSerializer();
@@ -561,48 +580,6 @@ namespace Stardust.Interstellar.Rest.Client
             var xmlSerializer = new Locator(_serviceLocator).GetServices<ISerializer>().SingleOrDefault(s => string.Equals(s.SerializationType, "xml", StringComparison.InvariantCultureIgnoreCase));
             if (xmlSerializer == null) throw new IndexOutOfRangeException("Could not find serializer");
             return xmlSerializer;
-        }
-
-        private void JsonBodySerializer(WebRequest req, object val)
-        {
-	        var serializer = CreateJsonSerializer(val?.GetType());
-            byte[] buffer;
-            using (var memStream = new MemoryStream())
-            {
-                using (var stream = new StreamWriter(memStream))
-                {
-                    using (var writer = new JsonTextWriter(stream))
-                    {
-                        serializer.Serialize(writer, val);
-                    }
-                }
-                buffer = memStream.ToArray();
-            }
-            req.ContentLength = buffer.Length;
-            var requestStream = req.GetRequestStream();
-            requestStream.Write(buffer, 0, buffer.Length);
-        }
-
-        private async Task<HttpWebRequest> JsonBodySerializerAsync(HttpWebRequest req, object val)
-        {
-
-            var serializer = CreateJsonSerializer(val?.GetType());
-            byte[] buffer;
-            using (var memStream = new MemoryStream())
-            {
-                using (var stream = new StreamWriter(memStream))
-                {
-                    using (var writer = new JsonTextWriter(stream))
-                    {
-                        serializer.Serialize(writer, val);
-                    }
-                }
-                buffer = memStream.ToArray();
-            }
-            req.ContentLength = buffer.Length;
-            var requestStream = await req.GetRequestStreamAsync();
-            await requestStream.WriteAsync(buffer, 0, buffer.Length);
-            return req;
         }
 
         public async Task<ResultWrapper> ExecuteAsync(string name, ParameterWrapper[] parameters)
@@ -682,14 +659,7 @@ namespace Stardust.Interstellar.Rest.Client
                 EnsureActionId(webError, req);
                 GetHeaderValues(action, webError.Response as HttpWebResponse);
                 errorResult = HandleWebException(webError, action);
-                //tryr
-                //{
-                //    webError.Response?.Close();
-                //    webError.Response?.Dispose();
-                //}
-                //catch (Exception)
-                //{
-                //}
+
             }
             catch (Exception ex)
             {
@@ -701,6 +671,7 @@ namespace Stardust.Interstellar.Rest.Client
                 {
                     response?.Close();
                     response?.Dispose();
+                    
                 }
                 catch (Exception)
                 {
@@ -813,5 +784,17 @@ namespace Stardust.Interstellar.Rest.Client
         }
 
         public IServiceProvider ServiceLocator => _serviceLocator;
+
+        public void AppendTrailingQueryString(string queryStringSegment)
+        {
+            _trailingQueryString = _trailingQueryString.ContainsCharacters() ? "&" : "" + queryStringSegment;
+        }
+
+        public void SetPathVersion(string version)
+        {
+            if (_pathVersionSet) return;
+            baseUri += $"{(baseUri.EndsWith("/") ? "" : "/")}{version}";
+            _pathVersionSet = true;
+        }
     }
 }

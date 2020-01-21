@@ -50,7 +50,7 @@ namespace Stardust.Interstellar.Rest.Service
         {
             try
             {
-                serviceLocator?.GetService<ILogger>().Message("Generating webapi controller for {0}", interfaceType.FullName);
+                serviceLocator?.GetService<ILogger>()?.Message("Generating webapi controller for {0}", interfaceType.FullName);
                 var type = CreateServiceType(interfaceType);
                 ctor(type, interfaceType);
                 foreach (var methodInfo in interfaceType.GetMethods().Length == 0 ? interfaceType.GetInterfaces().First().GetMethods() : interfaceType.GetMethods())
@@ -69,7 +69,7 @@ namespace Stardust.Interstellar.Rest.Service
                         else BuildMethod(type, methodInfo, serviceLocator);
                     }
                 }
-                return type.CreateType();
+                return type.CreateTypeInfo();
             }
             catch (Exception ex)
             {

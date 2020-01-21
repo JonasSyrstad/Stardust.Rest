@@ -25,7 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Stardust.Interstellar.Rest.Annotations\Stardust.Interstellar.Rest.Annotations.csproj" />
-    <ProjectReference Include="..\Stardust.Interstellar.Rest.CoreService\Stardust.Interstellar.Rest.CoreService.csproj" />
+    <ProjectReference Include="..\Stardust.Interstellar.Rest.CoreService\Stardust.Interstellar.Rest.Service.AspNetCore.csproj" />
     <ProjectReference Include="..\Stardust.Interstellar.Rest\Stardust.Interstellar.Rest.csproj" />
   </ItemGroup>
 

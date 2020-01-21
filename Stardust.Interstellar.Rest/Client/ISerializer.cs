@@ -14,5 +14,6 @@ namespace Stardust.Interstellar.Rest.Client
         void Serialize(WebRequest req, object val);
 
         object Deserialize(Stream responseStream, Type type);
+        byte[] Serialize(object value);
     }
 }

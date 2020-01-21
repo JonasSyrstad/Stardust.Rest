@@ -82,9 +82,9 @@
       <Project>{FB9F29E3-83D5-4751-BAFC-CCB64E40F220}</Project>
       <Name>Stardust.Interstellar.Rest.Annotations</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Stardust.Interstellar.Rest.Service\Stardust.Interstellar.Rest.Service.csproj">
-      <Project>{780744E0-5684-43C8-A28C-447EDAF2170A}</Project>
-      <Name>Stardust.Interstellar.Rest.Service</Name>
+    <ProjectReference Include="..\Stardust.Interstellar.Rest.Service.Asp\Stardust.Interstellar.Rest.Service.AspNet.csproj">
+      <Project>{5d5c817e-f67c-4947-ae0a-faeaec8d4b07}</Project>
+      <Name>Stardust.Interstellar.Rest.Service.AspNet</Name>
     </ProjectReference>
     <ProjectReference Include="..\Stardust.Interstellar.Rest\Stardust.Interstellar.Rest.csproj">
       <Project>{5EE819E3-B588-431F-B5DA-3EBC0557242B}</Project>

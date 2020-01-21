@@ -17,7 +17,6 @@ using Stardust.Interstellar.Rest.Service;
 using Stardust.Particles;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
@@ -40,12 +39,13 @@ namespace NetCoreTestWeb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddInterstellar().AddHttpContextAccessor()
+            ServiceFactory.ThrowOnException = true;
+            services.AddInterstellar().AddHttpContextAccessor().AddLogging()
                 .AddSingleton(s => new Locator(s))
                 .AddSingleton<ILogger, LogWrapper>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddB2CAuthentication("OAuth2", "Azure B2C authentication");
-            services.AddScoped<IDummyClient>(s => s.CreateRestClient<IDummyClient>("https://localhost:44305/jonas.syrstad%40dnvgl.com/ledger"));
+            services.AddScoped(s => s.CreateRestClient<IDummyClient>("https://localhost:44305/jonas.syrstad%40dnvgl.com/ledger"));
 
             var builder = services.AddMvc().AddAsController<IMyServies, MyServies>().UseInterstellar();
 
@@ -82,8 +82,7 @@ namespace NetCoreTestWeb
     [DummyAuth]
     public interface IDummyClient
     {
-        [Get("action")]
-        [ServiceDescription("test")]
+        [Get("action","test")]
         Task<string> Echo([InQuery] string message);
     }
 
@@ -113,6 +112,11 @@ namespace NetCoreTestWeb
         public Task ApplyAsync(HttpWebRequest req)
         {
             return Task.CompletedTask; ;
+        }
+
+        public void BodyData(byte[] body)
+        {
+            
         }
     }
 
@@ -159,52 +163,23 @@ namespace NetCoreTestWeb
     {
         private readonly Microsoft.Extensions.Logging.ILogger _logger;
 
-        public LogWrapper(ILogger<Startup> logger)
-        {
-            _logger = logger;
-        }
+        //public LogWrapper(Microsoft.Extensions.Logging.ILogger logger)
+        //{
+        //    _logger = logger;
+        //}
         public void Error(Exception error)
         {
-            _logger.LogError(error, error.Message);
+            _logger?.LogError(error, error.Message);
         }
 
         public void Message(string message)
         {
-            _logger.LogDebug(message);
+            _logger?.LogDebug(message);
         }
 
         public void Message(string format, params object[] args)
         {
             Message(string.Format(format, args));
         }
-    }
-
-    public class ServiceLocator : IServiceLocator
-    {
-        private readonly IServiceProvider _serviceProvider;
-
-        public ServiceLocator(IServiceProvider serviceProvider)
-        {
-            _serviceProvider = serviceProvider;
-        }
-
-        public T GetService<T>()
-        {
-            return ServiceProviderServiceExtensions.GetService<T>(_serviceProvider);
-        }
-
-        public object GetService(Type serviceType)
-        {
-            return _serviceProvider.GetService(serviceType);
-        }
-
-        public IEnumerable<T> GetServices<T>()
-        {
-            return _serviceProvider.GetServices<T>();
-        }
-
-        public object CreateInstanceOf(Type type) => ActivatorUtilities.CreateInstance(_serviceProvider, type);
-
-        public T CreateInstance<T>() where T : class => ActivatorUtilities.CreateInstance(_serviceProvider, typeof(T)) as T;
     }
 }

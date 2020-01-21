@@ -9,5 +9,6 @@ namespace Stardust.Interstellar.Rest.Extensions
         void Apply(HttpWebRequest req);
 
         Task ApplyAsync(HttpWebRequest req);
+        void BodyData(byte[] body);
     }
 }
