@@ -12,9 +12,4 @@ namespace Stardust.Interstellar.Rest.Annotations.Service
     {
         public abstract void Initialize(IInitializableService service, StateDictionary state, object[] parameters);
     }
-
-    public interface IInitializableService
-    {
-        void Initialize(params object[] instances);
-    }
 }

@@ -79,7 +79,7 @@ namespace Stardust.Interstellar.Rest.Service
             // finished
 
 
-            var t = typeBuilder.CreateType();
+            var t = typeBuilder.CreateTypeInfo();
             return t;
         }
 
@@ -161,7 +161,7 @@ namespace Stardust.Interstellar.Rest.Service
             // finished
 
 
-            var t = typeBuilder.CreateType();
+            var t = typeBuilder.CreateTypeInfo();
             return t;
         }
 

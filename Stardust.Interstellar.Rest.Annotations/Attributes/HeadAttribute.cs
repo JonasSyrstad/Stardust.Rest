@@ -12,5 +12,9 @@ namespace Stardust.Interstellar.Rest.Annotations
         public HeadAttribute(string route) : base("HEAD",route)
         {
         }
-    }
+
+	    public HeadAttribute(string route, string serviceDescription) : base("HEAD", route, serviceDescription)
+	    {
+	    }
+	}
 }

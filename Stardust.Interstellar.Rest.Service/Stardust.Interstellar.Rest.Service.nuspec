@@ -2,55 +2,42 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata>
     <id>Stardust.Interstellar.Rest.Service</id>
-    <version>3.4.2</version>
+    <version>4.1.0</version>
     <title>Stardust.Interstellar.Rest.Service</title>
     <authors>Stardust</authors>
     <owners>Stardust</owners>
-    <description>Create webapi controllers based on decorated interfaces.</description>
+    <description>
+      Deprecated, this is only for ease of migration
+      Create webapi controllers based on decorated interfaces.
+    </description>
     <!--<licenseUrl>https://github.com/JonasSyrstad/Stardust.Rest/blob/master/LICENSE</licenseUrl>-->
     <license type="expression">Apache-2.0</license>
     <projectUrl>https://github.com/JonasSyrstad/Stardust.Rest</projectUrl>
-    <iconUrl>http://stardustframework.wdfiles.com/local--files/blog%3A_start/logo_smal.png</iconUrl>
+    <iconUrl>https://stardustframework.wdfiles.com/local--files/blog%3A_start/logo_smal.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <developmentDependency>false</developmentDependency>
     <tags>WebApi Rest Generator asp.net aspnetcore</tags>
     <releaseNotes>
-      Switching to use IServiceProvider as standard service locator for ease of integration in existing projects.
-      Alligning version numbers of the packages related to the rest tool.
+      Deprecated this package, use Stardust.Interstellar.Rest.Service.AspNetCore for web apps running aspnet 2.* on .net core or .net framework and Stardust.Interstellar.Rest.Service.AspNet for asp.net on .net framework
     </releaseNotes>
-    <copyright>Copyright © Stardust 2018</copyright>
+    <copyright>Copyright © Stardust 2019</copyright>
     <frameworkAssemblies />
     <dependencies>
       <group  targetFramework="net471">
-        <dependency id="Microsoft.AspNet.WebApi.Client" version="5.2.3" />
-        <dependency id="Microsoft.AspNet.WebApi.Core" version="5.2.3" />
-        <dependency id="Microsoft.AspNet.WebApi.WebHost" version="5.2.3" />
-        <dependency id="Newtonsoft.Json" version="10.0.3" />
-        <dependency id="Stardust.Interstellar.Rest" version="3.4.6" />
-        <dependency id="Stardust.Interstellar.Rest.Annotations" version="3.4.3" />
-        <dependency id="Stardust.Particles" version="5.0.2"/>
-        <dependency id="System.Reflection.Emit" version="4.3.0" />
-        <dependency id="System.Reflection.Emit.ILGeneration" version="4.3.0" />
-        <dependency id="System.Reflection.Emit.Lightweight" version="4.3.0" />
-        <dependency id="Microsoft.AspNet.WebApi.Versioning" version="2.3.0" />
+        
+        <dependency id="Stardust.Interstellar.Rest.Service.AspNet" version="4.1.0" />
       </group>
       <group targetFramework="netcoreapp2.0">
-        <dependency id="Microsoft.AspNetCore" version="2.0.1" />
-        <dependency id="Microsoft.AspNetCore.Mvc" version="2.0.2" />
-        <dependency id="Microsoft.Extensions.Primitives" version="2.0.0" />
-        <dependency id="Microsoft.AspNetCore.Authentication.Abstractions" version="2.0.1" />
-        <dependency id="Stardust.Interstellar.Rest" version="3.4.6" />
-        <dependency id="Stardust.Interstellar.Rest.Annotations" version="3.4.3" />
-        <dependency id="Stardust.Particles" version="5.0.2"/>
-        <dependency id="Newtonsoft.Json" version="10.0.3" />
-        <dependency id="Microsoft.AspNetCore.Mvc.Versioning" version="2.3.0" />
+        <dependency id="Stardust.Interstellar.Rest.Service.AspNetCore" version="4.1.0" />
+      </group>
+      <group targetFramework="netcoreapp2.1">
+        <dependency id="Stardust.Interstellar.Rest.Service.AspNetCore" version="4.1.0" />
+      </group>
+      <group targetFramework="netcoreapp2.2">
+        <dependency id="Stardust.Interstellar.Rest.Service.AspNetCore" version="4.1.0" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src=".\bin\Release\Stardust.Interstellar.Rest.Service.dll" target="lib\net471" />
-    <file src=".\bin\Release\Stardust.Interstellar.Rest.Service.pdb" target="lib\net471" />
-    <file src="..\Stardust.Interstellar.Rest.CoreService\bin\Release\netcoreapp2.1\Stardust.Interstellar.Rest.Service.dll" target="lib\netcoreapp2.0" />
-    <file src="..\Stardust.Interstellar.Rest.CoreService\bin\Release\netcoreapp2.1\Stardust.Interstellar.Rest.Service.pdb" target="lib\netcoreapp2.0" />
   </files>
 </package>

@@ -3,17 +3,18 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Annotations for the rest generator tool</Description>
-    <Version>3.4.3</Version>
+    <Version>4.1.1</Version>
     <Company>Stardust</Company>
     <Authors>Stardust</Authors>
-    <Copyright>Copyright © Stardust 2018</Copyright>
-    <PackageLicenseUrl>https://licenses.nuget.org/Apache-2.0</PackageLicenseUrl>
+    <Copyright>Copyright © Stardust 2019</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/JonasSyrstad/Stardust.Interstellar.Rest</PackageProjectUrl>
-    <PackageIconUrl>http://stardustframework.wdfiles.com/local--files/blog%3A_start/logo_smal.png</PackageIconUrl>
+    <PackageIconUrl>https://stardustframework.wdfiles.com/local--files/blog:_start/logo_smal.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/JonasSyrstad/Stardust.Rest</RepositoryUrl>
     <RepositoryType>github</RepositoryType>
     <PackageTags>rest webapi client proxy generator</PackageTags>
-    <PackageReleaseNotes>Improving support for IoC frameworks by using IServiceCollection and IServiceProvider</PackageReleaseNotes>
+    <PackageReleaseNotes>Added Service Description options to Verb attributes
+</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSource>True</IncludeSource>
     <IncludeSymbols>True</IncludeSymbols>
@@ -28,15 +29,6 @@
     <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
     <PackageReference Include="System.Reflection.Emit.ILGeneration" Version="4.3.0" />
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
-      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.2.0.0\lib\netstandard2.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.Primitives">
-      <HintPath>..\..\..\..\Users\jonsyr\.nuget\packages\microsoft.extensions.primitives\2.0.0\lib\netstandard2.0\Microsoft.Extensions.Primitives.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

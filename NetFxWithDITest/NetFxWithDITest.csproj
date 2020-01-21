@@ -230,6 +230,10 @@
     <Content Include="Scripts\jquery-3.3.1.min.map" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Stardust.Continuum.Client\Stardust.Continuum.Client.csproj">
+      <Project>{08f46d3f-7a28-467c-9c0a-4e39e8ac288e}</Project>
+      <Name>Stardust.Continuum.Client</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Stardust.Interstellar.Rest.Annotations\Stardust.Interstellar.Rest.Annotations.csproj">
       <Project>{03F62A57-E6B3-4F9D-977D-5BEF0D188C6C}</Project>
       <Name>Stardust.Interstellar.Rest.Annotations</Name>
@@ -238,9 +242,9 @@
       <Project>{CE144E90-71B8-4498-BAA8-FD24CE921259}</Project>
       <Name>Stardust.Interstellar.Rest.DependencyInjection</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Stardust.Interstellar.Rest.Service\Stardust.Interstellar.Rest.Service.csproj">
-      <Project>{780744E0-5684-43C8-A28C-447EDAF2170A}</Project>
-      <Name>Stardust.Interstellar.Rest.Service</Name>
+    <ProjectReference Include="..\Stardust.Interstellar.Rest.Service.Asp\Stardust.Interstellar.Rest.Service.AspNet.csproj">
+      <Project>{5d5c817e-f67c-4947-ae0a-faeaec8d4b07}</Project>
+      <Name>Stardust.Interstellar.Rest.Service.AspNet</Name>
     </ProjectReference>
     <ProjectReference Include="..\Stardust.Interstellar.Rest\Stardust.Interstellar.Rest.csproj">
       <Project>{3A09F749-DCC7-4208-B113-68745211A6A5}</Project>

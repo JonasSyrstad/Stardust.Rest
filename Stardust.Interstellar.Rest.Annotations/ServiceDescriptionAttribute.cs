@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Stardust.Interstellar.Rest.Annotations
 {
     [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Method,AllowMultiple = false)]
-    public sealed class ServiceDescriptionAttribute : Attribute
+    public class ServiceDescriptionAttribute : Attribute
     {
         private string description;
 

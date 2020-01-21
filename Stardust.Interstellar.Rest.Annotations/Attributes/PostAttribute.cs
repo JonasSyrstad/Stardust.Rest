@@ -12,5 +12,9 @@ namespace Stardust.Interstellar.Rest.Annotations
         public PostAttribute(string route) : base("POST",route)
         {
         }
-    }
+
+	    public PostAttribute(string route, string serviceDescription) : base("POST", route, serviceDescription)
+	    {
+	    }
+	}
 }

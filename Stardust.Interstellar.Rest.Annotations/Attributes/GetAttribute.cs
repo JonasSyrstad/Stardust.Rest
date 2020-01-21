@@ -12,5 +12,9 @@ namespace Stardust.Interstellar.Rest.Annotations
         public GetAttribute(string route) : base("GET",route)
         {
         }
-    }
+
+	    public GetAttribute(string route, string serviceDescription) : base("GET", route, serviceDescription)
+	    {
+	    }
+	}
 }

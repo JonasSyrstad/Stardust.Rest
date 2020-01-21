@@ -29,6 +29,8 @@ namespace Stardust.Interstellar.Rest.Client
         /// </summary>
         public static int? ContinueTimeout { get; set; }
 
+        public static bool? KeepAlive { get; set; }
+
         public static void SetExtendedTimeouts()
         {
             Timeout = 300000;

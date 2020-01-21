@@ -1,6 +1,5 @@
 using Stardust.Interstellar.Rest.Annotations;
 using Stardust.Interstellar.Rest.Annotations.Messaging;
-using Stardust.Interstellar.Rest.Common;
 using Stardust.Interstellar.Rest.Service;
 using Swashbuckle.Swagger;
 using System;
@@ -11,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Web.Http;
 using System.Web.Http.Description;
+using Stardust.Interstellar.Rest.Common;
 
 namespace Swashbuckle.Stardust.Interstellar
 {

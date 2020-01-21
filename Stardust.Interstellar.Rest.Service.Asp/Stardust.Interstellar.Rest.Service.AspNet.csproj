@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net471</TargetFramework>
+    <AssemblyName>Stardust.Interstellar.Rest.Service.AspNet</AssemblyName>
+    <Version>4.1.0</Version>
+    <Description>Create webapi controllers based on decorated interfaces.
+For use with asp.net mvc 5</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/JonasSyrstad/Stardust.Rest</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/JonasSyrstad/Stardust.Rest</RepositoryUrl>
+    <RepositoryType>github</RepositoryType>
+    <PackageIconUrl>https://stardustframework.wdfiles.com/local--files/blog%3A_start/logo_smal.png</PackageIconUrl>
+    <PackageTags>WebApi Rest Generator asp.net</PackageTags>
+    <Copyright>Copyright © Stardust 2019</Copyright>
+    <PackageId>Stardust.Interstellar.Rest.Service.AspNet</PackageId>
+    <RootNamespace>Stardust.Interstellar.Rest.Service</RootNamespace>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeSource>True</IncludeSource>
+    <IncludeSymbols>True</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.4" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Versioning" Version="2.3.0" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.WebHost" Version="5.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Stardust.Interstellar.Rest.Annotations\Stardust.Interstellar.Rest.Annotations.csproj" />
+    <ProjectReference Include="..\Stardust.Interstellar.Rest\Stardust.Interstellar.Rest.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web" />
+  </ItemGroup>
+
+</Project>
