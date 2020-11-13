@@ -11,57 +11,42 @@ Add the nuget: Install-Package Stardust.Interstellar.Rest
 
 Sample service definition interface
 ```CS
-    [IRoutePrefix("api")] //Custom: as the RoutePrefix attribute only supports classes, this is one to one
+    [Api("api"")] 
     [CallingMachineName]
     public interface ITestApi
     {
-        [Route("test/{id}")]
-        [HttpGet]
+        [Get("test/{id}")]
         string Apply1([In(InclutionTypes.Path)] string id, [In(InclutionTypes.Path)]string name);// the In attribute supports more than the basic webapi attributes (but you can use them; FomeUri and FromBody)
 
-        [Route("test2/{id}")]
-        [HttpGet]
+        [Get("test2/{id}")]
         string Apply2([In(InclutionTypes.Path)] string id, [In(InclutionTypes.Path)]string name, [In(InclutionTypes.Header)]string item3);
 
-        [Route("test3/{id}")]
-        [HttpGet]
+        [Get("test3/{id}")]
         string Apply3([In(InclutionTypes.Path)] string id, [In(InclutionTypes.Path)]string name, [In(InclutionTypes.Header)]string item3, [In(InclutionTypes.Header)]string item4);
 
-        [Route("put1/{id}")]
-        [HttpPut]
+        [Put("put1/{id}")]
         void Put([In(InclutionTypes.Path)] string id, [In(InclutionTypes.Body)] DateTime timestamp);
 
-        [Route("test5/{id}")]
-        [HttpGet]
+        [Get("test5/{id}")]
         Task<StringWrapper> ApplyAsync([In(InclutionTypes.Path)] string id, [In(InclutionTypes.Path)]string name, [In(InclutionTypes.Path)]string item3, [In(InclutionTypes.Path)]string item4);
 
-        [Route("put2/{id}")]
-        [HttpPut]
+        [Put("put2/{id}")]
         Task PutAsync([In(InclutionTypes.Path)] string id, [In(InclutionTypes.Body)] DateTime timestamp);
     }
 ```
 Creating a service proxy
 ```CS
 
-        var service = ProxyFactory.CreateInstance<ITestApi>("http://localhost/Stardust.Interstellar.Test/",
-                    extras =>
-                        {
-                            foreach (var extra in extras)
-                            {
-                                output.WriteLine($"{extra.Key}:{extra.Value}");
-                            }
-                        });
-        try
-        {
-            var res =await service.ApplyAsync("101", "SampleService", "Hello", "Sample");
-            output.WriteLine(res.Value);
-            // outputs: 101-SampleService-Hello-Sample
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
+        var client= serviceProvider.CreateRestClient<ITestApi>(serviceBaseUrl);
 ```
+
+or add the service client in startup.cs
+```CS
+
+Services.AddScoped(s=>s.CreateRestClient<ITestApi>(serviceBaseUrl));
+
+```
+
 Optional: Setting JsonSerializerSettings to service definitions or message types 
 
 ```CS
@@ -131,7 +116,7 @@ Creating the WebApi controller
         }
     }
 ```
-Adding swagger to the service add the following line in Swashbuckle's SwaggerConfig.cs (added with the nuget)
+Adding swagger to the service add the following line in Swashbuckle's SwaggerConfig.cs (added with the nuget).
 Add the nuget: Install-Package Stardust.Interstellar.Swashbuckle
 
 ```CS

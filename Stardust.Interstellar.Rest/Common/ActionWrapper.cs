@@ -38,6 +38,7 @@ namespace Stardust.Interstellar.Rest.Common
         public IThrottlingManager Throttler { get; set; }
         public ErrorHandlerAttribute ErrorHandler { get; set; }
         public IErrorHandler DefaultErrorHandler { get; set; }
+        public HttpStatusCode? DefaultResponseCode { get; set; }
     }
 
 

@@ -187,7 +187,7 @@ namespace Stardust.Interstellar.Rest.Service
             var method = type.DefineMethod(implementationMethod.Name, methodAttributes);
             // Preparing Reflection instances
 
-            
+
             var route = typeof(RouteAttribute).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { typeof(String) }, null);
             var httpGet = httpMethodAttribute(implementationMethod, serviceLocator);
             var uriAttrib = typeof(FromRouteAttribute).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { }, null);
@@ -235,22 +235,36 @@ namespace Stardust.Interstellar.Rest.Service
             method.SetCustomAttribute(new CustomAttributeBuilder(route, new[] { template }));
             // [HttpGetAttribute]
             method.SetCustomAttribute(new CustomAttributeBuilder(httpGet, new Type[] { }));
-
-            BuildServiceDescriptionAttribute(implementationMethod, method);
-            ConstructorInfo ctor5 = typeof(ProducesResponseTypeAttribute).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { typeof(Type), typeof(int) }, null);
-            method.SetCustomAttribute(new CustomAttributeBuilder(ctor5, new object[] { GetReturnType(implementationMethod), 200 }));
-            try
+            var defaultResponse = implementationMethod.GetCustomAttribute<SuccessStatusCodeAttribute>();
+            if (defaultResponse != null)
             {
-                var attributeCreators = implementationMethod.GetCustomAttributes().OfType<ICreateImplementationAttribute>();
-                foreach (var createImplementationAttribute in attributeCreators)
+                var returnType = implementationMethod.ReturnType;
+                if (returnType.IsGenericType)
+                    returnType = returnType.GetGenericArguments().First();
+                if (returnType != typeof(void))
+                    method.SetCustomAttribute(defaultResponse.CreateAttribute(returnType));
+                else
+                    method.SetCustomAttribute(defaultResponse.CreateAttribute());
+            }
+            else
+            {
+                ConstructorInfo ctor5 = typeof(ProducesResponseTypeAttribute).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { typeof(Type), typeof(int) }, null);
+                method.SetCustomAttribute(new CustomAttributeBuilder(ctor5, new object[] { GetReturnType(implementationMethod), 200 }));
+                try
                 {
-                    method.SetCustomAttribute(createImplementationAttribute.CreateAttribute());
+                    var attributeCreators = implementationMethod.GetCustomAttributes().OfType<ICreateImplementationAttribute>();
+                    foreach (var createImplementationAttribute in attributeCreators)
+                    {
+                        method.SetCustomAttribute(createImplementationAttribute.CreateAttribute());
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
                 }
             }
-            catch (Exception ex)
-            {
-                Logging.Exception(ex);
-            }
+            BuildServiceDescriptionAttribute(implementationMethod, method);
+            
             return method;
         }
 

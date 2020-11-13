@@ -70,7 +70,8 @@ namespace Stardust.Interstellar.Rest.Service
                 if (Request.HttpContext.Items.ContainsKey(ActionId))
                     actionId = Request.HttpContext.Items[ActionId].ToString();
             }
-            result.Headers.Add(ExtensionsFactory.ActionIdName, actionId);
+            if(!result.Headers.ContainsKey(ExtensionsFactory.ActionIdName))
+                result.Headers.Add(ExtensionsFactory.ActionIdName, actionId);
             var handler = new List<IHeaderHandler>();
             foreach (var customHandler in action.CustomHandlers)
             {
@@ -457,7 +458,7 @@ namespace Stardust.Interstellar.Rest.Service
                 var handlers = ExtensionsFactory.GetHeaderInspectors(methodInfo, _serviceLocator);
                 action.CustomHandlers = handlers.ToList();
                 action.Actions = methods;
-
+                action.DefaultResponseCode = methodInfo.GetCustomAttribute<SuccessStatusCodeAttribute>()?.StatusCode;
                 action.Interceptor = methodInfo.GetCustomAttributes().OfType<InputInterceptorAttribute>().ToArray();
                 action.Initializers = methodInitializers;
                 if (assemblyThrottler != null)
@@ -561,7 +562,7 @@ namespace Stardust.Interstellar.Rest.Service
                     }
                 });
                 if (error != null) return CreateErrorResponse(error.InnerException);
-                return CreateResponse(HttpStatusCode.OK, result);
+                return CreateResponse(action.DefaultResponseCode ?? HttpStatusCode.OK, result);
             }
             catch (Exception ex)
             {
@@ -578,7 +579,7 @@ namespace Stardust.Interstellar.Rest.Service
                 var action = GetAction(_name);
                 await func();
                 await ExecuteInterceptorsAsync(action, _wrappers);
-                return CreateResponse(HttpStatusCode.NoContent, (object)null);
+                return CreateResponse(action.DefaultResponseCode??HttpStatusCode.NoContent, (object)null);
             }
             catch (Exception ex)
             {

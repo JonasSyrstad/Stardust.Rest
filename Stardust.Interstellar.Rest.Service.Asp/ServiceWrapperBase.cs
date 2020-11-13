@@ -433,7 +433,7 @@ namespace Stardust.Interstellar.Rest.Service
                 var handlers = ExtensionsFactory.GetHeaderInspectors(methodInfo, _serviceLocator);
                 action.CustomHandlers = handlers.ToList();
                 action.Actions = methods;
-
+                action.DefaultResponseCode = methodInfo.GetCustomAttribute<SuccessStatusCodeAttribute>()?.StatusCode;
                 action.Interceptor = methodInfo.GetCustomAttributes().OfType<InputInterceptorAttribute>().ToArray();
                 action.Initializers = methodInitializers;
                 if (assemblyThrottler != null)
@@ -537,7 +537,7 @@ namespace Stardust.Interstellar.Rest.Service
                     }
                 });
                 if (error != null) return CreateErrorResponse(error.InnerException);
-                return await CreateResponseAsync(HttpStatusCode.OK, result);
+                return await CreateResponseAsync(action.DefaultResponseCode ?? HttpStatusCode.OK, result);
             }
             catch (Exception ex)
             {
@@ -572,7 +572,7 @@ namespace Stardust.Interstellar.Rest.Service
                 var action = GetAction(_name);
                 await ExecuteInterceptorsAsync(action, _wrappers);
                 await func();
-                return await CreateResponseAsync(HttpStatusCode.NoContent, (object)null);
+                return await CreateResponseAsync(action.DefaultResponseCode ?? HttpStatusCode.NoContent, (object)null);
             }
             catch (Exception ex)
             {

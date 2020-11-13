@@ -3,14 +3,14 @@
   <PropertyGroup>
     <TargetFramework>net471</TargetFramework>
     <AssemblyName>Stardust.Interstellar.Rest.Service.AspNet</AssemblyName>
-    <Version>4.1.0</Version>
+    <Version>4.2.1</Version>
     <Description>Create webapi controllers based on decorated interfaces.
 For use with asp.net mvc 5</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/JonasSyrstad/Stardust.Rest</PackageProjectUrl>
     <RepositoryUrl>https://github.com/JonasSyrstad/Stardust.Rest</RepositoryUrl>
     <RepositoryType>github</RepositoryType>
-    <PackageIconUrl>https://stardustframework.wdfiles.com/local--files/blog%3A_start/logo_smal.png</PackageIconUrl>
+    <PackageIcon>icon.png</PackageIcon>
     <PackageTags>WebApi Rest Generator asp.net</PackageTags>
     <Copyright>Copyright © Stardust 2019</Copyright>
     <PackageId>Stardust.Interstellar.Rest.Service.AspNet</PackageId>
@@ -20,7 +20,9 @@ For use with asp.net mvc 5</Description>
     <IncludeSymbols>True</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
-
+  <ItemGroup>
+    <None Include="images\icon.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.4" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Versioning" Version="2.3.0" />

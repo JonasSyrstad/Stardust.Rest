@@ -3,13 +3,12 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Annotations for the rest generator tool</Description>
-    <Version>4.1.1</Version>
+    <Version>4.2.0</Version>
     <Company>Stardust</Company>
     <Authors>Stardust</Authors>
     <Copyright>Copyright © Stardust 2019</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/JonasSyrstad/Stardust.Interstellar.Rest</PackageProjectUrl>
-    <PackageIconUrl>https://stardustframework.wdfiles.com/local--files/blog:_start/logo_smal.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/JonasSyrstad/Stardust.Rest</RepositoryUrl>
     <RepositoryType>github</RepositoryType>
     <PackageTags>rest webapi client proxy generator</PackageTags>
@@ -19,6 +18,7 @@
     <IncludeSource>True</IncludeSource>
     <IncludeSymbols>True</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,9 +26,16 @@
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="2.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="Stardust.Particles" Version="5.0.2" />
-    <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.Emit.ILGeneration" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
+    <PackageReference Include="System.Reflection.Emit.ILGeneration" Version="4.7.0" />
+    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Stardust.Interstellar.Rest\Images\icon.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

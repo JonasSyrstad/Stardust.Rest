@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.1</TargetFrameworks>
     <AssemblyName>Stardust.Interstellar.Rest.Service.AspNetCore</AssemblyName>
     <RootNamespace>Stardust.Interstellar.Rest.Service</RootNamespace>
-    <Version>4.1.0</Version>
+    <Version>4.2.1</Version>
     <Company>Stardust</Company>
     <Authors>Stardust</Authors>
     <PackageId>Stardust.Interstellar.Rest.Service.AspNetCore</PackageId>
@@ -13,7 +13,7 @@
 For use with aspnetcore on netcore or .net framework</Description>
     <Copyright>Copyright © Stardust 2019</Copyright>
     <PackageProjectUrl>https://github.com/JonasSyrstad/Stardust.Rest</PackageProjectUrl>
-    <PackageIconUrl>https://stardustframework.wdfiles.com/local--files/blog:_start/logo_smal.png</PackageIconUrl>
+    <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/JonasSyrstad/Stardust.Rest</RepositoryUrl>
     <RepositoryType>github</RepositoryType>
     <PackageTags>WebApi Rest Generator asp.net aspnetcore</PackageTags>
@@ -23,17 +23,30 @@ For use with aspnetcore on netcore or .net framework</Description>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageReleaseNotes>Fixed version issue with Microsoft.AspNetCore.Mvc.Versioning</PackageReleaseNotes>
   </PropertyGroup>
-
   <ItemGroup>
+    <None Include="images\icon.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="Microsoft.AspNetCore" Version="2.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="2.0.0" />
     <PackageReference Include="Stardust.Particles" Version="5.0.2" />
-    <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.Emit.ILGeneration" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
+    <PackageReference Include="System.Reflection.Emit.ILGeneration" Version="4.7.0" />
+    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="4.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="3.1.1" />
+    <PackageReference Include="Stardust.Particles" Version="5.0.2" />
+    <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
+    <PackageReference Include="System.Reflection.Emit.ILGeneration" Version="4.7.0" />
+    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
   </ItemGroup>
 
   <ItemGroup>
