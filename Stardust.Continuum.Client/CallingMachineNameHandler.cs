@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Primitives;
 using Stardust.Interstellar.Rest.Extensions;
@@ -23,13 +24,13 @@ namespace Stardust.Continuum.Client
 
         public static long ReceivedLastHour => receivedLastHour;
 
-        public void SetHeader(HttpWebRequest req)
+        public void SetHeader(HttpRequestMessage req)
         {
             req.Headers.Add("x-callingMachine", Environment.MachineName);
-            req.UserAgent += $"(continuum/{Version})";
+            //req.UserAgent += $"(continuum/{Version})";
         }
 
-        public void GetHeader(HttpWebResponse response)
+        public void GetHeader(HttpResponseMessage response)
         {
 
         }

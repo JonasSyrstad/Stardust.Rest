@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,24 +21,24 @@ namespace Stardust.Interstellar.Rest.Extensions
         /// Set custom header values on sending request to a service
         /// </summary>
         /// <param name="req"></param>
-        public void SetHeader(HttpWebRequest req)
+        public void SetHeader(HttpRequestMessage req)
         {
             var state = req.GetState();
             DoSetHeader(state, req);
         }
 
 
-        protected abstract void DoSetHeader(IStateContainer state, HttpWebRequest req);
+        protected abstract void DoSetHeader(IStateContainer state, HttpRequestMessage req);
 
         /// <summary>
         /// Get header values form a service response
         /// </summary>
         /// <param name="response"></param>
-        public void GetHeader(HttpWebResponse response)
+        public void GetHeader(HttpResponseMessage response)
         {
             try
             {
-                var state = response.GetState();
+                var state = response.Headers.GetState();
                 DoGetHeader(state, response);
             }
             catch (Exception)
@@ -48,7 +49,7 @@ namespace Stardust.Interstellar.Rest.Extensions
 
 
 
-        protected abstract void DoGetHeader(IStateContainer state, HttpWebResponse response);
+        protected abstract void DoGetHeader(IStateContainer state, HttpResponseMessage response);
 
 
         protected abstract void DoSetServiceHeaders(IStateContainer state, HttpResponseHeaders headers);

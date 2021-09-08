@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Primitives;
 
@@ -16,13 +17,13 @@ namespace Stardust.Interstellar.Rest.Extensions
         /// Set custom header values on sending request to a service
         /// </summary>
         /// <param name="req"></param>
-        void SetHeader(HttpWebRequest req);
+        void SetHeader(HttpRequestMessage req);
 
         /// <summary>
         /// Get header values form a service response
         /// </summary>
         /// <param name="response"></param>
-        void GetHeader(HttpWebResponse response);
+        void GetHeader(HttpResponseMessage response);
 
 
 

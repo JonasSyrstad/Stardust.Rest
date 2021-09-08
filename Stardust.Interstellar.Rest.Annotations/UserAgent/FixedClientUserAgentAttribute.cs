@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Primitives;
 using Stardust.Interstellar.Rest.Extensions;
 
 namespace Stardust.Interstellar.Rest.Annotations.UserAgent
 {
+    [Obsolete("Deprecated", false)]
     public class FixedClientUserAgentAttribute : Attribute, IHeaderHandler, IHeaderInspector
     {
         private readonly string userAgentName;
@@ -25,16 +27,16 @@ namespace Stardust.Interstellar.Rest.Annotations.UserAgent
         /// Set custom header values on sending request to a service
         /// </summary>
         /// <param name="req"></param>
-        void IHeaderHandler.SetHeader(HttpWebRequest req)
+        void IHeaderHandler.SetHeader(HttpRequestMessage req)
         {
-            req.UserAgent = userAgentName;
+            //req.Headers.UserAgent= userAgentName;
         }
 
         /// <summary>
         /// Get header values form a service response
         /// </summary>
         /// <param name="response"></param>
-        void IHeaderHandler.GetHeader(HttpWebResponse response)
+        void IHeaderHandler.GetHeader(HttpResponseMessage response)
         {
 
         }

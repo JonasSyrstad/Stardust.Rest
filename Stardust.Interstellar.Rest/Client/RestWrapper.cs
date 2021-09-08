@@ -1,509 +1,500 @@
 ﻿using Newtonsoft.Json;
 using Stardust.Interstellar.Rest.Annotations;
 using Stardust.Interstellar.Rest.Annotations.Messaging;
+using Stardust.Interstellar.Rest.Annotations.Rest.Extensions;
 using Stardust.Interstellar.Rest.Client.CircuitBreaker;
 using Stardust.Interstellar.Rest.Common;
 using Stardust.Interstellar.Rest.Extensions;
 using Stardust.Interstellar.Rest.Service;
+using Stardust.Particles;
+using Stardust.Particles.Collection.Arrays;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
-using Stardust.Interstellar.Rest.Annotations.Rest.Extensions;
-using Stardust.Particles;
-using Stardust.Particles.Collection.Arrays;
 
 namespace Stardust.Interstellar.Rest.Client
 {
     public class RestWrapper : IServiceWithGlobalParameters, IConfigurableService
     {
-
-
-        public void SetHttpHeader(string name, string value)
-        {
-            additionalHeaders.TryAdd(name, value);
-        }
-
         private ConcurrentDictionary<string, string> additionalHeaders = new ConcurrentDictionary<string, string>();
         private IAuthenticationHandler authenticationHandler;
         private readonly IServiceProvider _serviceLocator;
-
         private readonly IEnumerable<IHeaderHandler> headerHandlers;
-
         private readonly Type interfaceType;
-
         private static ConcurrentDictionary<Type, ConcurrentDictionary<string, ActionWrapper>> cache = new ConcurrentDictionary<Type, ConcurrentDictionary<string, ActionWrapper>>();
-
         private string baseUri;
-
         private readonly CookieContainer cookieContainer;
-
         private ErrorHandlerAttribute _errorInterceptor;
         private readonly ILogger _logger;
         private string _trailingQueryString;
         private bool _pathVersionSet;
         private bool? _runAuthProviderBeforeAppendingBody;
         private Func<string, IWebProxy> _proxyFunc;
+        private static readonly ConcurrentDictionary<string, HttpClient> _clients = new ConcurrentDictionary<string, HttpClient>();
 
-        internal static ConcurrentDictionary<Type, ConcurrentDictionary<string, ActionWrapper>> Cache() => cache;
+        public void SetHttpHeader(string name, string value) => this.additionalHeaders.TryAdd(name, value);
 
-        public void SetBaseUrl(string url)
-        {
-            baseUri = url;
-        }
+        internal static ConcurrentDictionary<Type, ConcurrentDictionary<string, ActionWrapper>> Cache() => RestWrapper.cache;
+
+        public void SetBaseUrl(string url) => this.baseUri = url;
 
         public Action<Dictionary<string, object>> Extras { get; internal set; }
 
-        protected RestWrapper(IAuthenticationHandler authenticationHandler, IHeaderHandlerFactory headerHandlers, TypeWrapper interfaceType, IServiceProvider serviceLocator)
+        protected RestWrapper(
+          IAuthenticationHandler authenticationHandler,
+          IHeaderHandlerFactory headerHandlers,
+          TypeWrapper interfaceType,
+          IServiceProvider serviceLocator)
         {
             this.authenticationHandler = authenticationHandler;
-            _serviceLocator = serviceLocator;
-            this.headerHandlers = headerHandlers?.GetHandlers(_serviceLocator) ?? new List<IHeaderHandler>();
+            this._serviceLocator = serviceLocator;
+            this.headerHandlers = headerHandlers?.GetHandlers(this._serviceLocator) ?? (IEnumerable<IHeaderHandler>)new List<IHeaderHandler>();
             this.interfaceType = interfaceType.Type;
-            InitializeClient(this.interfaceType);
-            cookieContainer = _serviceLocator.GetService<CookieContainer>() ?? new CookieContainer();
-            _logger = serviceLocator.GetService<ILogger>();
+            this.InitializeClient(this.interfaceType);
+            this.cookieContainer = this._serviceLocator.GetService<CookieContainer>() ?? new CookieContainer();
+            this._logger = serviceLocator.GetService<ILogger>();
         }
 
         private static IRoutePrefix GetRoutePrefix(Type interfaceType)
         {
-            IRoutePrefix routePrefix = interfaceType.GetCustomAttribute<ApiAttribute>()
-                                       ?? interfaceType.GetInterfaces().FirstOrDefault()?.GetCustomAttribute<ApiAttribute>();
+            ApiAttribute apiAttribute = interfaceType.GetCustomAttribute<ApiAttribute>();
+            if (apiAttribute == null)
+            {
+                Type element = ((IEnumerable<Type>)interfaceType.GetInterfaces()).FirstOrDefault<Type>();
+                apiAttribute = (object)element != null ? element.GetCustomAttribute<ApiAttribute>() : (ApiAttribute)null;
+            }
+            IRoutePrefix routePrefix = (IRoutePrefix)apiAttribute;
             if (routePrefix == null)
-                routePrefix = interfaceType.GetCustomAttribute<IRoutePrefixAttribute>()
-                              ?? interfaceType.GetInterfaces().FirstOrDefault()?.GetCustomAttribute<IRoutePrefixAttribute>();
+            {
+                IRoutePrefixAttribute iroutePrefixAttribute = interfaceType.GetCustomAttribute<IRoutePrefixAttribute>();
+                if (iroutePrefixAttribute == null)
+                {
+                    Type element = ((IEnumerable<Type>)interfaceType.GetInterfaces()).FirstOrDefault<Type>();
+                    iroutePrefixAttribute = (object)element != null ? element.GetCustomAttribute<IRoutePrefixAttribute>() : (IRoutePrefixAttribute)null;
+                }
+                routePrefix = (IRoutePrefix)iroutePrefixAttribute;
+            }
             return routePrefix;
         }
 
         public void InitializeClient(Type interfaceType)
         {
-            if (cache.TryGetValue(interfaceType, out ConcurrentDictionary<string, ActionWrapper> wrapper)) return;
-            var newWrapper = new ConcurrentDictionary<string, ActionWrapper>();
-            var templatePrefix = GetRoutePrefix(interfaceType);
-            _errorInterceptor = interfaceType.GetCustomAttribute<ErrorHandlerAttribute>();
-            _serviceLocator.GetService<ILogger>()?.Message($"Initializing client {interfaceType.Name}");
-            var retry = interfaceType.GetCustomAttribute<RetryAttribute>();
+            ConcurrentDictionary<string, ActionWrapper> concurrentDictionary1;
+            if (RestWrapper.cache.TryGetValue(interfaceType, out concurrentDictionary1))
+                return;
+            ConcurrentDictionary<string, ActionWrapper> concurrentDictionary2 = new ConcurrentDictionary<string, ActionWrapper>();
+            IRoutePrefix routePrefix = RestWrapper.GetRoutePrefix(interfaceType);
+            this._errorInterceptor = interfaceType.GetCustomAttribute<ErrorHandlerAttribute>();
+            this._serviceLocator.GetService<ILogger>()?.Message("Initializing client " + interfaceType.Name);
+            RetryAttribute customAttribute = interfaceType.GetCustomAttribute<RetryAttribute>();
             if (interfaceType.GetCustomAttribute<CircuitBreakerAttribute>() != null)
-            {
-                CircuitBreakerContainer.Register(interfaceType, new CircuitBreaker.CircuitBreaker(interfaceType.GetCustomAttribute<CircuitBreakerAttribute>(), _serviceLocator) { ServiceName = interfaceType.FullName });
-            }
+                CircuitBreakerContainer.Register(interfaceType, (ICircuitBreaker)new Stardust.Interstellar.Rest.Client.CircuitBreaker.CircuitBreaker(interfaceType.GetCustomAttribute<CircuitBreakerAttribute>(), this._serviceLocator)
+                {
+                    ServiceName = interfaceType.FullName
+                });
             else
-            {
-                CircuitBreakerContainer.Register(interfaceType, new NullBreaker());
-            }
-            foreach (var methodInfo in interfaceType.GetMethods().Length == 0 ? interfaceType.GetInterfaces().First().GetMethods() : interfaceType.GetMethods())
+                CircuitBreakerContainer.Register(interfaceType, (ICircuitBreaker)new NullBreaker());
+            foreach (MethodInfo methodInfo in interfaceType.GetMethods().Length == 0 ? ((IEnumerable<Type>)interfaceType.GetInterfaces()).First<Type>().GetMethods() : interfaceType.GetMethods())
             {
                 try
                 {
-                    var actionRetry = methodInfo.GetCustomAttribute<RetryAttribute>() ?? retry;
-                    _serviceLocator.GetService<ILogger>()?.Message($"Initializing client action {interfaceType.Name}.{methodInfo.Name}");
-                    var template = methodInfo.GetCustomAttribute<IRouteAttribute>() ?? methodInfo.GetCustomAttribute<VerbAttribute>() as IRoute;
-                    var actionName = GetActionName(methodInfo);
-                    var actions = methodInfo.GetCustomAttributes(true).OfType<VerbAttribute>().ToList();
-                    var action = new ActionWrapper { Name = actionName, ReturnType = methodInfo.ReturnType, RouteTemplate = ExtensionsFactory.GetRouteTemplate(templatePrefix, template, methodInfo, _serviceLocator), Parameters = new List<ParameterWrapper>() };
-
-                    var methods = ExtensionsFactory.GetHttpMethods(actions, methodInfo, _serviceLocator);
-                    var handlers = ExtensionsFactory.GetHeaderInspectors(methodInfo, _serviceLocator);
-
-                    action.UseXml = methodInfo.GetCustomAttributes().OfType<UseXmlAttribute>().Any();
-                    action.CustomHandlers = handlers.Where(h => headerHandlers.All(parent => parent.GetType() != h.GetType())).ToList();
-                    action.ErrorHandler = _errorInterceptor;//?.ErrorHandler(_serviceLocator);
-                    action.Actions = methods;
-                    if (actionRetry != null)
+                    RetryAttribute retryAttribute = methodInfo.GetCustomAttribute<RetryAttribute>() ?? customAttribute;
+                    this._serviceLocator.GetService<ILogger>()?.Message("Initializing client action " + interfaceType.Name + "." + methodInfo.Name);
+                    IRoute template = (IRoute)methodInfo.GetCustomAttribute<IRouteAttribute>() ?? (IRoute)methodInfo.GetCustomAttribute<VerbAttribute>();
+                    string actionName = this.GetActionName(methodInfo);
+                    List<VerbAttribute> list = methodInfo.GetCustomAttributes(true).OfType<VerbAttribute>().ToList<VerbAttribute>();
+                    ActionWrapper action = new ActionWrapper()
+                    {
+                        Name = actionName,
+                        ReturnType = methodInfo.ReturnType,
+                        RouteTemplate = ExtensionsFactory.GetRouteTemplate(routePrefix, template, methodInfo, this._serviceLocator),
+                        Parameters = new List<ParameterWrapper>()
+                    };
+                    MethodInfo method = methodInfo;
+                    IServiceProvider serviceLocator = this._serviceLocator;
+                    List<HttpMethod> httpMethods = ExtensionsFactory.GetHttpMethods(list, method, serviceLocator);
+                    List<IHeaderInspector> headerInspectors = ExtensionsFactory.GetHeaderInspectors(methodInfo, this._serviceLocator);
+                    action.UseXml = methodInfo.GetCustomAttributes().OfType<UseXmlAttribute>().Any<UseXmlAttribute>();
+                    action.CustomHandlers = headerInspectors.Where<IHeaderInspector>((Func<IHeaderInspector, bool>)(h => this.headerHandlers.All<IHeaderHandler>((Func<IHeaderHandler, bool>)(parent => parent.GetType() != h.GetType())))).ToList<IHeaderInspector>();
+                    action.ErrorHandler = this._errorInterceptor;
+                    action.Actions = httpMethods;
+                    if (retryAttribute != null)
                     {
                         action.Retry = true;
-                        action.Interval = actionRetry.RetryInterval;
-                        action.NumberOfRetries = actionRetry.NumberOfRetries;
-                        action.IncrementalRetry = actionRetry.IncremetalWait;
-                        if (actionRetry.ErrorCategorizer != null)
-                            action.ErrorCategorizer = (IErrorCategorizer)Activator.CreateInstance(actionRetry.ErrorCategorizer, _serviceLocator);
+                        action.Interval = retryAttribute.RetryInterval;
+                        action.NumberOfRetries = retryAttribute.NumberOfRetries;
+                        action.IncrementalRetry = retryAttribute.IncremetalWait;
+                        if (retryAttribute.ErrorCategorizer != (Type)null)
+                            action.ErrorCategorizer = (IErrorCategorizer)Activator.CreateInstance(retryAttribute.ErrorCategorizer, (object)this._serviceLocator);
                     }
-                    ExtensionsFactory.BuildParameterInfo(methodInfo, action, _serviceLocator);
-                    newWrapper.TryAdd(action.Name, action);
+                    ExtensionsFactory.BuildParameterInfo(methodInfo, action, this._serviceLocator);
+                    concurrentDictionary2.TryAdd(action.Name, action);
                 }
                 catch (Exception ex)
                 {
-                    _logger?.Error(ex);
+                    this._logger?.Error(ex);
                     throw;
                 }
             }
-            if (cache.TryGetValue(interfaceType, out wrapper)) return;
-            cache.TryAdd(interfaceType, newWrapper);
+            if (RestWrapper.cache.TryGetValue(interfaceType, out concurrentDictionary1))
+                return;
+            RestWrapper.cache.TryAdd(interfaceType, concurrentDictionary2);
         }
 
-
-        protected string GetActionName(MethodInfo methodInfo)
-        {
-            var actionName = methodInfo.Name;
-            return GetActionName(actionName);
-        }
+        protected string GetActionName(MethodInfo methodInfo) => RestWrapper.GetActionName(methodInfo.Name);
 
         internal static string GetActionName(string actionName)
         {
-            if (actionName.EndsWith("Async")) actionName = actionName.Replace("Async", "");
+            if (actionName.EndsWith("Async"))
+                actionName = actionName.Replace("Async", "");
             return actionName;
         }
 
         public ResultWrapper Execute(string name, ParameterWrapper[] parameters)
         {
-            var action = GetAction(name);
-            var path = BuildActionUrl(parameters, action);
-            var cnt = 0;
-            var waittime = action.Interval;
-            while (cnt <= action.NumberOfRetries)
+            ActionWrapper action = this.GetAction(name);
+            string path = RestWrapper.BuildActionUrl(parameters, action);
+            int num = 0;
+            int interval = action.Interval;
+            while (num <= action.NumberOfRetries)
             {
-                cnt++;
+                ++num;
                 try
                 {
-                    var result = CircuitBreakerContainer.GetCircuitBreaker(interfaceType).Execute($"{baseUri}{path}", () => InvokeAction(name, parameters, action, path), _serviceLocator);
+                    ResultWrapper result = CircuitBreakerContainer.GetCircuitBreaker(this.interfaceType).Execute(this.baseUri + path, (Func<ResultWrapper>)(() => this.InvokeAction(name, parameters, action, path)), this._serviceLocator);
                     if (result.Error != null)
                     {
-                        if (result.Error is SuspendedDependencyException) return result;
-                        if (!action.Retry || cnt > action.NumberOfRetries || !IsTransient(action, result.Error)) return result;
-                        _serviceLocator.GetService<ILogger>()?.Error(result.Error);
-                        _serviceLocator.GetService<ILogger>()?.Message($"Retrying action {action.Name}, retry count {cnt}");
-                        waittime = waittime * (action.IncrementalRetry ? cnt : 1);
+                        if (result.Error is SuspendedDependencyException || !action.Retry || num > action.NumberOfRetries || !this.IsTransient(action, result.Error))
+                            return result;
+                        this._serviceLocator.GetService<ILogger>()?.Error(result.Error);
+                        this._serviceLocator.GetService<ILogger>()?.Message(string.Format("Retrying action {0}, retry count {1}", (object)action.Name, (object)num));
+                        interval *= action.IncrementalRetry ? num : 1;
                         result.EndState();
-                        Thread.Sleep(waittime);
+                        Thread.Sleep(interval);
                     }
                     else
                     {
-                        if (cnt > 1) result.GetState().Extras.Add("retryCount", cnt);
+                        if (num > 1)
+                            result.GetState().Extras.Add("retryCount", (object)num);
                         return result;
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger?.Error(ex);
-                    if (!action.Retry || cnt > action.NumberOfRetries || !IsTransient(action, ex)) throw;
-                    Thread.Sleep(action.IncrementalRetry ? cnt : 1 * action.Interval);
+                    this._logger?.Error(ex);
+                    if (!action.Retry || num > action.NumberOfRetries || !this.IsTransient(action, ex))
+                        throw;
+                    else
+                        Thread.Sleep(action.IncrementalRetry ? num : action.Interval);
                 }
             }
             throw new Exception("Should not get here!?!");
-
         }
 
-        private ResultWrapper InvokeAction(string name, ParameterWrapper[] parameters, ActionWrapper action, string path)
+        private HttpClient GetClient()
         {
-            var req = CreateActionRequest(parameters, action, path);
-            ResultWrapper errorResult;
-            HttpWebResponse response = null;
-            try
+            HttpClient httpClient1;
+            if (RestWrapper._clients.TryGetValue(this.baseUri.ToLower(), out httpClient1))
+                return httpClient1;
+            HttpClient httpClient2 = new HttpClient()
             {
-                response = req.GetResponse() as HttpWebResponse;
-                EnsureActionId(req, response);
-                GetHeaderValues(action, response);
-                var result = CreateResult(action, response);
-                result.ActionId = req.ActionId();
-                return result;
-            }
-            catch (WebException webError)
-            {
-                _logger?.Error(webError);
-                EnsureActionId(webError, req);
+                BaseAddress = new Uri(this.baseUri),
+                Timeout = TimeSpan.FromSeconds((double)(ClientGlobalSettings.Timeout ?? 100))
+            };
+            RestWrapper._clients.TryAdd(this.baseUri.ToLower(), httpClient2);
+            return httpClient2;
+        }
 
-                GetHeaderValues(action, webError.Response as HttpWebResponse);
-                errorResult = HandleWebException(webError, action);
-                //try
-                //{
-                //    webError.Response?.Close();
-                //    webError.Response?.Dispose();
-                //}
-                //catch (Exception)
-                //{
-                //}
-            }
-            catch (Exception ex)
+        private ResultWrapper InvokeAction(
+          string name,
+          ParameterWrapper[] parameters,
+          ActionWrapper action,
+          string path)
+        {
+            return Task.Run<ResultWrapper>((Func<Task<ResultWrapper>>)(async () => await this.InvokeActionAsync(parameters, action, path))).Result;
+        }
+
+        private void GetHeaderValues(ActionWrapper action, HttpResponseMessage response)
+        {
+            if (response == null)
+                return;
+            List<IHeaderHandler> source = new List<IHeaderHandler>();
+            foreach (IHeaderInspector customHandler in action.CustomHandlers)
+                source.AddRange((IEnumerable<IHeaderHandler>)customHandler.GetHandlers(this._serviceLocator));
+            foreach (IHeaderHandler headerHandler in (IEnumerable<IHeaderHandler>)source.OrderBy<IHeaderHandler, int>((Func<IHeaderHandler, int>)(f => f.ProcessingOrder)))
+                headerHandler.GetHeader(response);
+        }
+
+        private static ResultWrapper HandleGenericException(Exception ex) => new ResultWrapper()
+        {
+            Status = HttpStatusCode.BadGateway,
+            StatusMessage = ex.Message,
+            Error = ex
+        };
+
+        private static async Task<ResultWrapper> HandleWebException(
+          HttpRequestException webError,
+          HttpResponseMessage response,
+          ActionWrapper action)
+        {
+            if (response != null)
             {
-                _logger?.Error(ex);
-                errorResult = HandleGenericException(ex);
-            }
-            finally
-            {
-                try
+                string errorBody = await RestWrapper.TryGetErrorBody(action, response);
+                return new ResultWrapper()
                 {
-                    response?.Close();
-                    response?.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    _logger?.Error(ex);
-                }
+                    Status = response.StatusCode,
+                    StatusMessage = response.ReasonPhrase,
+                    Error = (Exception)webError,
+                    Value = (object)errorBody
+                };
             }
-            errorResult.ActionId = req.ActionId();
-            return errorResult;
-        }
-
-        private void GetHeaderValues(ActionWrapper action, HttpWebResponse response)
-        {
-            if (response == null) return;
-            if (response.Cookies != null && response.Cookies.Count > 0)
-                cookieContainer.Add(response.Cookies);
-            var handler = new List<IHeaderHandler>();
-            foreach (var customHandler in action.CustomHandlers)
+            return new ResultWrapper()
             {
-                handler.AddRange(customHandler.GetHandlers(_serviceLocator));
-            }
-
-            foreach (var customHandler in handler.OrderBy(f => f.ProcessingOrder))
-            {
-                customHandler.GetHeader(response);
-            }
+                Status = HttpStatusCode.BadGateway,
+                StatusMessage = webError.Message,
+                Error = (Exception)new WebException(webError.Message)
+            };
         }
 
-        private static ResultWrapper HandleGenericException(Exception ex)
-        {
-            return new ResultWrapper { Status = HttpStatusCode.BadGateway, StatusMessage = ex.Message, Error = ex };
-        }
-
-        private static ResultWrapper HandleWebException(WebException webError, ActionWrapper action)
-        {
-            using (webError.Response)
-            {
-
-                var resp = webError.Response as HttpWebResponse;
-                if (resp != null)
-                {
-                    var result = TryGetErrorBody(action, resp);
-                    return new ResultWrapper
-                    {
-                        Status = resp.StatusCode,
-
-                        StatusMessage = resp.StatusDescription,
-                        Error = new WebException(webError.Message,webError.Status),
-                        Value = result
-                    };
-                }
-                return new ResultWrapper { Status = HttpStatusCode.BadGateway, StatusMessage = webError.Message, Error = new WebException(webError.Message)}; 
-            }
-        }
-
-        private static string TryGetErrorBody(ActionWrapper action, HttpWebResponse resp)
+        private static async Task<string> TryGetErrorBody(
+          ActionWrapper action,
+          HttpResponseMessage resp)
         {
             try
             {
-                using (var reader = new StreamReader(resp.GetResponseStream()))
-                {
-                    return reader.ReadToEnd();
-                }
+                return await resp.Content.ReadAsStringAsync();
             }
             catch
             {
-                // ignored
             }
-            return null;
+            return (string)null;
         }
 
-        private ResultWrapper CreateResult(ActionWrapper action, HttpWebResponse response)
+        private async Task<ResultWrapper> CreateResult(
+          ActionWrapper action,
+          HttpResponseMessage response)
         {
-            var type = typeof(Task).IsAssignableFrom(action.ReturnType) ? action.ReturnType.GetGenericArguments().FirstOrDefault() : action.ReturnType;
-            if (type == typeof(void) || type == null)
+            Type type = typeof(Task).IsAssignableFrom(action.ReturnType) ? ((IEnumerable<Type>)action.ReturnType.GetGenericArguments()).FirstOrDefault<Type>() : action.ReturnType;
+            if (type == typeof(void) || type == (Type)null)
+                return new ResultWrapper()
+                {
+                    Type = typeof(void),
+                    IsVoid = true,
+                    Value = (object)null,
+                    Status = response.StatusCode,
+                    StatusMessage = response.ReasonPhrase,
+                    ActionId = response.ActionId()
+                };
+            object resultFromResponse = await this.GetResultFromResponse(action, response, type);
+            return new ResultWrapper()
             {
-                return new ResultWrapper { Type = typeof(void), IsVoid = true, Value = null, Status = response.StatusCode, StatusMessage = response.StatusDescription, ActionId = response.ActionId() };
-            }
-            var result = GetResultFromResponse(action, response, type);
-            return new ResultWrapper { Type = type, IsVoid = false, Value = result, Status = response.StatusCode, StatusMessage = response.StatusDescription, ActionId = response.ActionId() };
+                Type = type,
+                IsVoid = false,
+                Value = resultFromResponse,
+                Status = response.StatusCode,
+                StatusMessage = response.ReasonPhrase,
+                ActionId = response.ActionId()
+            };
         }
 
-        private object GetResultFromResponse(ActionWrapper action, HttpWebResponse response, Type type)
+        private async Task<object> GetResultFromResponse(
+          ActionWrapper action,
+          HttpResponseMessage response,
+          Type type)
         {
-
-            object result;
+            object obj;
             if (action.UseXml)
             {
-                result = GetSerializer().Deserialize(response.GetResponseStream(), type);
+                ISerializer serializer = this.GetSerializer();
+                obj = serializer.Deserialize(await response.Content.ReadAsStreamAsync(), type);
+                serializer = (ISerializer)null;
             }
             else
             {
-                using (var reader = new JsonTextReader(new StreamReader(response.GetResponseStream())))
-                {
-                    var serializer = CreateJsonSerializer(type);
-                    result = serializer.Deserialize(reader, type);
-                }
+                using (JsonTextReader jsonTextReader = new JsonTextReader((TextReader)new StreamReader(await response.Content.ReadAsStreamAsync())))
+                    obj = this.CreateJsonSerializer(type).Deserialize((JsonReader)jsonTextReader, type);
             }
-            return result;
+            return obj;
         }
 
         private JsonSerializer CreateJsonSerializer(Type getType)
         {
-            JsonSerializerSettings serializerSettings = null;
-            if (getType != null) serializerSettings = getType.GetClientSerializationSettings();
-            if (serializerSettings == null)
-            {
-                serializerSettings = interfaceType.GetClientSerializationSettings();
-            }
-            var serializer = serializerSettings == null ? JsonSerializer.Create() : JsonSerializer.Create(serializerSettings);
-            return serializer;
+            JsonSerializerSettings settings = (JsonSerializerSettings)null;
+            if (getType != (Type)null)
+                settings = getType.GetClientSerializationSettings();
+            if (settings == null)
+                settings = this.interfaceType.GetClientSerializationSettings();
+            return settings != null ? JsonSerializer.Create(settings) : JsonSerializer.Create();
         }
 
-        private HttpWebRequest CreateActionRequest(ParameterWrapper[] parameters, ActionWrapper action, string path)
+        private HttpRequestMessage CreateActionRequest(
+          ParameterWrapper[] parameters,
+          ActionWrapper action,
+          string path)
         {
-            var req = CreateActionRequestBase(parameters, action, path);
-            byte[] body = PrepareBody(parameters, req, action);
-            if (authenticationHandler == null) authenticationHandler = _serviceLocator.GetService<IAuthenticationHandler>();
-            authenticationHandler?.BodyData(body);
-            if (RunAuthProviderBeforeAppendingBody)
-                authenticationHandler?.Apply(req);
-            AppendBody(body, req, action);
-            if (!RunAuthProviderBeforeAppendingBody)
-                authenticationHandler?.Apply(req);
-            return req;
+            HttpRequestMessage actionRequestBase = this.CreateActionRequestBase(parameters, action, path);
+            byte[] body = this.PrepareBody(parameters, actionRequestBase, action);
+            if (this.authenticationHandler == null)
+                this.authenticationHandler = this._serviceLocator.GetService<IAuthenticationHandler>();
+            this.authenticationHandler?.BodyData(body);
+            if (this.RunAuthProviderBeforeAppendingBody)
+                this.authenticationHandler?.Apply(actionRequestBase);
+            if (!this.RunAuthProviderBeforeAppendingBody)
+                this.authenticationHandler?.Apply(actionRequestBase);
+            return actionRequestBase;
         }
 
         public bool RunAuthProviderBeforeAppendingBody
         {
-            get => _runAuthProviderBeforeAppendingBody ?? ProxyFactory.RunAuthProviderBeforeAppendingBody;
-            set => _runAuthProviderBeforeAppendingBody = value;
+            get => this._runAuthProviderBeforeAppendingBody ?? ProxyFactory.RunAuthProviderBeforeAppendingBody;
+            set => this._runAuthProviderBeforeAppendingBody = new bool?(value);
         }
 
-        private async Task<HttpWebRequest> CreateActionRequestAsync(ParameterWrapper[] parameters, ActionWrapper action, string path)
+        private async Task<HttpRequestMessage> CreateActionRequestAsync(
+          ParameterWrapper[] parameters,
+          ActionWrapper action,
+          string path)
         {
-            var req = CreateActionRequestBase(parameters, action, path);
-            byte[] body = PrepareBody(parameters, req, action);
-            if (authenticationHandler == null) authenticationHandler = _serviceLocator.GetService<IAuthenticationHandler>();
-            authenticationHandler?.BodyData(body);
-            if (RunAuthProviderBeforeAppendingBody)
-                if (authenticationHandler != null) await authenticationHandler.ApplyAsync(req);
-            req = await AppendBodyAsync(body, req, action);
-            if (!RunAuthProviderBeforeAppendingBody)
-                if (authenticationHandler != null) await authenticationHandler.ApplyAsync(req);
-            return req;
+            HttpRequestMessage req = this.CreateActionRequestBase(parameters, action, path);
+            byte[] body = this.PrepareBody(parameters, req, action);
+            if (this.authenticationHandler == null)
+                this.authenticationHandler = this._serviceLocator.GetService<IAuthenticationHandler>();
+            this.authenticationHandler?.BodyData(body);
+            if (this.RunAuthProviderBeforeAppendingBody && this.authenticationHandler != null)
+                await this.authenticationHandler.ApplyAsync(req);
+            if (req.Method != HttpMethod.Get && req.Method != HttpMethod.Head && req.Method != HttpMethod.Options && req.Method != HttpMethod.Trace)
+            {
+                req.Content = (HttpContent)new ByteArrayContent(body ?? new byte[0]);
+                req.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            }
+            if (!this.RunAuthProviderBeforeAppendingBody && this.authenticationHandler != null)
+                await this.authenticationHandler.ApplyAsync(req);
+            HttpRequestMessage httpRequestMessage = req;
+            req = (HttpRequestMessage)null;
+            body = (byte[])null;
+            return httpRequestMessage;
         }
 
-        private byte[] PrepareBody(ParameterWrapper[] parameters, HttpWebRequest req, ActionWrapper action)
+        private byte[] PrepareBody(
+          ParameterWrapper[] parameters,
+          HttpRequestMessage req,
+          ActionWrapper action)
         {
-            if (parameters.Any(p => p.In == InclutionTypes.Body))
-            {
-                if (parameters.Count(p => p.In == InclutionTypes.Body) > 1)
-                {
-                    return Serialize(parameters.Where(p => p.In == InclutionTypes.Body).Select(p => p.value).ToList(), action);
-                }
-                else
-                {
-                    var val = parameters.Single(p => p.In == InclutionTypes.Body);
-                    var v = val.value;
-                    if (val.value != null && val.value?.GetType() == typeof(byte[]))
-                        v = Convert.ToBase64String((byte[])val.value);
-                    return Serialize(v, action);
-                }
-            }
-            else
-            {
-                req.ContentLength = 0;
-            }
-            if (req.ContentType.Contains("xml")) req.ContentType = null;
-
-            return null;
+            if (!((IEnumerable<ParameterWrapper>)parameters).Any<ParameterWrapper>((Func<ParameterWrapper, bool>)(p => p.In == InclutionTypes.Body)))
+                return (byte[])null;
+            if (((IEnumerable<ParameterWrapper>)parameters).Count<ParameterWrapper>((Func<ParameterWrapper, bool>)(p => p.In == InclutionTypes.Body)) > 1)
+                return this.Serialize((object)((IEnumerable<ParameterWrapper>)parameters).Where<ParameterWrapper>((Func<ParameterWrapper, bool>)(p => p.In == InclutionTypes.Body)).Select<ParameterWrapper, object>((Func<ParameterWrapper, object>)(p => p.value)).ToList<object>(), action);
+            ParameterWrapper parameterWrapper = ((IEnumerable<ParameterWrapper>)parameters).Single<ParameterWrapper>((Func<ParameterWrapper, bool>)(p => p.In == InclutionTypes.Body));
+            object base64String = parameterWrapper.value;
+            if (parameterWrapper.value != null && parameterWrapper.value?.GetType() == typeof(byte[]))
+                base64String = (object)Convert.ToBase64String((byte[])parameterWrapper.value);
+            return this.Serialize(base64String, action);
         }
 
         private byte[] Serialize(object value, ActionWrapper action)
         {
             if (action.UseXml)
+                return this.GetSerializer().Serialize(value);
+            using (MemoryStream memoryStream = new MemoryStream())
             {
-                var xmlSerializer = GetSerializer();
-                return xmlSerializer.Serialize(value);
-            }
-            var serializer = CreateJsonSerializer(value?.GetType());
-            byte[] buffer;
-            using (var memStream = new MemoryStream())
-            {
-                using (var stream = new StreamWriter(memStream))
+                using (StreamWriter streamWriter = new StreamWriter((Stream)memoryStream))
                 {
-                    using (var writer = new JsonTextWriter(stream))
-                    {
-                        serializer.Serialize(writer, value);
-                    }
+                    using (JsonTextWriter jsonTextWriter = new JsonTextWriter((TextWriter)streamWriter))
+                        this.CreateJsonSerializer(value?.GetType()).Serialize((JsonWriter)jsonTextWriter, value);
                 }
-                buffer = memStream.ToArray();
+                return memoryStream.ToArray();
             }
-
-            return buffer;
         }
 
-        private HttpWebRequest CreateActionRequestBase(ParameterWrapper[] parameters, ActionWrapper action, string path)
+        private HttpRequestMessage CreateActionRequestBase(
+          ParameterWrapper[] parameters,
+          ActionWrapper action,
+          string path)
         {
-            var req = action.UseXml ? CreateRequest(path, "application/xml") : CreateRequest(path);
-            if (DisableProxy) req.Proxy = null;
-            req.Headers.Add(ExtensionsFactory.ActionIdName, Guid.NewGuid().ToString());
-            req.InitializeState();
-            req.Method = action.Actions.First().ToString();
-            req.GetState().Extras.Add("serviceRoot", baseUri);
-            AppendHeaders(parameters, req, action);
-
-            return req;
+            string action1 = action.Actions.First<HttpMethod>().ToString();
+            HttpRequestMessage httpRequestMessage = action.UseXml ? this.CreateRequest(path, action1, "application/xml") : this.CreateRequest(path, action1);
+            httpRequestMessage.Headers.Add("sd-ActionId", Guid.NewGuid().ToString());
+            httpRequestMessage.InitializeState();
+            httpRequestMessage.GetState().Extras.Add("serviceRoot", (object)this.baseUri);
+            this.AppendHeaders(parameters, httpRequestMessage, action);
+            return httpRequestMessage;
         }
 
         private static string BuildActionUrl(ParameterWrapper[] parameters, ActionWrapper action)
         {
-            if (action == null) Console.WriteLine($"no action definition found ?!?!");
-            var path = action?.RouteTemplate ?? "";
-            var queryStrings = new List<string>();
-            if (parameters == null) return path;
-            foreach (var source in parameters.Where(p => p.In == InclutionTypes.Path || p.In == InclutionTypes.Query))
+            if (action == null)
+                Console.WriteLine("no action definition found ?!?!");
+            string str = action?.RouteTemplate ?? "";
+            List<string> source = new List<string>();
+            if (parameters == null)
+                return str;
+            foreach (ParameterWrapper parameterWrapper in ((IEnumerable<ParameterWrapper>)parameters).Where<ParameterWrapper>((Func<ParameterWrapper, bool>)(p => p.In == InclutionTypes.Path || p.In == InclutionTypes.Query)))
             {
-                if (path.Contains($"{{{source.Name}}}") && source.In == InclutionTypes.Path)
-                {
-                    path = path.Replace($"{{{source.Name}}}", Uri.EscapeDataString(source?.value?.ToString() ?? ""));
-                }
+                if (str.Contains("{" + parameterWrapper.Name + "}") && parameterWrapper.In == InclutionTypes.Path)
+                    str = str.Replace("{" + parameterWrapper.Name + "}", Uri.EscapeDataString(parameterWrapper?.value?.ToString() ?? ""));
                 else
-                {
-                    queryStrings.Add($"{source.Name}={HttpUtility.UrlEncode(source?.value?.ToString() ?? "")}");
-                }
+                    source.Add(parameterWrapper.Name + "=" + HttpUtility.UrlEncode(parameterWrapper?.value?.ToString() ?? ""));
             }
-            if (queryStrings.Any()) path = path + "?" + string.Join("&", queryStrings);
-            return path;
+            if (source.Any<string>())
+                str = str + "?" + string.Join("&", (IEnumerable<string>)source);
+            if (str.StartsWith("/"))
+                str = str.Substring(1);
+            return str;
         }
 
         public static bool DisableProxy { get; set; }
 
         private ActionWrapper GetAction(string name)
         {
-            if (!cache.TryGetValue(interfaceType, out ConcurrentDictionary<string, ActionWrapper> @interface)) throw new InvalidOperationException("Unknown interface type");
-
-            if (!@interface.TryGetValue(GetActionName(name), out ActionWrapper action)) throw new InvalidOperationException("Unknown method");
-            return action;
+            ConcurrentDictionary<string, ActionWrapper> concurrentDictionary;
+            if (!RestWrapper.cache.TryGetValue(this.interfaceType, out concurrentDictionary))
+                throw new InvalidOperationException("Unknown interface type");
+            ActionWrapper actionWrapper;
+            if (!concurrentDictionary.TryGetValue(RestWrapper.GetActionName(name), out actionWrapper))
+                throw new InvalidOperationException("Unknown method");
+            return actionWrapper;
         }
 
-        private static string Version { get; } = $"{typeof(GetAttribute).Assembly.GetName().Version.Major}.{typeof(GetAttribute).Assembly.GetName().Version.Minor}";
+        private static string Version { get; } = string.Format("{0}.{1}", (object)typeof(GetAttribute).Assembly.GetName().Version.Major, (object)typeof(GetAttribute).Assembly.GetName().Version.Minor);
 
-        public void SetProxyHandler(Func<string,IWebProxy> proxyFunc)
-        {
-            _proxyFunc = proxyFunc;
-        }
+        public void SetProxyHandler(Func<string, IWebProxy> proxyFunc) => this._proxyFunc = proxyFunc;
 
-        private HttpWebRequest CreateRequest(string path, string contentType = "application/json")
+        private HttpRequestMessage CreateRequest(
+          string path,
+          string action,
+          string contentType = "application/json")
         {
-            var req = WebRequest.Create(new Uri(CreateUrl(path))) as HttpWebRequest;
-            if (_proxyFunc != null) 
-                req.Proxy = _proxyFunc($"{req.RequestUri.Scheme}://{req.RequestUri.DnsSafeHost}");
-            req.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
-            req.Accept = contentType;
-            req.ContentType = contentType;
-            req.Headers.Add("Accept-Language", "en-us");
-            req.UserAgent = $"stardust/{Version}";
-            req.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
-            req.CookieContainer = cookieContainer;
-            SetExtraHeaderValues(req);
-            SetTimeoutValues(req);
+            HttpRequestMessage req = new HttpRequestMessage(new HttpMethod(action), this.CreateUrl(path))
+            {
+                Method = new HttpMethod(action)
+            };
+            req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(contentType));
+            req.Headers.UserAgent.Add(new ProductInfoHeaderValue("stardust", RestWrapper.Version));
+            this.SetExtraHeaderValues(req);
+            RestWrapper.SetTimeoutValues(req);
             return req;
         }
 
-        private string CreateUrl(string path)
+        private string CreateUrl(string path) => !this._trailingQueryString.IsNullOrWhiteSpace() ? RestWrapper.NormalizeUrl(this.baseUri) + path + (path.Contains("?") ? "&" : "?") + this._trailingQueryString : RestWrapper.NormalizeUrl(this.baseUri) + path;
+
+        private static string NormalizeUrl(string baseUrl)
         {
-            return _trailingQueryString.IsNullOrWhiteSpace()
-                ? $"{baseUri}/{path}"
-                : $"{baseUri}/{path}{(path.Contains("?") ? "&" : "?")}{_trailingQueryString}";
+            Uri uri = new Uri(baseUrl);
+            return uri.AbsolutePath + (uri.AbsolutePath.EndsWith("/") ? "" : "/");
         }
 
-        private void SetExtraHeaderValues(HttpWebRequest req)
+        private void SetExtraHeaderValues(HttpRequestMessage req)
         {
-            foreach (var additionalHeader in additionalHeaders)
+            foreach (KeyValuePair<string, string> additionalHeader in this.additionalHeaders)
             {
                 try
                 {
@@ -511,111 +502,98 @@ namespace Stardust.Interstellar.Rest.Client
                 }
                 catch (Exception ex)
                 {
-                    _serviceLocator.GetService<ILogger>()?.Error(ex);
+                    this._serviceLocator.GetService<ILogger>()?.Error(ex);
                 }
             }
         }
 
-        private static void SetTimeoutValues(HttpWebRequest req)
+        private static void SetTimeoutValues(HttpRequestMessage req)
         {
-            if (ClientGlobalSettings.KeepAlive != null)
-                req.KeepAlive = ClientGlobalSettings.KeepAlive.Value;
-            if (ClientGlobalSettings.Timeout != null) req.Timeout = ClientGlobalSettings.Timeout.Value;
-            if (ClientGlobalSettings.ReadWriteTimeout != null) req.ReadWriteTimeout = ClientGlobalSettings.ReadWriteTimeout.Value;
-            if (ClientGlobalSettings.ContinueTimeout != null) req.ContinueTimeout = ClientGlobalSettings.ContinueTimeout.Value;
         }
 
-        private HttpWebRequest AppendBody(byte[] buffer, HttpWebRequest req, ActionWrapper action)
+        private HttpWebRequest AppendBody(
+          byte[] buffer,
+          HttpWebRequest req,
+          ActionWrapper action)
         {
-            if (buffer.IsEmpty()) return req;
-            var requestStream = req.GetRequestStream();
-            requestStream.Write(buffer, 0, buffer.Length);
+            if (buffer.IsEmpty())
+                return req;
+            req.GetRequestStream().Write(buffer, 0, buffer.Length);
             return req;
         }
 
-        private async Task<HttpWebRequest> AppendBodyAsync(byte[] buffer, HttpWebRequest req, ActionWrapper action)
+        private async Task<HttpWebRequest> AppendBodyAsync(
+          byte[] buffer,
+          HttpWebRequest req,
+          ActionWrapper action)
         {
-            if (buffer.IsEmpty()) return req;
-            var requestStream = await req.GetRequestStreamAsync();
-            await requestStream.WriteAsync(buffer, 0, buffer.Length);
+            if (buffer.IsEmpty())
+                return req;
+            await (await req.GetRequestStreamAsync()).WriteAsync(buffer, 0, buffer.Length);
             return req;
         }
 
-        private void AppendHeaders(ParameterWrapper[] parameters, HttpWebRequest req, ActionWrapper action)
+        private void AppendHeaders(
+          ParameterWrapper[] parameters,
+          HttpRequestMessage req,
+          ActionWrapper action)
         {
-            foreach (var source in parameters.Where(p => p.In == InclutionTypes.Header))
-            {
-                req.Headers.Add(string.Format("{0}", source.Name), source.value?.ToString());
-            }
+            foreach (ParameterWrapper parameterWrapper in ((IEnumerable<ParameterWrapper>)parameters).Where<ParameterWrapper>((Func<ParameterWrapper, bool>)(p => p.In == InclutionTypes.Header)))
+                req.Headers.Add(string.Format("{0}", (object)parameterWrapper.Name), parameterWrapper.value?.ToString());
             if (action.CustomHandlers != null)
             {
-                var handler = new List<IHeaderHandler>();
-                foreach (var customHandler in action.CustomHandlers)
-                {
-                    handler.AddRange(customHandler.GetHandlers(_serviceLocator));
-                }
-
-                foreach (var customHandler in handler.OrderBy(f => f.ProcessingOrder))
-                {
-                    customHandler.SetHeader(req);
-                }
+                List<IHeaderHandler> source = new List<IHeaderHandler>();
+                foreach (IHeaderInspector customHandler in action.CustomHandlers)
+                    source.AddRange((IEnumerable<IHeaderHandler>)customHandler.GetHandlers(this._serviceLocator));
+                foreach (IHeaderHandler headerHandler in (IEnumerable<IHeaderHandler>)source.OrderBy<IHeaderHandler, int>((Func<IHeaderHandler, int>)(f => f.ProcessingOrder)))
+                    headerHandler.SetHeader(req);
             }
-            if (headerHandlers == null) return;
-            foreach (var headerHandler in headerHandlers)
-            {
+            if (this.headerHandlers == null)
+                return;
+            foreach (IHeaderHandler headerHandler in this.headerHandlers)
                 headerHandler.SetHeader(req);
-            }
-
-
-        }
-        
-        private void XmlBodySerializer(WebRequest req, object val)
-        {
-            var xmlSerializer = GetSerializer();
-            xmlSerializer.Serialize(req, val);
         }
 
-        private ISerializer GetSerializer()
-        {
-            var xmlSerializer = new Locator(_serviceLocator).GetServices<ISerializer>().SingleOrDefault(s => string.Equals(s.SerializationType, "xml", StringComparison.InvariantCultureIgnoreCase));
-            if (xmlSerializer == null) throw new IndexOutOfRangeException("Could not find serializer");
-            return xmlSerializer;
-        }
+        private void XmlBodySerializer(WebRequest req, object val) => this.GetSerializer().Serialize(req, val);
 
-        public async Task<ResultWrapper> ExecuteAsync(string name, ParameterWrapper[] parameters)
+        private ISerializer GetSerializer() => new Locator(this._serviceLocator).GetServices<ISerializer>().SingleOrDefault<ISerializer>((Func<ISerializer, bool>)(s => string.Equals(s.SerializationType, "xml", StringComparison.InvariantCultureIgnoreCase))) ?? throw new IndexOutOfRangeException("Could not find serializer");
+
+        public async Task<ResultWrapper> ExecuteAsync(
+          string name,
+          ParameterWrapper[] parameters)
         {
-            var action = GetAction(name);
-            var path = BuildActionUrl(parameters, action);
+            ActionWrapper action = this.GetAction(name);
+            string path = RestWrapper.BuildActionUrl(parameters, action);
             int cnt = 0;
-            var waittime = action.Interval;
+            int waittime = action.Interval;
             while (cnt <= action.NumberOfRetries)
             {
-                cnt++;
+                ++cnt;
                 try
                 {
-                    var result = await CircuitBreakerContainer.GetCircuitBreaker(interfaceType).ExecuteAsync($"{baseUri}{path}", async () => await InvokeActionAsync(parameters, action, path), _serviceLocator);
+                    ResultWrapper result = await CircuitBreakerContainer.GetCircuitBreaker(this.interfaceType).ExecuteAsync(this.baseUri + path, (Func<Task<ResultWrapper>>)(async () => await this.InvokeActionAsync(parameters, action, path)), this._serviceLocator);
                     if (result.Error != null)
                     {
-                        if (result.Error is SuspendedDependencyException)
+                        if (result.Error is SuspendedDependencyException || !action.Retry || cnt > action.NumberOfRetries || !this.IsTransient(action, result.Error))
                             return result;
-                        if (!action.Retry || cnt > action.NumberOfRetries || !IsTransient(action, result.Error)) return result;
-                        _serviceLocator.GetService<ILogger>()?.Error(result.Error);
-                        _serviceLocator.GetService<ILogger>()?.Message($"Retrying action {action.Name}, retry count {cnt}");
-                        waittime = waittime * (action.IncrementalRetry ? cnt : 1);
+                        this._serviceLocator.GetService<ILogger>()?.Error(result.Error);
+                        this._serviceLocator.GetService<ILogger>()?.Message(string.Format("Retrying action {0}, retry count {1}", (object)action.Name, (object)cnt));
+                        waittime *= action.IncrementalRetry ? cnt : 1;
                         result.EndState();
                         await Task.Delay(waittime);
                     }
                     else
                     {
-                        if (cnt > 1) result.GetState().Extras.Add("retryCount", cnt);
+                        if (cnt > 1)
+                            result.GetState().Extras.Add("retryCount", (object)cnt);
                         return result;
                     }
                 }
                 catch (Exception ex)
                 {
-
-                    if (!action.Retry || cnt > action.NumberOfRetries || !IsTransient(action, ex)) throw;
-                    await Task.Delay(action.IncrementalRetry ? cnt : 1 * action.Interval);
+                    if (!action.Retry || cnt > action.NumberOfRetries || !this.IsTransient(action, ex))
+                        throw;
+                    await Task.Delay(action.IncrementalRetry ? cnt : action.Interval);
                 }
             }
             throw new Exception("Should not get here!?!");
@@ -624,177 +602,176 @@ namespace Stardust.Interstellar.Rest.Client
         private bool IsTransient(ActionWrapper action, Exception exception)
         {
             if (action.ErrorCategorizer != null)
-            {
                 return action.ErrorCategorizer.IsTransientError(exception);
-            }
-            var webException = exception as WebException;
-            if (webException != null)
+            if (!(exception is WebException webException))
+                return false;
+            return ((IEnumerable<WebExceptionStatus>)new WebExceptionStatus[4]
             {
-                return new[] {WebExceptionStatus.ConnectionClosed,
-                  WebExceptionStatus.Timeout,
-                  WebExceptionStatus.RequestCanceled ,WebExceptionStatus.ConnectFailure}.
-                        Contains(webException.Status);
-            }
-
-            return false;
-
+        WebExceptionStatus.ConnectionClosed,
+        WebExceptionStatus.Timeout,
+        WebExceptionStatus.RequestCanceled,
+        WebExceptionStatus.ConnectFailure
+            }).Contains<WebExceptionStatus>(webException.Status);
         }
 
-        private async Task<ResultWrapper> InvokeActionAsync(ParameterWrapper[] parameters, ActionWrapper action, string path)
+        private async Task<ResultWrapper> InvokeActionAsync(
+          ParameterWrapper[] parameters,
+          ActionWrapper action,
+          string path)
         {
-            var req = await CreateActionRequestAsync(parameters, action, path);
+            HttpRequestMessage req = await this.CreateActionRequestAsync(parameters, action, path);
+            HttpResponseMessage response = (HttpResponseMessage)null;
             ResultWrapper errorResult;
-            HttpWebResponse response = null;
             try
             {
-                response = await req.GetResponseAsync() as HttpWebResponse;
-                EnsureActionId(req, response);
-                GetHeaderValues(action, response);
-                var result = CreateResult(action, response);
+                response = await this.GetClient().SendAsync(req);
+                if (!response.IsSuccessStatusCode)
+                    throw new HttpRequestException(response.ReasonPhrase);
+                RestWrapper.EnsureActionId(req, response);
+                this.GetHeaderValues(action, response);
+                ResultWrapper result = await this.CreateResult(action, response);
                 result.ActionId = req.ActionId();
                 return result;
             }
-            catch (WebException webError)
+            catch (HttpRequestException ex)
             {
-                EnsureActionId(webError, req);
-                GetHeaderValues(action, webError.Response as HttpWebResponse);
-                errorResult = HandleWebException(webError, action);
-
+                RestWrapper.EnsureActionId(req, response);
+                this.GetHeaderValues(action, response);
+                HttpResponseMessage response1 = response;
+                ActionWrapper action1 = action;
+                errorResult = await RestWrapper.HandleWebException(ex, response1, action1);
             }
             catch (Exception ex)
             {
-                errorResult = HandleGenericException(ex);
+                errorResult = RestWrapper.HandleGenericException(ex);
             }
             finally
             {
-                try
-                {
-                    response?.Close();
-                    response?.Dispose();
-                    
-                }
-                catch (Exception)
-                {
-                }
+                HttpRequestMessage self1 = req;
+                if (self1 != null)
+                    self1.TryDispose();
+                HttpResponseMessage self2 = response;
+                if (self2 != null)
+                    self2.TryDispose();
             }
             errorResult.ActionId = req.ActionId();
             return errorResult;
         }
 
-        private static void EnsureActionId(WebException webError, HttpWebRequest req)
+        private static void EnsureActionId(HttpRequestMessage req, HttpResponseMessage resp)
         {
-            var resp = webError.Response;
-            EnsureActionId(req, resp);
-        }
-
-        private static void EnsureActionId(HttpWebRequest req, WebResponse resp)
-        {
-            if (string.IsNullOrWhiteSpace(resp?.Headers?.Get("sd-ActionId")))
+            bool? nullable;
+            if (resp == null)
             {
-                resp?.Headers?.Add("sd-ActionId", req.ActionId());
+                nullable = new bool?();
             }
+            else
+            {
+                HttpResponseHeaders headers = resp.Headers;
+                nullable = headers != null ? new bool?(!headers.Contains("sd-ActionId")) : new bool?();
+            }
+            if (!nullable.GetValueOrDefault() || resp == null)
+                return;
+            resp.Headers?.Add("sd-ActionId", req.ActionId());
         }
 
         public T Invoke<T>(string name, ParameterWrapper[] parameters)
         {
-            var result = Execute(name, parameters);
-            Extras?.Invoke(result.GetState().Extras);
+            ResultWrapper result = this.Execute(name, parameters);
+            Action<Dictionary<string, object>> extras = this.Extras;
+            if (extras != null)
+                extras((Dictionary<string, object>)result.GetState().Extras);
             result.EndState();
-
             if (result.Error == null)
                 return (T)result.Value;
-            CreateException(name, result);
+            this.CreateException(name, result);
             return default(T);
         }
 
         public async Task<T> InvokeAsync<T>(string name, ParameterWrapper[] parameters)
         {
-            var result = await ExecuteAsync(GetActionName(name), parameters);
-            Extras?.Invoke(result.GetState().Extras);
+            ResultWrapper result = await this.ExecuteAsync(RestWrapper.GetActionName(name), parameters);
+            Action<Dictionary<string, object>> extras = this.Extras;
+            if (extras != null)
+                extras((Dictionary<string, object>)result.GetState().Extras);
             StateHelper.EndState(result.ActionId);
-            if (typeof(T) == typeof(void)) return default(T);
+            if (typeof(T) == typeof(void))
+                return default(T);
             if (result.Error == null)
                 return (T)result.Value;
-            CreateException(name, result);
+            this.CreateException(name, result);
             return default(T);
         }
 
         private void CreateException(string name, ResultWrapper result)
         {
-            var action = GetAction(name);
-            if (result?.Status == (HttpStatusCode)429)
-                throw new RestWrapperException(result?.StatusMessage, (HttpStatusCode)429, new ThrottledRequestException(result?.Error));
-            var handler = GetErrorHandler(action);
-            if (handler != null) throw handler.ProduceClientException(result.StatusMessage, result.Status, result.Error, result.Value as string);
-            if (result?.Value != null) throw new RestWrapperException(result.StatusMessage, result.Status, result.Value, result.Error);
-            throw new RestWrapperException(result?.StatusMessage, result?.Status ?? HttpStatusCode.Unused, result?.Error);
+            ActionWrapper action = this.GetAction(name);
+            if (result != null && result.Status == (HttpStatusCode)429)
+                throw new RestWrapperException(result?.StatusMessage, (HttpStatusCode)429, (Exception)new ThrottledRequestException(result?.Error));
+            IErrorHandler errorHandler = this.GetErrorHandler(action);
+            if (errorHandler != null)
+                throw errorHandler.ProduceClientException(result.StatusMessage, result.Status, result.Error, result.Value as string);
+            if (result != null && result.Value != null)
+                throw new RestWrapperException(result.StatusMessage, result.Status, result.Value, result.Error);
+            throw new RestWrapperException(result?.StatusMessage, result != null ? result.Status : HttpStatusCode.Unused, result?.Error);
         }
 
         private IErrorHandler GetErrorHandler(ActionWrapper action)
         {
-            IErrorHandler handler;
-            var globalErrorHandler = _serviceLocator.GetService<IErrorHandler>();
-            var errorHandler = action?.ErrorHandler;
-            if (globalErrorHandler != null && errorHandler != null)
-            {
-                handler = new AggregateHandler(globalErrorHandler, errorHandler?.ErrorHandler(_serviceLocator));
-            }
-            else if (globalErrorHandler != null)
-            {
-                handler = globalErrorHandler;
-            }
-            else
-            {
-                handler = errorHandler?.ErrorHandler(_serviceLocator);
-            }
-            return handler;
+            IErrorHandler service = this._serviceLocator.GetService<IErrorHandler>();
+            ErrorHandlerAttribute errorHandler = action?.ErrorHandler;
+            return service == null || errorHandler == null ? (service == null ? errorHandler?.ErrorHandler(this._serviceLocator) : service) : (IErrorHandler)new AggregateHandler(service, errorHandler?.ErrorHandler(this._serviceLocator));
         }
 
         public async Task InvokeVoidAsync(string name, ParameterWrapper[] parameters)
         {
-            var result = await ExecuteAsync(GetActionName(name), parameters);
+            ResultWrapper result = await this.ExecuteAsync(RestWrapper.GetActionName(name), parameters);
             StateHelper.EndState(result.ActionId);
             if (result.Error == null)
                 return;
-            CreateException(name, result);
+            this.CreateException(name, result);
         }
 
         public void InvokeVoid(string name, ParameterWrapper[] parameters)
         {
-            var result = Execute(name, parameters);
+            ResultWrapper result = this.Execute(name, parameters);
             StateHelper.EndState(result.ActionId);
             if (result.Error == null)
                 return;
-            CreateException(name, result);
+            this.CreateException(name, result);
         }
 
-        protected ParameterWrapper[] GetParameters(string name, params object[] parameters)
+        protected ParameterWrapper[] GetParameters(
+          string name,
+          params object[] parameters)
         {
-            if (!cache.TryGetValue(interfaceType, out ConcurrentDictionary<string, ActionWrapper> item)) throw new InvalidOperationException("Invalid interface type");
-            if (!item.TryGetValue(GetActionName(name), out ActionWrapper action)) throw new InvalidOperationException("Invalid action");
-            var i = 0;
-            var wrappers = new List<ParameterWrapper>();
-            foreach (var parameter in parameters)
+            ConcurrentDictionary<string, ActionWrapper> concurrentDictionary;
+            if (!RestWrapper.cache.TryGetValue(this.interfaceType, out concurrentDictionary))
+                throw new InvalidOperationException("Invalid interface type");
+            ActionWrapper actionWrapper;
+            if (!concurrentDictionary.TryGetValue(RestWrapper.GetActionName(name), out actionWrapper))
+                throw new InvalidOperationException("Invalid action");
+            int index = 0;
+            List<ParameterWrapper> parameterWrapperList = new List<ParameterWrapper>();
+            foreach (object parameter1 in parameters)
             {
-                var def = action.Parameters[i];
-                wrappers.Add(def.Create(parameter));
-                i++;
+                ParameterWrapper parameter2 = actionWrapper.Parameters[index];
+                parameterWrapperList.Add(parameter2.Create(parameter1));
+                ++index;
             }
-            return wrappers.ToArray();
+            return parameterWrapperList.ToArray();
         }
 
-        public IServiceProvider ServiceLocator => _serviceLocator;
+        public IServiceProvider ServiceLocator => this._serviceLocator;
 
-        public void AppendTrailingQueryString(string queryStringSegment)
-        {
-            _trailingQueryString = _trailingQueryString.ContainsCharacters() ? "&" : "" + queryStringSegment;
-        }
+        public void AppendTrailingQueryString(string queryStringSegment) => this._trailingQueryString = this._trailingQueryString.ContainsCharacters() ? "&" : queryStringSegment ?? "";
 
         public void SetPathVersion(string version)
         {
-            if (_pathVersionSet) return;
-            baseUri += $"{(baseUri.EndsWith("/") ? "" : "/")}{version}";
-            _pathVersionSet = true;
+            if (this._pathVersionSet)
+                return;
+            this.baseUri = this.baseUri + (this.baseUri.EndsWith("/") ? "" : "/") + version;
+            this._pathVersionSet = true;
         }
     }
 }

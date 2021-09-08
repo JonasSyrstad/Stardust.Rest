@@ -27,7 +27,7 @@ namespace NetCore3TestApp
         public void ConfigureServices(IServiceCollection services)
         {
             
-            services.AddInterstellar().AddMvc()
+            services.AddInterstellar().AddAuthentication().AddCookie().Services.AddMvc()
                 .AddAsController<ITestService,TestService>()
                 .UseInterstellar();
             services.AddSwaggerGen(c =>

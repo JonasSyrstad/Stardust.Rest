@@ -45,6 +45,9 @@ namespace Stardust.Interstellar.Rest.Extensions
             {
             }
         }
+        public static string ActionId(this HttpWebRequest request) => request.Headers["sd-ActionId"];
+
+        public static string ActionId(this HttpWebResponse response) => response.Headers["sd-ActionId"];
 
         public static void InitializeState(this HttpWebRequest req)
         {
@@ -133,15 +136,14 @@ namespace Stardust.Interstellar.Rest.Extensions
             return InitializeState(actionId);
         }
 
-        public static string ActionId(this HttpWebRequest request)
+        public static string ActionId(this HttpRequestMessage request)
         {
-            return request.Headers[ActionIdName];
+            return request.Headers.Contains("sd-ActionId") ? request.Headers.GetValues("sd-ActionId").FirstOrDefault() : null;
         }
 
-        public static string ActionId(this HttpWebResponse response)
+        public static string ActionId(this HttpResponseMessage response)
         {
-            return response.Headers[ActionIdName];
-        }
+            return response.Headers.Contains("sd-ActionId") ? response.Headers.GetValues("sd-ActionId").FirstOrDefault() : null;        }
 
         public static string ActionId(this HttpRequestHeaders headers)
         {
@@ -158,12 +160,12 @@ namespace Stardust.Interstellar.Rest.Extensions
             return headers.Where(h => h.Key == ActionIdName).Select(h => h.Value).FirstOrDefault().FirstOrDefault();
         }
 
-        public static string ActionId(this HttpRequestMessage request)
-        {
-            if (request.Headers.Contains(ActionIdName))
-                return request.Headers.GetValues(ActionIdName).FirstOrDefault();
-            return null;
-        }
+        //public static string ActionId(this HttpRequestMessage request)
+        //{
+        //    if (request.Headers.Contains(ActionIdName))
+        //        return request.Headers.GetValues(ActionIdName).FirstOrDefault();
+        //    return null;
+        //}
 
         private static ConcurrentDictionary<string, LowPriorityContainer> stateContainer = new ConcurrentDictionary<string, LowPriorityContainer>();
 

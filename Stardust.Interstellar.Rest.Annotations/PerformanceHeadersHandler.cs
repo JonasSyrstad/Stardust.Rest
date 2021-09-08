@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Primitives;
 using Stardust.Interstellar.Rest.Extensions;
@@ -16,26 +18,26 @@ namespace Stardust.Interstellar.Rest.Annotations
         /// </summary>
         public override int ProcessingOrder => -2;
 
-        protected override void DoSetHeader(IStateContainer state, HttpWebRequest req)
+        protected override void DoSetHeader(IStateContainer state, HttpRequestMessage req)
         {
             if (state.ContainsKey(StardustTimerKey)) return;
             state.SetState(StardustTimerKey, Stopwatch.StartNew());
         }
 
-        protected override void DoGetHeader(IStateContainer state, HttpWebResponse response)
+        protected override void DoGetHeader(IStateContainer state, HttpResponseMessage response)
         {
             var sw = state.GetState<Stopwatch>(StardustTimerKey);
             if (sw == null) return;
             sw.Stop();
-            var server = response.Headers[StardustTimerKey];
-            if (!string.IsNullOrWhiteSpace(server))
-            {
-                var serverTime = long.Parse(server);
-                var latency = sw.ElapsedMilliseconds - serverTime;
-                state.Extras.Add("latency", latency);
-                state.Extras.Add("serverTime", serverTime);
-                state.Extras.Add("totalTime", sw.ElapsedMilliseconds);
-            }
+            IEnumerable<string> values = response.Headers.GetValues("x-execution-timer");
+            string s = values != null ? values.FirstOrDefault() : null;
+            if (string.IsNullOrWhiteSpace(s))
+                return;
+            long num1 = long.Parse(s);
+            long num2 = sw.ElapsedMilliseconds - num1;
+            state.Extras.Add("latency", (object)num2);
+            state.Extras.Add("serverTime", (object)num1);
+            state.Extras.Add("totalTime", (object)sw.ElapsedMilliseconds);
 
         }
 

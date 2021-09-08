@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -19,7 +18,7 @@ using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using ILogger = Stardust.Interstellar.Rest.Common.ILogger;
 
@@ -104,12 +103,12 @@ namespace NetCoreTestWeb
             return new DummyAuthAttribute(provider);
         }
 
-        public void Apply(HttpWebRequest req)
+        public void Apply(HttpRequestMessage req)
         {
 
         }
 
-        public Task ApplyAsync(HttpWebRequest req)
+        public Task ApplyAsync(HttpRequestMessage req)
         {
             return Task.CompletedTask; ;
         }
