@@ -23,6 +23,10 @@ namespace NetCore3TestApp.Api
 
         [Get("test4")]
         string Test4([InPath] string message);
+
+        [Post("test5")] 
+        [SuccessStatusCode(HttpStatusCode.Accepted)]
+        Task Test5([InQuery]string tt);
     }
 
     public class TestService : ITestService
@@ -45,6 +49,11 @@ namespace NetCore3TestApp.Api
         public string Test4(string message)
         {
             return $"{DateTime.UtcNow}: {message}";
+        }
+
+        public Task Test5(string tt) 
+        {
+            return Task.CompletedTask;
         }
     }
 }

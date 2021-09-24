@@ -239,9 +239,11 @@ namespace Stardust.Interstellar.Rest.Service
             if (defaultResponse != null)
             {
                 var returnType = implementationMethod.ReturnType;
-                if (returnType.IsGenericType)
+                if (returnType.IsGenericType && typeof(Task).IsAssignableFrom(returnType))
                     returnType = returnType.GetGenericArguments().First();
-                if (returnType != typeof(void))
+                else if (returnType == typeof(Task))
+                    method.SetCustomAttribute(defaultResponse.CreateAttribute());
+                else if (returnType != typeof(void))
                     method.SetCustomAttribute(defaultResponse.CreateAttribute(returnType));
                 else
                     method.SetCustomAttribute(defaultResponse.CreateAttribute());
