@@ -3,11 +3,11 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>Stardust.Continuum.Client</PackageId>
-    <Version>3.5.0</Version>
+    <Version>3.5.1</Version>
     <Authors>Stardust</Authors>
     <Company>Stardust</Company>
     <Description>Client for the continuum live log stream service</Description>
-    <Copyright>Copyright © Stardust  2018</Copyright>
+    <Copyright>Copyright © Stardust  2022</Copyright>
     <PackageTags>logging real-time stream</PackageTags>
     <PackageReleaseNotes>netstandard version</PackageReleaseNotes>
     <PackageIconUrl>https://stardustframework.wdfiles.com/local--files/blog:_start/logo_smal.png</PackageIconUrl>

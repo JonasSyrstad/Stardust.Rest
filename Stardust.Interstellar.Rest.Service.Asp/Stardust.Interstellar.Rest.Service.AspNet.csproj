@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net471</TargetFramework>
     <AssemblyName>Stardust.Interstellar.Rest.Service.AspNet</AssemblyName>
-    <Version>5.5.0-rc1</Version>
+    <Version>5.5.0</Version>
     <Description>Create webapi controllers based on decorated interfaces.
 For use with asp.net mvc 5</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
