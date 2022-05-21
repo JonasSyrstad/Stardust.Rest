@@ -539,7 +539,7 @@ namespace Stardust.Interstellar.Rest.Client
           ActionWrapper action)
         {
             foreach (ParameterWrapper parameterWrapper in ((IEnumerable<ParameterWrapper>)parameters).Where<ParameterWrapper>((Func<ParameterWrapper, bool>)(p => p.In == InclutionTypes.Header)))
-                req.Headers.Add(string.Format("{0}", (object)parameterWrapper.Name), parameterWrapper.value?.ToString());
+                req.Headers.Add(string.Format("{0}", (object)parameterWrapper.Name), parameterWrapper.value?.ToString().SanitizeHttpHeaderValue());
             if (action.CustomHandlers != null)
             {
                 List<IHeaderHandler> source = new List<IHeaderHandler>();

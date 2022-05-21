@@ -63,7 +63,7 @@ namespace Stardust.Interstellar.Rest.Service
             SetServiceHeaders(result);
             var action = GetAction();
             if (ServiceFactory._includeStardustVersion)
-                result.Headers.Add("x-interstellarVersion", Version);
+                result.Headers.Add("x-interstellarVersion", Version.SanitizeHttpHeaderValue());
             var actionId = Request.ActionId();
             if (string.IsNullOrWhiteSpace(actionId))
             {
@@ -71,7 +71,7 @@ namespace Stardust.Interstellar.Rest.Service
                     actionId = Request.HttpContext.Items[ActionId].ToString();
             }
             if(!result.Headers.ContainsKey(ExtensionsFactory.ActionIdName))
-                result.Headers.Add(ExtensionsFactory.ActionIdName, actionId);
+                result.Headers.Add(ExtensionsFactory.ActionIdName, actionId.SanitizeHttpHeaderValue());
             var handler = new List<IHeaderHandler>();
             foreach (var customHandler in action.CustomHandlers)
             {
@@ -101,7 +101,7 @@ namespace Stardust.Interstellar.Rest.Service
                             //else if (String.Equals(headerElement.Key, "wetag", StringComparison.OrdinalIgnoreCase))
                             //    result.Headers.ETag = new EntityTagHeaderValue(headerElement.Value, true);
                             //else
-                            result.Headers.Add(headerElement.Key, headerElement.Value);
+                            result.Headers.Add(headerElement.Key, headerElement.Value?.Replace("\r", "")?.Replace("\n", "")?.Replace("%0a", "")?.Replace("%0d",""));
                         }
                         catch (Exception ex)
                         {

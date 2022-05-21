@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Http;
+using Stardust.Interstellar.Rest.Common;
 using Stardust.Interstellar.Rest.Extensions;
 
 namespace Stardust.Interstellar.Rest.Service
@@ -30,7 +31,7 @@ namespace Stardust.Interstellar.Rest.Service
             {
 
                 actionId = Guid.NewGuid().ToString();
-                req.Headers.Add(ActionIdName, actionId);
+                req.Headers.Add(ActionIdName, actionId.SanitizeHttpHeaderValue());
 
             }
             StateHelper.InitializeState(actionId);

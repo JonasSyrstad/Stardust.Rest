@@ -5,12 +5,22 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Stardust.Particles;
 
 namespace Stardust.Interstellar.Rest.Common
 {
     public static class JsonSerializerExtensions
     {
-
+        public static string SanitizeHttpHeaderValue(this string header)
+        {
+            if (header.IsNullOrWhiteSpace()) return header;
+            return header.Replace("\r", string.Empty)
+                .Replace("%0d", string.Empty)
+                .Replace("%0D", string.Empty)
+                .Replace("\n", string.Empty)
+                .Replace("%0a", string.Empty)
+                .Replace("%0A", string.Empty);
+        }
         private static Dictionary<Type, JsonSerializerSettings> clientSerializerSettings = new Dictionary<Type, JsonSerializerSettings>();
         public static JsonSerializerSettings AddClientSerializer<T>(this JsonSerializerSettings settings) where T : class
         {
