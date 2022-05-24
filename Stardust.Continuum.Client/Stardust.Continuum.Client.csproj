@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>Stardust.Continuum.Client</PackageId>
-    <Version>3.5.1</Version>
+    <Version>3.5.2</Version>
     <Authors>Stardust</Authors>
     <Company>Stardust</Company>
     <Description>Client for the continuum live log stream service</Description>
