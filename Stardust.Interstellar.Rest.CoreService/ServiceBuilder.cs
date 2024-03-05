@@ -181,6 +181,7 @@ namespace Stardust.Interstellar.Rest.Service
 
         private static MethodBuilder DefineMethod(TypeBuilder type, MethodInfo implementationMethod, out List<ParameterWrapper> methodParams, out Type[] pTypes, IServiceLocator serviceLocator)
         {
+           var prefix= GetRoutePrefix(implementationMethod.DeclaringType);
             // Declaring method builder
             // Method attributes
             const MethodAttributes methodAttributes = MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot;
@@ -206,15 +207,21 @@ namespace Stardust.Interstellar.Rest.Service
             var template = implementationMethod.GetCustomAttribute<RouteAttribute>()?.Template ?? implementationMethod.GetCustomAttribute<VerbAttribute>()?.Route;
             if (template == null) template = ExtensionsFactory.GetServiceTemplate(implementationMethod, serviceLocator);
             if (template == null) template = "";
+            var t = template;
+            if (prefix.Prefix.ContainsCharacters())
+                template = $"{prefix.Prefix}/{template}";
             int pid = 1;
             foreach (var parameterWrapper in methodParams.Where(p => p.In != InclutionTypes.Header))
             {
                 try
                 {
                     var p = method.DefineParameter(pid, ParameterAttributes.None, parameterWrapper.Name);
-                    if (parameterWrapper.In == InclutionTypes.Path && template.Contains("{" + parameterWrapper.Name + "}")) p.SetCustomAttribute(new CustomAttributeBuilder(uriAttrib, new Type[] { }));
-                    else if (parameterWrapper.In == InclutionTypes.Path) p.SetCustomAttribute(new CustomAttributeBuilder(queryAttib, new Type[] { }));
-                    else if (parameterWrapper.In == InclutionTypes.Body) p.SetCustomAttribute(new CustomAttributeBuilder(bodyAttrib, new Type[] { }));
+                    if (parameterWrapper.In == InclutionTypes.Path && template.Contains("{" + parameterWrapper.Name + "}")) 
+                        p.SetCustomAttribute(new CustomAttributeBuilder(uriAttrib, new Type[] { }));
+                    else if (parameterWrapper.In == InclutionTypes.Path|| parameterWrapper.In == InclutionTypes.Query) 
+                        p.SetCustomAttribute(new CustomAttributeBuilder(queryAttib, new Type[] { }));
+                    else if (parameterWrapper.In == InclutionTypes.Body) 
+                        p.SetCustomAttribute(new CustomAttributeBuilder(bodyAttrib, new Type[] { }));
                     pid++;
                 }
                 catch (Exception ex)
@@ -222,6 +229,8 @@ namespace Stardust.Interstellar.Rest.Service
                     throw;
                 }
             }
+
+            template = t;
             DefineAuthorizeAttributes(implementationMethod, method);
             if (_apiControllerAttributeType != null)
             {

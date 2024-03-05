@@ -1,12 +1,12 @@
-using Stardust.Interstellar.Rest.Annotations;
-using Stardust.Interstellar.Rest.Annotations.Messaging;
-using Stardust.Interstellar.Rest.Client;
-using Stardust.Interstellar.Rest.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using Stardust.Interstellar.Rest.Annotations;
+using Stardust.Interstellar.Rest.Annotations.Messaging;
+using Stardust.Interstellar.Rest.Client;
+using Stardust.Interstellar.Rest.Extensions;
 
 namespace Stardust.Interstellar.Rest.Common
 {
@@ -26,7 +26,7 @@ namespace Stardust.Interstellar.Rest.Common
 
         public static string GetServiceTemplate(MethodInfo methodInfo, IServiceProvider serviceLocator)
         {
-            var template = ServiceProviderExtensions.GetService<IRouteTemplateResolver>(serviceLocator)?.GetTemplate(methodInfo);
+            var template = serviceLocator.GetService<IRouteTemplateResolver>()?.GetTemplate(methodInfo);
             if (!String.IsNullOrWhiteSpace(template)) return template;
             var verbAttribute = methodInfo.GetCustomAttribute<VerbAttribute>();
             var templateAttrib = methodInfo.GetCustomAttribute<IRouteAttribute>();
@@ -41,7 +41,7 @@ namespace Stardust.Interstellar.Rest.Common
         public static string GetRouteTemplate(IRoutePrefix templatePrefix, IRoute template, MethodInfo methodInfo, IServiceProvider serviceLocator)
         {
             var interfaceType = methodInfo.DeclaringType;
-            var templateResolver = ServiceProviderExtensions.GetService<IRouteTemplateResolver>(serviceLocator);
+            var templateResolver = serviceLocator.GetService<IRouteTemplateResolver>();
             var route = templateResolver?.GetTemplate(methodInfo);
             if (!String.IsNullOrWhiteSpace(route)) return route;
             string prefix = "";
@@ -57,7 +57,7 @@ namespace Stardust.Interstellar.Rest.Common
         public static void BuildParameterInfo(MethodInfo methodInfo, ActionWrapper action, IServiceProvider serviceLocator)
         {
 
-            var parameterHandler = ServiceProviderExtensions.GetService<IServiceParameterResolver>(serviceLocator);
+            var parameterHandler = serviceLocator.GetService<IServiceParameterResolver>();
             if (parameterHandler != null)
             {
                 var parameters = parameterHandler.ResolveParameters(methodInfo);
@@ -122,7 +122,7 @@ namespace Stardust.Interstellar.Rest.Common
 
         public static List<HttpMethod> GetHttpMethods(List<VerbAttribute> actions, MethodInfo method, IServiceProvider serviceLocator)
         {
-            var methodResolver = ServiceProviderExtensions.GetService<IWebMethodConverter>(serviceLocator);
+            var methodResolver = serviceLocator.GetService<IWebMethodConverter>();
             var methods = new List<HttpMethod>();
             if (methodResolver != null) methods.AddRange(methodResolver.GetHttpMethods(method));
             foreach (var actionHttpMethodProvider in actions)
@@ -153,7 +153,7 @@ namespace Stardust.Interstellar.Rest.Common
 
         public IHeaderHandler[] GetHandlers(IServiceProvider serviceLocator)
         {
-            return new IHeaderHandler[] { _headerHandler };
+            return new[] { _headerHandler };
         }
     }
 }

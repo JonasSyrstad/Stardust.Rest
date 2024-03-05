@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Text;
 using Stardust.Interstellar.Rest.Annotations.Rest.Extensions;
 
 namespace Stardust.Interstellar.Rest.Client

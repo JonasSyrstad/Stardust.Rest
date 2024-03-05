@@ -29,14 +29,14 @@ namespace Stardust.Interstellar.Rest.Client
         public RestWrapperException(string message, HttpStatusCode httpStatus, object response, Exception innerException)
             : base(message, innerException)
         {
-            this.HttpStatus = httpStatus;
-            this.Response = response;
+            HttpStatus = httpStatus;
+            Response = response;
         }
 
         public RestWrapperException(string message, HttpStatusCode status, Exception innerException)
             : this(message, status, null, innerException)
         {
-            this.HttpStatus = status;
+            HttpStatus = status;
         }
 
         public HttpStatusCode HttpStatus { get; }

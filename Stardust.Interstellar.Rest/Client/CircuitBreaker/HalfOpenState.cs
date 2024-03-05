@@ -1,6 +1,6 @@
 ﻿using System;
-using Stardust.Interstellar.Rest.Common;
 using Stardust.Interstellar.Rest.Annotations;
+using Stardust.Interstellar.Rest.Common;
 
 namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 {

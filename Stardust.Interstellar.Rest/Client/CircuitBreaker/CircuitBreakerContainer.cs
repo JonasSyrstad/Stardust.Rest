@@ -1,9 +1,9 @@
-﻿using Stardust.Interstellar.Rest.Annotations;
-using Stardust.Interstellar.Rest.Extensions;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Stardust.Interstellar.Rest.Annotations;
+using Stardust.Interstellar.Rest.Extensions;
 
 namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 {

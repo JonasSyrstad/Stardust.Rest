@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
-using Stardust.Interstellar.Rest.Common;
 using Stardust.Interstellar.Rest.Extensions;
 
 namespace Stardust.Interstellar.Rest.Client

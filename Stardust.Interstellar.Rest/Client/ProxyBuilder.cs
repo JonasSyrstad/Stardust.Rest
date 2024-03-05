@@ -1,9 +1,7 @@
 using System;
-using System.Configuration;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Stardust.Interstellar.Rest.Common;
 using Stardust.Interstellar.Rest.Extensions;
@@ -23,7 +21,7 @@ namespace Stardust.Interstellar.Rest.Client
               var myAssemblyName = new AssemblyName();
               myAssemblyName.Name = Guid.NewGuid().ToString().Replace("-", "") + "_RestWrapper";
               //ExtensionsFactory.Logger?.Message("Creating dynamic assembly {0}", myAssemblyName.FullName);
-              var ab = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(myAssemblyName, AssemblyBuilderAccess.Run);
+              var ab = AssemblyBuilder.DefineDynamicAssembly(myAssemblyName, AssemblyBuilderAccess.Run);
 
               var myModuleBuilder = ab.DefineDynamicModule(myAssemblyName.Name);
               return new BuilderPair { AssemblyBuilder = ab, ModuleBuilder = myModuleBuilder };

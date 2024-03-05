@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using NetCore3TestApp.Api;
+using Stardust.Interstellar.Rest.Client;
 using Stardust.Interstellar.Rest.Service;
 
 namespace NetCore3TestApp
@@ -30,6 +31,7 @@ namespace NetCore3TestApp
             services.AddInterstellar().AddAuthentication().AddCookie().Services.AddMvc()
                 .AddAsController<ITestService,TestService>()
                 .UseInterstellar();
+            services.AddTransient(s=>s.CreateRestClient<ITestClient>("https://localhost:44337"));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo  { Title = "My API", Version = "v1" });

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Stardust.Interstellar.Rest.Common;
 
 namespace Stardust.Interstellar.Rest.Extensions
 {

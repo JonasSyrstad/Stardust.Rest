@@ -16,7 +16,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 
         public virtual CircuitBreaker ProtectedCodeIsAboutToBeCalled()
         {
-            return this.circuitBreaker;
+            return circuitBreaker;
         }
         public virtual void ProtectedCodeHasBeenCalled() { }
 

@@ -2,11 +2,9 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using Stardust.Interstellar.Rest.Annotations.Service;
 using Stardust.Interstellar.Rest.Common;
 using Stardust.Interstellar.Rest.Extensions;
-using Stardust.Interstellar.Rest.Service;
 
 namespace Stardust.Interstellar.Rest.Client
 {

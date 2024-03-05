@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Stardust.Interstellar.Rest.Annotations.Resolver;
 using Stardust.Interstellar.Rest.Client;
 using Stardust.Interstellar.Rest.Extensions;
 

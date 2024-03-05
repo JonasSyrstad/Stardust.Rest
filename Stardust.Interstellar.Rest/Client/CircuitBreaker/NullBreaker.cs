@@ -3,18 +3,11 @@ using System.Net;
 using System.Threading.Tasks;
 using Stardust.Interstellar.Rest.Annotations;
 using Stardust.Interstellar.Rest.Common;
-using Stardust.Interstellar.Rest.Extensions;
 
 namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 {
     internal class NullBreaker : ICircuitBreaker, ICircuitBreakerMonitor
     {
-        
-
-        public NullBreaker()
-        {
-            
-        }
         public ResultWrapper Execute(string path, Func<ResultWrapper> func, IServiceProvider provider)
         {
             var result = func();

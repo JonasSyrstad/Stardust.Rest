@@ -3,7 +3,6 @@ using System.Net;
 using System.Threading.Tasks;
 using Stardust.Interstellar.Rest.Annotations;
 using Stardust.Interstellar.Rest.Common;
-using Stardust.Interstellar.Rest.Extensions;
 
 namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 {
@@ -192,7 +191,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
             }
             catch (Exception e)
             {
-                this.exceptionFromLastAttemptCall = e;
+                exceptionFromLastAttemptCall = e;
                 lock (triowing)
                 {
                     state.ActUponException(actionUrl, e,provider);
@@ -216,7 +215,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
             }
             catch (Exception e)
             {
-                this.exceptionFromLastAttemptCall = e;
+                exceptionFromLastAttemptCall = e;
                 lock (triowing)
                 {
                     state.ActUponException(actionUrl, e,provider);
@@ -239,7 +238,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
             }
             catch (Exception e)
             {
-                this.exceptionFromLastAttemptCall = e;
+                exceptionFromLastAttemptCall = e;
                 lock (triowing)
                 {
                     state.ActUponException(actionUrl, e,provider);
@@ -260,7 +259,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
             }
             catch (Exception e)
             {
-                this.exceptionFromLastAttemptCall = e;
+                exceptionFromLastAttemptCall = e;
                 lock (triowing)
                 {
                     state.ActUponException(actionUrl, e,provider);
@@ -284,13 +283,13 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
                         exceptionFromLastAttemptCall);
                 }
             }
-            this.exceptionFromLastAttemptCall = null;
+            exceptionFromLastAttemptCall = null;
             return false;
         }
 
         private ResultWrapper PostProcessing(string path, Exception e, IServiceProvider provider)
         {
-            this.exceptionFromLastAttemptCall = e;
+            exceptionFromLastAttemptCall = e;
             lock (triowing)
             {
                 state.ActUponException(path, e,provider);
@@ -338,7 +337,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
                     }
                 }
             }
-            this.exceptionFromLastAttemptCall = null;
+            exceptionFromLastAttemptCall = null;
             execute = null;
             return false;
         }
