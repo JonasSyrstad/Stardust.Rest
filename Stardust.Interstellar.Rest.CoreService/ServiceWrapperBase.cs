@@ -51,8 +51,8 @@ namespace Stardust.Interstellar.Rest.Service
             }
             else
                 result = new JsonResult(message) { StatusCode = (int)statusCode };
-
-            SetHeaders(Response);
+            if(Response.ContentType!= "text/event-stream")//not able to set headers on event stream
+                SetHeaders(Response);
             Request.EndState();
             return result;
         }
@@ -228,7 +228,8 @@ namespace Stardust.Interstellar.Rest.Service
                 result = ConvertExceptionToErrorResult(ex, Response, errorHandler);
             }
             if (result == null) result = new StatusCodeResult((int)HttpStatusCode.InternalServerError);
-            SetHeaders(Response);
+            if (Response.ContentType != "text/event-stream")
+                SetHeaders(Response);
             Request.EndState();
             return result;
         }

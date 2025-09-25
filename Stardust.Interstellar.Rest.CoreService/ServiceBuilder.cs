@@ -839,6 +839,29 @@ namespace Stardust.Interstellar.Rest.Service
                     null
                 );
                 type.SetCustomAttribute(new CustomAttributeBuilder(versionCtor, new object[] { version.Version }, new[] { typeof(ApiVersionAttribute).GetProperty("Deprecated") }, new object[] { version.Deprecated }));
+
+                //#if NET6_0_OR_GREATER
+                //var versionCtor = typeof(ApiVersionAttribute).GetConstructor(
+                //                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                //                    null,
+                //                    new Type[]{
+                //                        typeof(string)
+                //                    },
+                //                    null
+                //                );
+                //                type.SetCustomAttribute(new CustomAttributeBuilder(versionCtor, new object[] { version.Version }, new[] { typeof(ApiVersionAttribute).GetProperty("Deprecated") }, new object[] { version.Deprecated }));
+                //#else
+
+                //                var versionCtor = typeof(ApiVersionAttribute).GetConstructor(
+                //                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                //                    null,
+                //                    new Type[]{
+                //                        typeof(string)
+                //                    },
+                //                    null
+                //                );
+                //                type.SetCustomAttribute(new CustomAttributeBuilder(versionCtor, new object[] { version.Version }, new[] { typeof(ApiVersionAttribute).GetProperty("Deprecated") }, new object[] { version.Deprecated }));
+                //#endif
             }
             if (routePrefix != null)
             {

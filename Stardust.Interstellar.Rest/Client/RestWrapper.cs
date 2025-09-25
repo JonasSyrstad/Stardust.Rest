@@ -96,13 +96,18 @@ namespace Stardust.Interstellar.Rest.Client
             _errorInterceptor = interfaceType.GetCustomAttribute<ErrorHandlerAttribute>();
             _serviceLocator.GetService<ILogger>()?.Message("Initializing client " + interfaceType.Name);
             RetryAttribute customAttribute = interfaceType.GetCustomAttribute<RetryAttribute>();
-            if (interfaceType.GetCustomAttribute<CircuitBreakerAttribute>() != null)
-                CircuitBreakerContainer.Register(interfaceType, new CircuitBreaker.CircuitBreaker(interfaceType.GetCustomAttribute<CircuitBreakerAttribute>(), _serviceLocator)
-                {
-                    ServiceName = interfaceType.FullName
-                });
+            
+            // Register circuit breaker with scoped support
+            var circuitBreakerAttribute = interfaceType.GetCustomAttribute<CircuitBreakerAttribute>();
+            if (circuitBreakerAttribute != null)
+            {
+                CircuitBreakerContainer.Register(interfaceType, circuitBreakerAttribute, _serviceLocator);
+            }
             else
+            {
                 CircuitBreakerContainer.Register(interfaceType, new NullBreaker());
+            }
+            
             foreach (MethodInfo methodInfo in interfaceType.GetMethods().Length == 0 ? interfaceType.GetInterfaces().First().GetMethods() : interfaceType.GetMethods())
             {
                 try
@@ -170,7 +175,7 @@ namespace Stardust.Interstellar.Rest.Client
                 ++num;
                 try
                 {
-                    ResultWrapper result = CircuitBreakerContainer.GetCircuitBreaker(interfaceType).Execute(baseUri + path, () => InvokeAction(name, parameters, action, path), _serviceLocator);
+                    ResultWrapper result = CircuitBreakerContainer.GetCircuitBreaker(interfaceType, _serviceLocator).Execute(baseUri + path, () => InvokeAction(name, parameters, action, path), _serviceLocator);
                     if (result.Error != null)
                     {
                         if (result.Error is SuspendedDependencyException || !action.Retry || num > action.NumberOfRetries || !IsTransient(action, result.Error))
@@ -313,15 +318,16 @@ namespace Stardust.Interstellar.Rest.Client
             object obj;
             if (action.UseXml)
             {
-                ISerializer serializer = GetSerializer();
+                var serializer = GetSerializer();
                 obj = serializer.Deserialize(await response.Content.ReadAsStreamAsync(), type);
                 serializer = null;
             }
             else
             {
-                using (JsonTextReader jsonTextReader = new JsonTextReader(new StreamReader(await response.Content.ReadAsStreamAsync())))
+                using (var jsonTextReader = new JsonTextReader(new StreamReader(await response.Content.ReadAsStreamAsync())))
                     obj = CreateJsonSerializer(type).Deserialize(jsonTextReader, type);
             }
+            if (obj is IClientResponseInjector injectableObj) await injectableObj.Inject(_serviceLocator);
             return obj;
         }
 
@@ -358,10 +364,7 @@ namespace Stardust.Interstellar.Rest.Client
             set => _runAuthProviderBeforeAppendingBody = value;
         }
 
-        private async Task<HttpRequestMessage> CreateActionRequestAsync(
-          ParameterWrapper[] parameters,
-          ActionWrapper action,
-          string path)
+        private async Task<HttpRequestMessage> CreateActionRequestAsync(ParameterWrapper[] parameters, ActionWrapper action, string path)
         {
             HttpRequestMessage req = CreateActionRequestBase(parameters, action, path);
             byte[] body = PrepareBody(parameters, req, action);
@@ -438,13 +441,13 @@ namespace Stardust.Interstellar.Rest.Client
                 return str;
             foreach (ParameterWrapper parameterWrapper in parameters.Where(p => p.In == InclutionTypes.Path || p.In == InclutionTypes.Query))
             {
-                if(VerboseLogging)
+                if (VerboseLogging)
                     Logging.DebugMessage($"Building parameter: {parameterWrapper.Name} with type {parameterWrapper.Type.Name}");
                 if (str.Contains("{" + parameterWrapper.Name + "}") && parameterWrapper.In == InclutionTypes.Path)
                     str = str.Replace("{" + parameterWrapper.Name + "}", Uri.EscapeDataString(parameterWrapper?.value?.ToString() ?? ""));
                 else
                 {
-                    if (parameterWrapper.value is Dictionary<string, string> || parameterWrapper.Type==typeof(Dictionary<string,string>))
+                    if (parameterWrapper.value is Dictionary<string, string> || parameterWrapper.Type == typeof(Dictionary<string, string>))
                         source.Add(string.Join("&", ((Dictionary<string, string>)parameterWrapper.value).Select(v => $"{v.Key}={v.Value}")));
                     else
                         source.Add(parameterWrapper.Name + "=" +
@@ -580,7 +583,7 @@ namespace Stardust.Interstellar.Rest.Client
                 ++cnt;
                 try
                 {
-                    ResultWrapper result = await CircuitBreakerContainer.GetCircuitBreaker(interfaceType).ExecuteAsync(baseUri + path, async () => await InvokeActionAsync(parameters, action, path), _serviceLocator);
+                    ResultWrapper result = await CircuitBreakerContainer.GetCircuitBreaker(interfaceType, _serviceLocator).ExecuteAsync(baseUri + path, async () => await InvokeActionAsync(parameters, action, path), _serviceLocator);
                     if (result.Error != null)
                     {
                         if (result.Error is SuspendedDependencyException || !action.Retry || cnt > action.NumberOfRetries || !IsTransient(action, result.Error))

@@ -22,14 +22,41 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 
         public virtual bool ActUponException(string path, Exception e, IServiceProvider provider)
         {
-            if (circuitBreaker.Monitor(provider).IsExceptionIgnorable(e)) return false;
+            // Check if the monitor considers this exception ignorable
+            if (circuitBreaker.Monitor(provider).IsExceptionIgnorable(e)) 
+                return false;
+
+            // Check if this exception type is in the ignored list
+            if (circuitBreaker.IgnoredExceptions?.Contains(e.GetType()) == true) 
+                return false;
+
+            // Handle WebException and check status codes
             var webEx = e as WebException;
-            if (e is AggregateException)
+            if (e is AggregateException aggregateEx)
             {
-                webEx = e.InnerException as WebException;
+                webEx = aggregateEx.InnerException as WebException;
             }
-            if (webEx?.Response is HttpWebResponse resp && ((int)resp.StatusCode > 501 || ((int)resp.StatusCode != 429 || (int)resp.StatusCode != 418))) return false;
-            if (circuitBreaker.IgnoredExceptions.Contains(e.GetType())) return false;
+
+            if (webEx?.Response is HttpWebResponse httpResp)
+            {
+                // Check if this status code should be ignored
+                if (circuitBreaker.IgnoredStatusCodes?.Contains(httpResp.StatusCode) == true)
+                    return false;
+
+                // Ignore client errors (4xx) and certain specific server errors that indicate application logic issues
+                // rather than service unavailability, unless they're specifically configured to be monitored
+                var statusCode = (int)httpResp.StatusCode;
+                if (statusCode >= 400 && statusCode < 500)
+                {
+                    // Most 4xx errors should not trip the circuit breaker as they indicate client errors
+                    // However, 429 (Too Many Requests) and 418 (I'm a teapot, often used for rate limiting)
+                    // could indicate service overload and should trip the breaker
+                    if (statusCode != 429 && statusCode != 418)
+                        return false;
+                }
+            }
+
+            // If we get here, this is an exception that should trip the circuit breaker
             circuitBreaker.IncreaseFailureCount();
             return true;
         }

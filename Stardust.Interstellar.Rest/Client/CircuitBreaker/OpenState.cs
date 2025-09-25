@@ -5,6 +5,7 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
     internal class OpenState : CircuitBreakerStateBase
     {
         private readonly DateTime openDateTime;
+        
         public OpenState(CircuitBreaker circuitBreaker)
             : base(circuitBreaker)
         {
@@ -21,10 +22,13 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
         public override CircuitBreakerStateBase Update()
         {
             base.Update();
+            
+            // After the timeout period has elapsed, move to HalfOpen state to test if the service has recovered
             if (DateTime.UtcNow >= openDateTime + circuitBreaker.Timeout)
             {
                 return circuitBreaker.MoveToHalfOpenState();
             }
+            
             return this;
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Stardust.Interstellar.Rest.Annotations;
@@ -12,41 +13,16 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
         {
             var result = func();
 
-            var exception = result.Error as WebException;
-            if (exception != null)
-            {
-                try
-                {
-                    exception.Response?.Close();
-                    exception.Response?.Dispose();
-                }
-                catch
-                {
-
-                }
-            }
+            CleanupWebException(result?.Error);
             return result;
         }
 
-        public async Task<ResultWrapper> ExecuteAsync(string path,Func<Task<ResultWrapper>> func, IServiceProvider provider)
+        public async Task<ResultWrapper> ExecuteAsync(string path, Func<Task<ResultWrapper>> func, IServiceProvider provider)
         {
-            var result= await func();
+            var result = await func();
 
-            var exception = result.Error as WebException;
-            if (exception != null)
-            {
-                try
-                {
-                    exception.Response?.Close();
-                    exception.Response?.Dispose();
-                }
-                catch
-                {
-                    
-                }
-            }
+            CleanupWebException(result?.Error);
             return result;
-
         }
 
         public T Invoke<T>(string actionUrl, Func<T> func, IServiceProvider provider)
@@ -71,16 +47,42 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 
         public void Trip(string circuitBreakerServiceName, Exception exception, ICircuitBreakerState state, IServiceProvider provider)
         {
-            provider?.GetService<ILogger>()?.Error(exception);
+            var logger = provider?.GetService<ILogger>();
+            logger?.Error(exception);
+            
             var webEx = exception as WebException ?? (exception as AggregateException)?.InnerException as WebException;
-            provider?.GetService<ILogger>()?.Message($"Invocation of service {circuitBreakerServiceName} failed. Action url: {webEx?.Response?.ResponseUri}");
+            if (webEx?.Response != null)
+            {
+                logger?.Message($"Circuit breaker tripped for service {circuitBreakerServiceName}. Action url: {webEx.Response.ResponseUri}. State: {state?.State}");
+            }
+            else
+            {
+                logger?.Message($"Circuit breaker tripped for service {circuitBreakerServiceName}. Exception: {exception?.GetType().Name}. State: {state?.State}");
+            }
         }
 
         public bool IsExceptionIgnorable(Exception exception)
         {
+            // The NullBreaker doesn't ignore any exceptions by default
+            // Let the actual circuit breaker configuration handle the ignore logic
             return false;
         }
+
+        private static void CleanupWebException(Exception exception)
+        {
+            var webException = exception as WebException;
+            if (webException != null)
+            {
+                try
+                {
+                    webException.Response?.Close();
+                    webException.Response?.Dispose();
+                }
+                catch
+                {
+                    // Ignore cleanup errors
+                }
+            }
+        }
     }
-
-
 }

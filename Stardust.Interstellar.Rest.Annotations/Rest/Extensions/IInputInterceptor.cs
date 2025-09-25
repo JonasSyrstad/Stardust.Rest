@@ -1,8 +1,15 @@
+using System;
 using System.Net;
 using System.Threading.Tasks;
+using Stardust.Interstellar.Rest.Service;
 
 namespace Stardust.Interstellar.Rest.Extensions
 {
+    public interface IClientResponseInjector
+    {
+        Task Inject(IServiceProvider serviceProvider);
+    }
+
     public interface IInputInterceptor
     {
 

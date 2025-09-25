@@ -14,17 +14,21 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 
         public override bool ActUponException(string path, Exception e, IServiceProvider provider)
         {
-            base.ActUponException(path, e,provider);
+            // Let the base class determine if we should act on this exception
+            if (!base.ActUponException(path, e, provider))
+                return false;
+
+            // Check if we've reached the threshold to open the circuit
             if (circuitBreaker.IsThresholdReached())
             {
                 circuitBreaker.MoveToOpenState();
                 try
                 {
-                    circuitBreaker.Monitor(provider)?.Trip(path, e, this,provider);
+                    circuitBreaker.Monitor(provider)?.Trip(path, e, this, provider);
                 }
                 catch (Exception ex)
                 {
-                    provider.GetService<ILogger>()?.Error(ex);
+                    provider?.GetService<ILogger>()?.Error(ex);
                 }
             }
             return true;
@@ -32,10 +36,15 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 
         public override void ProtectedCodeHasBeenCalled()
         {
-            if (!circuitBreaker.LastErrorTime.HasValue) return;
-            if (DateTime.UtcNow >= circuitBreaker.LastErrorTime + circuitBreaker.ResetTimeout)
+            // If there was a previous error and enough time has passed since the reset timeout,
+            // we can reset the failure count to give the service a fresh start
+            if (circuitBreaker.LastErrorTime.HasValue)
             {
-                circuitBreaker.ResetFailureCount();
+                var timeSinceLastError = DateTime.UtcNow - circuitBreaker.LastErrorTime.Value;
+                if (timeSinceLastError >= circuitBreaker.ResetTimeout)
+                {
+                    circuitBreaker.ResetFailureCount();
+                }
             }
         }
     }

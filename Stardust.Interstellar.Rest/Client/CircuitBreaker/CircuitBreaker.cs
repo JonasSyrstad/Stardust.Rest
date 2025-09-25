@@ -8,39 +8,52 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 {
     public class CircuitBreaker : ICircuitBreaker, ICircuit
     {
-        //internal readonly IServiceProvider _serviceLocator;
-
-        public CircuitBreaker(int threshold, TimeSpan timeout, TimeSpan resetTimeout, Type[] ignoredExceptions, HttpStatusCode[] ignoredStatusCodes, Type circuitBrakerMonitor, IServiceProvider serviceLocator)
-        {
-            if (threshold < 1)
-            {
-                throw new ArgumentOutOfRangeException("threshold", "Threshold should be greater than 0");
-            }
-
-            if (timeout.TotalMilliseconds < 1)
-            {
-                throw new ArgumentOutOfRangeException("timeout", "Timeout should be greater than 0");
-            }
-
-            
-
-            Threshold = threshold;
-            Timeout = timeout;
-            ResetTimeout = resetTimeout;
-            IgnoredExceptions = ignoredExceptions;
-            IgnoredStatusCodes = ignoredStatusCodes;
-            MoveToClosedState();
-            if (circuitBrakerMonitor != null)
-                monitor = (ICircuitBreakerMonitor)Activator.CreateInstance(circuitBrakerMonitor, serviceLocator);
-        }
-
-
-        private readonly object triowing = new object();
+        private readonly object syncLock = new object();
         private CircuitBreakerStateBase state;
         private Exception exceptionFromLastAttemptCall;
         private ICircuitBreakerMonitor monitor;
 
-        public CircuitBreaker(CircuitBreakerAttribute attribute, IServiceProvider serviceLocator) : this(attribute.Threshold, attribute.Timeout, attribute.ResetTimeout, attribute.IgnoredExceptionTypes, attribute.IgnoredStatusCodes, attribute.Monitor, serviceLocator)
+        public CircuitBreaker(int threshold, TimeSpan timeout, TimeSpan resetTimeout, Type[] ignoredExceptions, HttpStatusCode[] ignoredStatusCodes, Type circuitBreakerMonitor, IServiceProvider serviceLocator)
+        {
+            if (threshold < 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(threshold), "Threshold should be greater than 0");
+            }
+
+            if (timeout.TotalMilliseconds < 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(timeout), "Timeout should be greater than 0");
+            }
+
+            if (resetTimeout.TotalMilliseconds < 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(resetTimeout), "Reset timeout should be greater than 0");
+            }
+
+            Threshold = threshold;
+            Timeout = timeout;
+            ResetTimeout = resetTimeout;
+            IgnoredExceptions = ignoredExceptions ?? new Type[0];
+            IgnoredStatusCodes = ignoredStatusCodes ?? new HttpStatusCode[0];
+            
+            MoveToClosedState();
+            
+            if (circuitBreakerMonitor != null)
+            {
+                try
+                {
+                    monitor = (ICircuitBreakerMonitor)Activator.CreateInstance(circuitBreakerMonitor, serviceLocator);
+                }
+                catch (Exception ex)
+                {
+                    serviceLocator?.GetService<ILogger>()?.Message($"Failed to create circuit breaker monitor: {ex.Message}");
+                    // Fall back to NullBreaker if monitor creation fails
+                }
+            }
+        }
+
+        public CircuitBreaker(CircuitBreakerAttribute attribute, IServiceProvider serviceLocator) 
+            : this(attribute.Threshold, attribute.Timeout, attribute.ResetTimeout, attribute.IgnoredExceptionTypes, attribute.IgnoredStatusCodes, attribute.Monitor, serviceLocator)
         {
         }
 
@@ -48,7 +61,8 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 
         DateTime? ICircuit.LastFailure => LastErrorTime;
 
-        TimeSpan? ICircuit.SuspendedTime => ((LastErrorTime + ResetTimeout) - DateTime.UtcNow);
+        TimeSpan? ICircuit.SuspendedTime => LastErrorTime.HasValue ? 
+            (TimeSpan?)((LastErrorTime.Value + ResetTimeout) - DateTime.UtcNow) : (TimeSpan?)null;
 
         Exception ICircuit.LastError => GetExceptionFromLastAttemptCall();
 
@@ -56,33 +70,53 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 
         public TimeSpan Timeout { get; }
 
-        public TimeSpan ResetTimeout { get; private set; }
+        public TimeSpan ResetTimeout { get; }
 
-        public Type[] IgnoredExceptions { get; private set; }
+        public Type[] IgnoredExceptions { get; }
 
         public bool IsClosed
         {
-            get { return state.Update() is ClosedState; }
+            get 
+            { 
+                lock (syncLock)
+                {
+                    return state.Update() is ClosedState; 
+                }
+            }
         }
 
         public bool IsOpen
         {
-            get { return state.Update() is OpenState; }
+            get 
+            { 
+                lock (syncLock)
+                {
+                    return state.Update() is OpenState; 
+                }
+            }
         }
 
         public bool IsHalfOpen
         {
-            get { return state.Update() is HalfOpenState; }
+            get 
+            { 
+                lock (syncLock)
+                {
+                    return state.Update() is HalfOpenState; 
+                }
+            }
         }
 
-        public HttpStatusCode[] IgnoredStatusCodes { get; set; }
-        public DateTime? LastErrorTime { get; set; }
+        public HttpStatusCode[] IgnoredStatusCodes { get; }
+        public DateTime? LastErrorTime { get; private set; }
         public string ServiceName { get; set; }
 
-        public ICircuitBreakerMonitor Monitor(IServiceProvider _serviceLocator)
+        public ICircuitBreakerMonitor Monitor(IServiceProvider serviceLocator)
         {
             if (monitor == null)
-                monitor = _serviceLocator.GetService<ICircuitBreakerMonitor>() ?? new NullBreaker();
+            {
+                monitor = serviceLocator?.GetService<ICircuitBreakerMonitor>() ?? new NullBreaker();
+            }
             return monitor;
         }
 
@@ -106,75 +140,55 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 
         public Exception GetExceptionFromLastAttemptCall()
         {
-            return exceptionFromLastAttemptCall;
+            lock (syncLock)
+            {
+                return exceptionFromLastAttemptCall;
+            }
         }
 
         public virtual ResultWrapper Execute(string path, Func<ResultWrapper> func, IServiceProvider provider)
         {
             ResultWrapper result;
             if (PreCallProcessing(path, out result)) return result;
+            
             try
             {
                 result = func();
-                if (result.Error != null)
+                if (result?.Error != null)
                 {
-                    PostProcessing(path, result,provider);
-                    var exception = result.Error as WebException;
-                    if (exception != null)
-                    {
-                        try
-                        {
-                            exception.Response?.Close();
-                            exception.Response?.Dispose();
-                        }
-                        catch
-                        {
-
-                        }
-                    }
+                    PostProcessing(path, result, provider);
+                    CleanupWebException(result.Error);
                     return result;
                 }
             }
             catch (Exception e)
             {
-                return PostProcessing(path, e,provider);
+                return PostProcessing(path, e, provider);
             }
 
             PostProcessing();
             return result;
         }
 
-        public virtual async Task<ResultWrapper> ExecuteAsync(string path, Func<Task<ResultWrapper>> func,IServiceProvider provider)
+        public virtual async Task<ResultWrapper> ExecuteAsync(string path, Func<Task<ResultWrapper>> func, IServiceProvider provider)
         {
             ResultWrapper result;
             if (PreCallProcessing(path, out result)) return result;
+            
             try
             {
                 result = await func();
-                if (result.Error != null)
+                if (result?.Error != null)
                 {
-                    PostProcessing(path, result,provider);
-                    var exception = result.Error as WebException;
-                    if (exception != null)
-                    {
-                        try
-                        {
-                            exception.Response?.Close();
-                            exception.Response?.Dispose();
-                        }
-                        catch
-                        {
-
-                        }
-                    }
+                    PostProcessing(path, result, provider);
+                    CleanupWebException(result.Error);
                     return result;
                 }
             }
             catch (Exception e)
             {
-                return PostProcessing(path, e,provider);
+                return PostProcessing(path, e, provider);
             }
-
 
             PostProcessing();
             return result;
@@ -183,18 +197,29 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
         public T Invoke<T>(string actionUrl, Func<T> func, IServiceProvider provider)
         {
             T result;
-            PreCallProcessing(actionUrl);
+            if (PreCallProcessingForInvoke(actionUrl))
+            {
+                // Circuit is open, throw exception
+                lock (syncLock)
+                {
+                    var suspended = LastErrorTime.HasValue ? 
+                        (LastErrorTime.Value + ResetTimeout) - DateTime.UtcNow : TimeSpan.Zero;
+                    throw new SuspendedDependencyException(
+                        $"Calls to {actionUrl} are suspended for {suspended.TotalMinutes:F1} minutes",
+                        exceptionFromLastAttemptCall);
+                }
+            }
+
             try
             {
                 result = func();
-
             }
             catch (Exception e)
             {
-                exceptionFromLastAttemptCall = e;
-                lock (triowing)
+                lock (syncLock)
                 {
-                    state.ActUponException(actionUrl, e,provider);
+                    exceptionFromLastAttemptCall = e;
+                    state.ActUponException(actionUrl, e, provider);
                 }
                 throw;
             }
@@ -203,22 +228,32 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
             return result;
         }
 
-
         public async Task<T> InvokeAsync<T>(string actionUrl, Func<Task<T>> func, IServiceProvider provider)
         {
             T result;
-            PreCallProcessing(actionUrl);
+            if (PreCallProcessingForInvoke(actionUrl))
+            {
+                // Circuit is open, throw exception
+                lock (syncLock)
+                {
+                    var suspended = LastErrorTime.HasValue ? 
+                        (LastErrorTime.Value + ResetTimeout) - DateTime.UtcNow : TimeSpan.Zero;
+                    throw new SuspendedDependencyException(
+                        $"Calls to {actionUrl} are suspended for {suspended.TotalMinutes:F1} minutes",
+                        exceptionFromLastAttemptCall);
+                }
+            }
+
             try
             {
                 result = await func();
-
             }
             catch (Exception e)
             {
-                exceptionFromLastAttemptCall = e;
-                lock (triowing)
+                lock (syncLock)
                 {
-                    state.ActUponException(actionUrl, e,provider);
+                    exceptionFromLastAttemptCall = e;
+                    state.ActUponException(actionUrl, e, provider);
                 }
                 throw;
             }
@@ -229,19 +264,29 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 
         public void Invoke(string actionUrl, Action func, IServiceProvider provider)
         {
+            if (PreCallProcessingForInvoke(actionUrl))
+            {
+                // Circuit is open, throw exception
+                lock (syncLock)
+                {
+                    var suspended = LastErrorTime.HasValue ? 
+                        (LastErrorTime.Value + ResetTimeout) - DateTime.UtcNow : TimeSpan.Zero;
+                    throw new SuspendedDependencyException(
+                        $"Calls to {actionUrl} are suspended for {suspended.TotalMinutes:F1} minutes",
+                        exceptionFromLastAttemptCall);
+                }
+            }
 
-            PreCallProcessing(actionUrl);
             try
             {
                 func();
-
             }
             catch (Exception e)
             {
-                exceptionFromLastAttemptCall = e;
-                lock (triowing)
+                lock (syncLock)
                 {
-                    state.ActUponException(actionUrl, e,provider);
+                    exceptionFromLastAttemptCall = e;
+                    state.ActUponException(actionUrl, e, provider);
                 }
                 throw;
             }
@@ -251,18 +296,29 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
 
         public async Task InvokeAsync(string actionUrl, Func<Task> func, IServiceProvider provider)
         {
-            PreCallProcessing(actionUrl);
+            if (PreCallProcessingForInvoke(actionUrl))
+            {
+                // Circuit is open, throw exception
+                lock (syncLock)
+                {
+                    var suspended = LastErrorTime.HasValue ? 
+                        (LastErrorTime.Value + ResetTimeout) - DateTime.UtcNow : TimeSpan.Zero;
+                    throw new SuspendedDependencyException(
+                        $"Calls to {actionUrl} are suspended for {suspended.TotalMinutes:F1} minutes",
+                        exceptionFromLastAttemptCall);
+                }
+            }
+
             try
             {
                 await func();
-
             }
             catch (Exception e)
             {
-                exceptionFromLastAttemptCall = e;
-                lock (triowing)
+                lock (syncLock)
                 {
-                    state.ActUponException(actionUrl, e,provider);
+                    exceptionFromLastAttemptCall = e;
+                    state.ActUponException(actionUrl, e, provider);
                 }
                 throw;
             }
@@ -270,76 +326,90 @@ namespace Stardust.Interstellar.Rest.Client.CircuitBreaker
             PostProcessing();
         }
 
-        private bool PreCallProcessing(string actionUrl)
+        private bool PreCallProcessingForInvoke(string actionUrl)
         {
-            lock (triowing)
+            lock (syncLock)
+            {
+                state.ProtectedCodeIsAboutToBeCalled();
+                exceptionFromLastAttemptCall = null;
+                return state is OpenState;
+            }
+        }
+
+        private bool PreCallProcessing(string path, out ResultWrapper execute)
+        {
+            lock (syncLock)
             {
                 state.ProtectedCodeIsAboutToBeCalled();
                 if (state is OpenState)
                 {
-                    var suspended = ((LastErrorTime + ResetTimeout) - DateTime.UtcNow);
-                    throw new SuspendedDependencyException(
-                        $"Calls to {actionUrl} is suspended for {suspended?.TotalMinutes ?? 0} minutes",
-                        exceptionFromLastAttemptCall);
+                    var suspended = LastErrorTime.HasValue ? 
+                        (LastErrorTime.Value + ResetTimeout) - DateTime.UtcNow : TimeSpan.Zero;
+                    
+                    execute = new ResultWrapper
+                    {
+                        Error = new SuspendedDependencyException(
+                            $"Calls to {path} are suspended for {suspended.TotalMinutes:F1} minutes", 
+                            exceptionFromLastAttemptCall),
+                        Status = HttpStatusCode.ServiceUnavailable,
+                        StatusMessage = $"Service temporarily unavailable - suspended for {suspended.TotalMinutes:F1} minutes",
+                        ActionId = Guid.NewGuid().ToString()
+                    };
+                    
+                    var state = execute.GetState();
+                    state.Extras.Add("x-serviceSuspended", $"{suspended.TotalMinutes:F1} minutes");
+                    state.Extras.Add("x-suspendedService", path);
+                    return true;
                 }
             }
+            
             exceptionFromLastAttemptCall = null;
+            execute = null;
             return false;
         }
 
         private ResultWrapper PostProcessing(string path, Exception e, IServiceProvider provider)
         {
-            exceptionFromLastAttemptCall = e;
-            lock (triowing)
+            lock (syncLock)
             {
-                state.ActUponException(path, e,provider);
+                exceptionFromLastAttemptCall = e;
+                state.ActUponException(path, e, provider);
             }
             return new ResultWrapper { Error = e, ActionId = Guid.NewGuid().ToString() };
         }
 
         private void PostProcessing(string path, ResultWrapper result, IServiceProvider provider)
         {
-            exceptionFromLastAttemptCall = result.Error;
-            lock (triowing)
+            lock (syncLock)
             {
-                state.ActUponException(path, result.Error,provider);
+                exceptionFromLastAttemptCall = result.Error;
+                state.ActUponException(path, result.Error, provider);
             }
         }
 
         private void PostProcessing()
         {
-            lock (triowing)
+            lock (syncLock)
             {
                 state.ProtectedCodeHasBeenCalled();
             }
         }
 
-        private bool PreCallProcessing(string path, out ResultWrapper execute)
+        private static void CleanupWebException(Exception exception)
         {
-            ResultWrapper result;
-            lock (triowing)
+            var webException = exception as WebException;
+            if (webException != null)
             {
-                state.ProtectedCodeIsAboutToBeCalled();
-                if (state is OpenState)
+                try
                 {
-                    {
-                        var suspended = ((LastErrorTime + ResetTimeout) - DateTime.UtcNow);
-                        execute = new ResultWrapper
-                        {
-                            Error = new SuspendedDependencyException($"Calls to {path} is suspended for {suspended?.TotalMinutes ?? 0} minutes", exceptionFromLastAttemptCall),
-                            Status = HttpStatusCode.TemporaryRedirect,
-                            StatusMessage = $"Calls to {path} is suspended for {suspended?.TotalMinutes ?? 0d} minutes",
-                            ActionId = Guid.NewGuid().ToString()
-                        };
-                        execute.GetState().Extras.Add("x-serviceSuspended", $"{suspended?.TotalMinutes ?? 0d} minutes");
-                        execute.GetState().Extras.Add("x-suspendedService", path);
-                        return true;
-                    }
+                    webException.Response?.Close();
+                    webException.Response?.Dispose();
+                }
+                catch
+                {
+                    // Ignore cleanup errors
                 }
             }
-            exceptionFromLastAttemptCall = null;
-            execute = null;
-            return false;
         }
 
         public void IncreaseFailureCount()
