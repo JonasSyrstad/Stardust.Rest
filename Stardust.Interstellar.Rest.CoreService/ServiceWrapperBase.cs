@@ -426,8 +426,10 @@ namespace Stardust.Interstellar.Rest.Service
 
         private object GetFromHeaders(ParameterWrapper parameter)
         {
-            if (!Request.Headers.ContainsKey(parameter.Name)) return null;
-            var vals = Request.Headers[parameter.Name];
+            // Use EffectiveName to support custom header names
+            var headerName = parameter.EffectiveName;
+            if (!Request.Headers.ContainsKey(headerName)) return null;
+            var vals = Request.Headers[headerName];
             if (vals.Count() <= 1) return vals.SingleOrDefault();
             throw new InvalidCastException("Not currently able to deal with collections...");
         }
@@ -538,7 +540,13 @@ namespace Stardust.Interstellar.Rest.Service
                             @in = new InAttribute(InclutionTypes.Path);
                     }
                 }
-                action.Parameters.Add(new ParameterWrapper { Name = parameterInfo.Name, Type = parameterInfo.ParameterType, In = @in?.InclutionType ?? InclutionTypes.Body });
+                action.Parameters.Add(new ParameterWrapper 
+                { 
+                    Name = parameterInfo.Name, 
+                    CustomName = @in?.Name,
+                    Type = parameterInfo.ParameterType, 
+                    In = @in?.InclutionType ?? InclutionTypes.Body 
+                });
             }
         }
 

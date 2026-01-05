@@ -193,7 +193,10 @@ namespace Stardust.Interstellar.Rest.Service
             var httpGet = httpMethodAttribute(implementationMethod, serviceLocator);
             var uriAttrib = typeof(FromRouteAttribute).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { }, null);
             var queryAttib = typeof(FromQueryAttribute).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { }, null);
+            var queryAttibWithName = typeof(FromQueryAttribute).GetProperty("Name");
             var bodyAttrib = typeof(FromBodyAttribute).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { }, null);
+            var headerAttrib = typeof(FromHeaderAttribute).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { }, null);
+            var headerAttribWithName = typeof(FromHeaderAttribute).GetProperty("Name");
 
             method.SetReturnType(typeof(Task).IsAssignableFrom(implementationMethod.ReturnType) ? typeof(Task<IActionResult>) : typeof(IActionResult));
             // Adding parameters
@@ -218,8 +221,19 @@ namespace Stardust.Interstellar.Rest.Service
                     var p = method.DefineParameter(pid, ParameterAttributes.None, parameterWrapper.Name);
                     if (parameterWrapper.In == InclutionTypes.Path && template.Contains("{" + parameterWrapper.Name + "}")) 
                         p.SetCustomAttribute(new CustomAttributeBuilder(uriAttrib, new Type[] { }));
-                    else if (parameterWrapper.In == InclutionTypes.Path|| parameterWrapper.In == InclutionTypes.Query) 
-                        p.SetCustomAttribute(new CustomAttributeBuilder(queryAttib, new Type[] { }));
+                    else if (parameterWrapper.In == InclutionTypes.Path || parameterWrapper.In == InclutionTypes.Query)
+                    {
+                        // Apply FromQueryAttribute with custom name if specified
+                        if (!string.IsNullOrWhiteSpace(parameterWrapper.CustomName))
+                        {
+                            p.SetCustomAttribute(new CustomAttributeBuilder(queryAttib, new object[] { }, 
+                                new[] { queryAttibWithName }, new object[] { parameterWrapper.CustomName }));
+                        }
+                        else
+                        {
+                            p.SetCustomAttribute(new CustomAttributeBuilder(queryAttib, new Type[] { }));
+                        }
+                    }
                     else if (parameterWrapper.In == InclutionTypes.Body) 
                         p.SetCustomAttribute(new CustomAttributeBuilder(bodyAttrib, new Type[] { }));
                     pid++;
@@ -365,7 +379,13 @@ namespace Stardust.Interstellar.Rest.Service
                         if (fromUri != null) @in = new InAttribute(InclutionTypes.Path);
                     }
                 }
-                methodParams.Add(new ParameterWrapper { Name = parameterInfo.Name, Type = parameterInfo.ParameterType, In = @in?.InclutionType ?? InclutionTypes.Path });
+                methodParams.Add(new ParameterWrapper 
+                { 
+                    Name = parameterInfo.Name, 
+                    CustomName = @in?.Name,
+                    Type = parameterInfo.ParameterType, 
+                    In = @in?.InclutionType ?? InclutionTypes.Path 
+                });
             }
             return methodParams;
         }
@@ -434,6 +454,7 @@ namespace Stardust.Interstellar.Rest.Service
                 if (paramType.IsValueType)
                 {
                     gen.Emit(OpCodes.Box, paramType);
+
                 }
                 gen.Emit(OpCodes.Stelem_Ref);
 

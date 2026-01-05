@@ -447,10 +447,12 @@ namespace Stardust.Interstellar.Rest.Client
                     str = str.Replace("{" + parameterWrapper.Name + "}", Uri.EscapeDataString(parameterWrapper?.value?.ToString() ?? ""));
                 else
                 {
+                    // Use EffectiveName for query string parameters to support custom names
+                    var queryParamName = parameterWrapper.EffectiveName;
                     if (parameterWrapper.value is Dictionary<string, string> || parameterWrapper.Type == typeof(Dictionary<string, string>))
                         source.Add(string.Join("&", ((Dictionary<string, string>)parameterWrapper.value).Select(v => $"{v.Key}={v.Value}")));
                     else
-                        source.Add(parameterWrapper.Name + "=" +
+                        source.Add(queryParamName + "=" +
                                    HttpUtility.UrlEncode(parameterWrapper?.value?.ToString() ?? ""));
                 }
             }
@@ -551,7 +553,12 @@ namespace Stardust.Interstellar.Rest.Client
           ActionWrapper action)
         {
             foreach (ParameterWrapper parameterWrapper in parameters.Where(p => p.In == InclutionTypes.Header))
-                req.Headers.Add(string.Format("{0}", parameterWrapper.Name), parameterWrapper.value?.ToString().SanitizeHttpHeaderValue());
+            {
+                // Skip adding header if value is null
+                if (parameterWrapper.value == null)
+                    continue;
+                req.Headers.Add(string.Format("{0}", parameterWrapper.EffectiveName), parameterWrapper.value.ToString().SanitizeHttpHeaderValue());
+            }
             if (action.CustomHandlers != null)
             {
                 List<IHeaderHandler> source = new List<IHeaderHandler>();

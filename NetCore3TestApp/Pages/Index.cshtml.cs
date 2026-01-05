@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 using NetCore3TestApp.Api;
 
 namespace NetCore3TestApp.Pages
@@ -22,9 +16,8 @@ namespace NetCore3TestApp.Pages
 
         public async Task OnGet()
         {
-            var d = await _client.Params("test123",
-                new Dictionary<string, string> { { "$filter", "some filter" }, { "$top", "100" } });
-            
+            var d = await _client.Params("test123", new Dictionary<string, string> { { "$filter", "some filter" }, { "$top", "100" } });
+            var x = await _client.MixedParams("123", "123", 10, null, "123-123");
         }
     }
 }

@@ -1,0 +1,138 @@
+@page
+@model NetCore3TestApp.Pages.EndpointTestsModel
+@{
+    ViewData["Title"] = "Endpoint Routing Tests";
+}
+
+<h1>Endpoint Routing Tests</h1>
+
+<p>This page demonstrates the <code>AddAsEndpoints</code> functionality.</p>
+
+<h2>Available Endpoints</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Method</th>
+            <th>Route</th>
+            <th>Description</th>
+            <th>Test</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><span class="badge bg-success">GET</span></td>
+            <td><code>/api/endpoints/hello</code></td>
+            <td>Returns a hello message</td>
+            <td><a href="/api/endpoints/hello" target="_blank">Test</a></td>
+        </tr>
+        <tr>
+            <td><span class="badge bg-success">GET</span></td>
+            <td><code>/api/endpoints/hello/{name}</code></td>
+            <td>Returns a personalized hello message</td>
+            <td><a href="/api/endpoints/hello/World" target="_blank">Test</a></td>
+        </tr>
+        <tr>
+            <td><span class="badge bg-success">GET</span></td>
+            <td><code>/api/endpoints/items</code></td>
+            <td>Returns all items</td>
+            <td><a href="/api/endpoints/items" target="_blank">Test</a></td>
+        </tr>
+        <tr>
+            <td><span class="badge bg-success">GET</span></td>
+            <td><code>/api/endpoints/items/{id}</code></td>
+            <td>Returns item by ID</td>
+            <td><a href="/api/endpoints/items/1" target="_blank">Test</a></td>
+        </tr>
+        <tr>
+            <td><span class="badge bg-success">GET</span></td>
+            <td><code>/api/endpoints/query</code></td>
+            <td>Query parameter test</td>
+            <td><a href="/api/endpoints/query?filter=test&page=1" target="_blank">Test</a></td>
+        </tr>
+        <tr>
+            <td><span class="badge bg-success">GET</span></td>
+            <td><code>/api/endpoints/sync</code></td>
+            <td>Synchronous method test</td>
+            <td><a href="/api/endpoints/sync" target="_blank">Test</a></td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>Interactive Test</h2>
+<div class="mb-3">
+    <label for="endpointUrl" class="form-label">Endpoint URL</label>
+    <input type="text" class="form-control" id="endpointUrl" value="/api/endpoints/hello">
+</div>
+<div class="mb-3">
+    <label for="httpMethod" class="form-label">HTTP Method</label>
+    <select class="form-select" id="httpMethod">
+        <option value="GET" selected>GET</option>
+        <option value="POST">POST</option>
+        <option value="PUT">PUT</option>
+        <option value="DELETE">DELETE</option>
+    </select>
+</div>
+<div class="mb-3" id="bodySection" style="display:none;">
+    <label for="requestBody" class="form-label">Request Body (JSON)</label>
+    <textarea class="form-control" id="requestBody" rows="3">{"id":0,"name":"New Item","description":"Test"}</textarea>
+</div>
+<button type="button" class="btn btn-primary" onclick="testEndpoint()">Test Endpoint</button>
+
+<h3 class="mt-4">Response</h3>
+<div class="card">
+    <div class="card-header">
+        <span id="responseStatus">-</span>
+    </div>
+    <div class="card-body">
+        <pre id="responseBody">Click "Test Endpoint" to see response</pre>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.getElementById('httpMethod').addEventListener('change', function() {
+        var bodySection = document.getElementById('bodySection');
+        if (this.value === 'POST' || this.value === 'PUT') {
+            bodySection.style.display = 'block';
+        } else {
+            bodySection.style.display = 'none';
+        }
+    });
+
+    async function testEndpoint() {
+        var url = document.getElementById('endpointUrl').value;
+        var method = document.getElementById('httpMethod').value;
+        var body = document.getElementById('requestBody').value;
+        
+        var options = {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+        
+        if (method === 'POST' || method === 'PUT') {
+            options.body = body;
+        }
+        
+        try {
+            var response = await fetch(url, options);
+            var statusText = response.status + ' ' + response.statusText;
+            document.getElementById('responseStatus').textContent = statusText;
+            document.getElementById('responseStatus').className = response.ok ? 'text-success' : 'text-danger';
+            
+            var text = await response.text();
+            try {
+                var json = JSON.parse(text);
+                document.getElementById('responseBody').textContent = JSON.stringify(json, null, 2);
+            } catch {
+                document.getElementById('responseBody').textContent = text || '(empty response)';
+            }
+        } catch (error) {
+            document.getElementById('responseStatus').textContent = 'Error';
+            document.getElementById('responseStatus').className = 'text-danger';
+            document.getElementById('responseBody').textContent = error.message;
+        }
+    }
+</script>
+}

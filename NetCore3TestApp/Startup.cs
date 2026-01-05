@@ -1,15 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using NetCore3TestApp.Api;
+using Stardust.Interstellar.Rest.Annotations.EndpointRouting;
 using Stardust.Interstellar.Rest.Client;
 using Stardust.Interstellar.Rest.Service;
 
@@ -32,10 +23,27 @@ namespace NetCore3TestApp
                 .AddAsController<ITestService,TestService>()
                 .UseInterstellar();
             services.AddTransient(s=>s.CreateRestClient<ITestClient>("https://localhost:44337"));
+            
+            // Register the endpoint test service for use with AddAsEndpoints
+            services.AddScoped<IEndpointTestService, EndpointTestService>();
+            
+            // Register routing policies for endpoint customization
+            services.AddSingleton<IEndpointRoutingPolicy>(new CachingPolicy(maxAgeSeconds: 300));
+            services.AddSingleton<IEndpointRoutingPolicy>(new RateLimitingPolicy(requestsPerMinute: 60));
+            services.AddSingleton<IEndpointRoutingPolicy>(new ApiCorsPolicy(allowedOrigins: "*"));
+            services.AddSingleton<IEndpointRoutingPolicy>(new SecurityHeadersPolicy());
+            services.AddSingleton<IEndpointRoutingPolicy>(new ApiVersionPolicy(version: "1.0"));
+            
+            // Register endpoints for Swagger documentation
+            EndpointRoutingDocumentFilter.RegisterServiceEndpoints<IEndpointTestService>();
+            
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo  { Title = "My API", Version = "v1" });
                 c.IgnoreObsoleteActions();
+                
+                // Add the document filter for endpoint routing documentation
+                c.DocumentFilter<EndpointRoutingDocumentFilter>();
             });
 
         }
@@ -65,6 +73,9 @@ namespace NetCore3TestApp
             {
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
+                
+                // Test the new AddAsEndpoints functionality for minimal API endpoint routing
+                endpoints.AddAsEndpoints<IEndpointTestService>();
             });
             app.UseSwagger();
             app.UseSwaggerUI(c =>

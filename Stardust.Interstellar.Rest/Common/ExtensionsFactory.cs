@@ -92,7 +92,13 @@ namespace Stardust.Interstellar.Rest.Common
                 action.MessageExtesionLevel = parameterInfo.GetCustomAttribute<ExtensionLevelAttribute>() == null
                            ? action.MessageExtesionLevel
                            : parameterInfo.GetCustomAttribute<ExtensionLevelAttribute>().PropertInjectionLevel;
-                action.Parameters.Add(new ParameterWrapper { Name = parameterInfo.Name, Type = parameterInfo.ParameterType, In = @in?.InclutionType ?? InclutionTypes.Body });
+                action.Parameters.Add(new ParameterWrapper
+                {
+                    Name = parameterInfo.Name,
+                    CustomName = @in?.Name,
+                    Type = parameterInfo.ParameterType,
+                    In = @in?.InclutionType ?? InclutionTypes.Body
+                });
             }
         }
 
