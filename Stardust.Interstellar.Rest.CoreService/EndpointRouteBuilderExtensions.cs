@@ -138,7 +138,7 @@ namespace Stardust.Interstellar.Rest.Service
             foreach (var parameterInfo in methodInfo.GetParameters())
             {
                 var inAttribute = parameterInfo.GetCustomAttribute<InAttribute>(true);
-                var inclusionType = inAttribute?.InclutionType ?? DetermineDefaultInclusionType(parameterInfo, template);
+                var inclusionType = inAttribute?.InclusionType ?? DetermineDefaultInclusionType(parameterInfo, template);
 
                 parameters.Add(new EndpointParameterWrapper
                 {
@@ -153,19 +153,19 @@ namespace Stardust.Interstellar.Rest.Service
             return parameters;
         }
 
-        private static InclutionTypes DetermineDefaultInclusionType(ParameterInfo param, string template)
+        private static InclusionTypes DetermineDefaultInclusionType(ParameterInfo param, string template)
         {
             if (template.Contains("{" + param.Name + "}") || template.Contains("{" + param.Name + ":"))
             {
-                return InclutionTypes.Path;
+                return InclusionTypes.Path;
             }
 
             if (param.ParameterType.IsClass && param.ParameterType != typeof(string))
             {
-                return InclutionTypes.Body;
+                return InclusionTypes.Body;
             }
 
-            return InclutionTypes.Query;
+            return InclusionTypes.Query;
         }
 
         private static void MapMethodToEndpoint<TService>(IEndpointRouteBuilder endpoints, MethodInfo method, IRoutePrefix routePrefix)
@@ -608,18 +608,18 @@ namespace Stardust.Interstellar.Rest.Service
 
             switch (wrapper.In)
             {
-                case InclutionTypes.Path:
+                case InclusionTypes.Path:
                     return ConvertRouteValue(context.Request.RouteValues[paramName], paramType);
 
-                case InclutionTypes.Query:
+                case InclusionTypes.Query:
                     var queryValue = context.Request.Query[effectiveName].FirstOrDefault();
                     return ConvertValue(queryValue, paramType);
 
-                case InclutionTypes.Header:
+                case InclusionTypes.Header:
                     var headerValue = context.Request.Headers[effectiveName].FirstOrDefault();
                     return ConvertValue(headerValue, paramType);
 
-                case InclutionTypes.Body:
+                case InclusionTypes.Body:
                     if (context.Request.ContentLength > 0 || context.Request.ContentType != null)
                     {
                         try
@@ -638,42 +638,42 @@ namespace Stardust.Interstellar.Rest.Service
             }
         }
 
-        private static InclutionTypes DetermineDefaultInclusionType(ParameterInfo param, MethodInfo method)
+        private static InclusionTypes DetermineDefaultInclusionType(ParameterInfo param, MethodInfo method)
         {
             var template = method.GetCustomAttribute<VerbAttribute>()?.Route ?? "";
 
             if (template.Contains("{" + param.Name + "}") || template.Contains("{" + param.Name + ":"))
             {
-                return InclutionTypes.Path;
+                return InclusionTypes.Path;
             }
 
             if (param.ParameterType.IsClass && param.ParameterType != typeof(string))
             {
-                return InclutionTypes.Body;
+                return InclusionTypes.Body;
             }
 
-            return InclutionTypes.Query;
+            return InclusionTypes.Query;
         }
 
-        private static async Task<object> ResolveParameterValueAsync(HttpContext context, ParameterInfo param, InclutionTypes inclusionType)
+        private static async Task<object> ResolveParameterValueAsync(HttpContext context, ParameterInfo param, InclusionTypes inclusionType)
         {
             var paramType = param.ParameterType;
             var paramName = param.Name;
 
             switch (inclusionType)
             {
-                case InclutionTypes.Path:
+                case InclusionTypes.Path:
                     return ConvertRouteValue(context.Request.RouteValues[paramName], paramType);
 
-                case InclutionTypes.Query:
+                case InclusionTypes.Query:
                     var queryValue = context.Request.Query[paramName].FirstOrDefault();
                     return ConvertValue(queryValue, paramType);
 
-                case InclutionTypes.Header:
+                case InclusionTypes.Header:
                     var headerValue = context.Request.Headers[paramName].FirstOrDefault();
                     return ConvertValue(headerValue, paramType);
 
-                case InclutionTypes.Body:
+                case InclusionTypes.Body:
                     if (context.Request.ContentLength > 0 || context.Request.ContentType != null)
                     {
                         try
@@ -1038,11 +1038,11 @@ namespace Stardust.Interstellar.Rest.Service
             foreach (var param in parameters)
             {
                 var inAttribute = param.GetCustomAttribute<InAttribute>();
-                var inclusionType = inAttribute?.InclutionType ?? DetermineDefaultInclusionType(param, method);
+                var inclusionType = inAttribute?.InclusionType ?? DetermineDefaultInclusionType(param, method);
                 var customName = inAttribute?.Name;
                 var description = inAttribute?.Description;
                 
-                if (inclusionType == InclutionTypes.Body)
+                if (inclusionType == InclusionTypes.Body)
                 {
                     bodyType = param.ParameterType;
                 }
@@ -1154,7 +1154,7 @@ namespace Stardust.Interstellar.Rest.Service
         public string EffectiveName => !string.IsNullOrWhiteSpace(CustomName) ? CustomName : Name;
         
         public Type Type { get; set; }
-        public InclutionTypes In { get; set; }
+        public InclusionTypes In { get; set; }
     }
 
     /// <summary>
@@ -1162,7 +1162,7 @@ namespace Stardust.Interstellar.Rest.Service
     /// </summary>
     internal sealed class EndpointParameterMetadata : IParameterBindingMetadata
     {
-        public EndpointParameterMetadata(string name, string customName, string description, Type parameterType, InclutionTypes source, bool isOptional)
+        public EndpointParameterMetadata(string name, string customName, string description, Type parameterType, InclusionTypes source, bool isOptional)
         {
             Name = name;
             CustomName = customName;
@@ -1190,7 +1190,7 @@ namespace Stardust.Interstellar.Rest.Service
         public string Description { get; }
         
         public Type ParameterType { get; }
-        public InclutionTypes Source { get; }
+        public InclusionTypes Source { get; }
         public bool IsOptional { get; }
     }
     
@@ -1204,7 +1204,7 @@ namespace Stardust.Interstellar.Rest.Service
         string EffectiveName { get; }
         string Description { get; }
         Type ParameterType { get; }
-        InclutionTypes Source { get; }
+        InclusionTypes Source { get; }
         bool IsOptional { get; }
     }
 }

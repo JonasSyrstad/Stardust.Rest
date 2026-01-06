@@ -306,7 +306,7 @@ namespace Stardust.Interstellar.Rest.Service
                 var i = 0;
                 foreach (var parameter in action.Parameters)
                 {
-                    var val = parameter.In == InclutionTypes.Header
+                    var val = parameter.In == InclusionTypes.Header
                         ? GetFromHeaders(parameter)
                         : fromWebMethodParameters[i];
                     wrappers.Add(parameter.Create(val));
@@ -532,12 +532,12 @@ namespace Stardust.Interstellar.Rest.Service
                 {
                     var fromBody = parameterInfo.GetCustomAttribute<FromBodyAttribute>(true);
                     if (fromBody != null)
-                        @in = new InAttribute(InclutionTypes.Body);
+                        @in = new InAttribute(InclusionTypes.Body);
                     if (@in == null)
                     {
                         var fromUri = parameterInfo.GetCustomAttribute<FromRouteAttribute>(true) ?? parameterInfo.GetCustomAttribute<FromQueryAttribute>(true) as IBindingSourceMetadata;
                         if (fromUri != null)
-                            @in = new InAttribute(InclutionTypes.Path);
+                            @in = new InAttribute(InclusionTypes.Path);
                     }
                 }
                 action.Parameters.Add(new ParameterWrapper 
@@ -545,7 +545,7 @@ namespace Stardust.Interstellar.Rest.Service
                     Name = parameterInfo.Name, 
                     CustomName = @in?.Name,
                     Type = parameterInfo.ParameterType, 
-                    In = @in?.InclutionType ?? InclutionTypes.Body 
+                    In = @in?.InclusionType ?? InclusionTypes.Body 
                 });
             }
         }

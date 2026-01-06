@@ -86,7 +86,7 @@ namespace Stardust.Interstellar.Rest.Annotations
 		/// <summary>
 		/// Marks a parameter to be included in the request headers using the C# parameter name.
 		/// </summary>
-		public InHeaderAttribute() : base(InclutionTypes.Header)
+		public InHeaderAttribute() : base(InclusionTypes.Header)
 		{
 		}
 
@@ -107,7 +107,7 @@ namespace Stardust.Interstellar.Rest.Annotations
         ///     [InHeader(Description = "API key for authentication")] string apiKey);
         /// </code>
         /// </example>
-		public InHeaderAttribute(string name = null) : base(InclutionTypes.Header, name)
+		public InHeaderAttribute(string name = null) : base(InclusionTypes.Header, name)
 		{
 		}
 

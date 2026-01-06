@@ -30,13 +30,13 @@ namespace NetCore3TestApp.Api
         [Post("items", "Create Item", Summary = "Creates a new item")]
         [SuccessStatusCode(HttpStatusCode.Created)]
         [EndpointRoutingPolicy("RateLimiting")] // Rate limit write operations
-        Task<TestItem> CreateItemAsync([In(InclutionTypes.Body, Description = "The item to create with name and description")] TestItem item);
+        Task<TestItem> CreateItemAsync([In(InclusionTypes.Body, Description = "The item to create with name and description")] TestItem item);
 
         [Put("items/{id}", "Update Item", Summary = "Updates an existing item")]
         [EndpointRoutingPolicy("RateLimiting")]
         Task<TestItem> UpdateItemAsync(
             [InPath(Description = "The unique identifier of the item to update")] int id, 
-            [In(InclutionTypes.Body, Description = "The updated item data")] TestItem item);
+            [In(InclusionTypes.Body, Description = "The updated item data")] TestItem item);
 
         [Delete("items/{id}", "Delete Item", Summary = "Deletes an item by its ID")]
         [SuccessStatusCode(HttpStatusCode.NoContent)]
@@ -57,7 +57,7 @@ namespace NetCore3TestApp.Api
 
         [Post("void", "Void Return", Summary = "Demonstrates a void-returning async method")]
         [SuccessStatusCode(HttpStatusCode.NoContent)]
-        Task PostVoidAsync([In(InclutionTypes.Body, Description = "The item to process (will not be persisted)")] TestItem item);
+        Task PostVoidAsync([In(InclusionTypes.Body, Description = "The item to process (will not be persisted)")] TestItem item);
 
         [Get("versioned", "Versioned Endpoint", Summary = "Demonstrates API versioning policy")]
         [EndpointRoutingPolicy("ApiVersion")]

@@ -226,13 +226,13 @@ namespace Stardust.Interstellar.Rest.Service
                 {
                     var p = method.DefineParameter(pid, ParameterAttributes.None, parameterWrapper.Name);
                     
-                    if (parameterWrapper.In == InclutionTypes.Header)
+                    if (parameterWrapper.In == InclusionTypes.Header)
                     {
                         // Headers are not directly supported in ASP.NET Framework Web API parameters
                         // They are retrieved from Request.Headers in ServiceWrapperBase
                         // Skip adding FromUri/FromBody attribute for headers
                     }
-                    else if (parameterWrapper.In == InclutionTypes.Path || parameterWrapper.In == InclutionTypes.Query)
+                    else if (parameterWrapper.In == InclusionTypes.Path || parameterWrapper.In == InclusionTypes.Query)
                     {
                         // Apply FromUriAttribute with custom name if specified
                         if (!string.IsNullOrWhiteSpace(parameterWrapper.CustomName))
@@ -245,7 +245,7 @@ namespace Stardust.Interstellar.Rest.Service
                             p.SetCustomAttribute(new CustomAttributeBuilder(uriAttrib, new Type[] { }));
                         }
                     }
-                    else if (parameterWrapper.In == InclutionTypes.Body)
+                    else if (parameterWrapper.In == InclusionTypes.Body)
                     {
                         p.SetCustomAttribute(new CustomAttributeBuilder(bodyAttrib, new Type[] { }));
                     }
@@ -370,11 +370,11 @@ namespace Stardust.Interstellar.Rest.Service
                 if (@in == null)
                 {
                     var fromBody = parameterInfo.GetCustomAttribute<FromBodyAttribute>(true);
-                    if (fromBody != null) @in = new InAttribute(InclutionTypes.Body);
+                    if (fromBody != null) @in = new InAttribute(InclusionTypes.Body);
                     if (@in == null)
                     {
                         var fromUri = parameterInfo.GetCustomAttribute<FromUriAttribute>(true);
-                        if (fromUri != null) @in = new InAttribute(InclutionTypes.Path);
+                        if (fromUri != null) @in = new InAttribute(InclusionTypes.Path);
                     }
                 }
                 methodParams.Add(new ParameterWrapper 
@@ -383,7 +383,7 @@ namespace Stardust.Interstellar.Rest.Service
                     CustomName = @in?.Name,
                     Description = @in?.Description,
                     Type = parameterInfo.ParameterType, 
-                    In = @in?.InclutionType ?? InclutionTypes.Body 
+                    In = @in?.InclusionType ?? InclusionTypes.Body 
                 });
             }
             return methodParams;

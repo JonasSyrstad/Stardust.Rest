@@ -98,7 +98,7 @@ namespace Stardust.Interstellar.Rest.Common
                     CustomName = @in?.Name,
                     Description = @in?.Description,
                     Type = parameterInfo.ParameterType,
-                    In = @in?.InclutionType ?? InclutionTypes.Body
+                    In = @in?.InclusionType ?? InclusionTypes.Body
                 });
             }
         }

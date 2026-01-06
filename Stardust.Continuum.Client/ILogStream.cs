@@ -13,13 +13,13 @@ namespace Stardust.Continuum.Client
     public interface ILogStream
     {
         [Put("single/{project}/{environment}")]
-        Task AddStream([In(InclutionTypes.Path)]string project, [In(InclutionTypes.Path)]string environment, [In(InclutionTypes.Body)]StreamItem item);
+        Task AddStream([In(InclusionTypes.Path)]string project, [In(InclusionTypes.Path)]string environment, [In(InclusionTypes.Body)]StreamItem item);
 
         [Put("batch/{project}/{environment}")]
-        Task AddStreamBatch([In(InclutionTypes.Path)]string project, [In(InclutionTypes.Path)]string environment, [In(InclutionTypes.Body)]StreamItem[] items);
+        Task AddStreamBatch([In(InclusionTypes.Path)]string project, [In(InclusionTypes.Path)]string environment, [In(InclusionTypes.Body)]StreamItem[] items);
 
 
         [Options("single/{project}/{environment}")]
-        Task Options([In(InclutionTypes.Path)]string project, [In(InclutionTypes.Path)]string environment);
+        Task Options([In(InclusionTypes.Path)]string project, [In(InclusionTypes.Path)]string environment);
     }
 }

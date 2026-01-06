@@ -31,7 +31,7 @@ namespace Stardust.Interstellar.Rest.Annotations
     /// <item><description><see cref="InBodyAttribute"/> - Parameter is serialized in the request body (typically for POST/PUT)</description></item>
     /// </list>
     /// <para>
-    /// <strong>Default behavior:</strong> If no derived attribute is specified, the parameter defaults to <see cref="InclutionTypes.Path"/>.
+    /// <strong>Default behavior:</strong> If no derived attribute is specified, the parameter defaults to <see cref="InclusionTypes.Path"/>.
     /// </para>
     /// </remarks>
     /// <example>
@@ -56,21 +56,21 @@ namespace Stardust.Interstellar.Rest.Annotations
         /// <summary>
         /// Initializes a new instance of the <see cref="InAttribute"/> class with the specified inclusion type.
         /// </summary>
-        /// <param name="InclutionType">The type of inclusion (Path, Query, Body, or Header) for the parameter.</param>
-        public InAttribute(InclutionTypes InclutionType)
+        /// <param name="InclusionType">The type of inclusion (Path, Query, Body, or Header) for the parameter.</param>
+        public InAttribute(InclusionTypes InclusionType)
         {
-            this.InclutionType = InclutionType;
+            this.InclusionType = InclusionType;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InAttribute"/> class with the specified inclusion type and custom name.
         /// </summary>
-        /// <param name="InclutionType">The type of inclusion (Path, Query, Body, or Header) for the parameter.</param>
+        /// <param name="InclusionType">The type of inclusion (Path, Query, Body, or Header) for the parameter.</param>
         /// <param name="name">The custom name to use for the parameter in the HTTP request/response instead of the C# parameter name.</param>
-        protected InAttribute(InclutionTypes InclutionType, string name)
+        protected InAttribute(InclusionTypes InclusionType, string name)
         {
-            this.InclutionType = InclutionType;
-            if(InclutionType != InclutionTypes.Header && InclutionType != InclutionTypes.Query)
+            this.InclusionType = InclusionType;
+            if(InclusionType != InclusionTypes.Header && InclusionType != InclusionTypes.Query)
                 if(name != null)
                     throw new NotSupportedException("Custom names are not supported for path and body parameters.");
 
@@ -78,20 +78,20 @@ namespace Stardust.Interstellar.Rest.Annotations
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="InAttribute"/> class with the default inclusion type of <see cref="InclutionTypes.Path"/>.
+        /// Initializes a new instance of the <see cref="InAttribute"/> class with the default inclusion type of <see cref="InclusionTypes.Path"/>.
         /// </summary>
         public InAttribute()
         {
-            InclutionType = InclutionTypes.Path;
+            InclusionType = InclusionTypes.Path;
         }
 
         /// <summary>
         /// Gets or sets the type of inclusion that determines where the parameter value should be placed in the HTTP request.
         /// </summary>
         /// <value>
-        /// An <see cref="InclutionTypes"/> value specifying whether the parameter is in the path, query string, body, or headers.
+        /// An <see cref="InclusionTypes"/> value specifying whether the parameter is in the path, query string, body, or headers.
         /// </value>
-        public InclutionTypes InclutionType { get; set; }
+        public InclusionTypes InclusionType { get; set; }
 
         /// <summary>
         /// Gets or sets the custom name to use for the parameter in requests/responses.

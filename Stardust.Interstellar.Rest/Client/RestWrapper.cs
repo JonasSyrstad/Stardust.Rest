@@ -391,11 +391,11 @@ namespace Stardust.Interstellar.Rest.Client
           HttpRequestMessage req,
           ActionWrapper action)
         {
-            if (!parameters.Any(p => p.In == InclutionTypes.Body))
+            if (!parameters.Any(p => p.In == InclusionTypes.Body))
                 return null;
-            if (parameters.Count(p => p.In == InclutionTypes.Body) > 1)
-                return Serialize(parameters.Where(p => p.In == InclutionTypes.Body).Select(p => p.value).ToList(), action);
-            ParameterWrapper parameterWrapper = parameters.Single(p => p.In == InclutionTypes.Body);
+            if (parameters.Count(p => p.In == InclusionTypes.Body) > 1)
+                return Serialize(parameters.Where(p => p.In == InclusionTypes.Body).Select(p => p.value).ToList(), action);
+            ParameterWrapper parameterWrapper = parameters.Single(p => p.In == InclusionTypes.Body);
             object base64String = parameterWrapper.value;
             if (parameterWrapper.value != null && parameterWrapper.value?.GetType() == typeof(byte[]))
                 base64String = Convert.ToBase64String((byte[])parameterWrapper.value);
@@ -439,11 +439,11 @@ namespace Stardust.Interstellar.Rest.Client
             List<string> source = new List<string>();
             if (parameters == null)
                 return str;
-            foreach (ParameterWrapper parameterWrapper in parameters.Where(p => p.In == InclutionTypes.Path || p.In == InclutionTypes.Query))
+            foreach (ParameterWrapper parameterWrapper in parameters.Where(p => p.In == InclusionTypes.Path || p.In == InclusionTypes.Query))
             {
                 if (VerboseLogging)
                     Logging.DebugMessage($"Building parameter: {parameterWrapper.Name} with type {parameterWrapper.Type.Name}");
-                if (str.Contains("{" + parameterWrapper.Name + "}") && parameterWrapper.In == InclutionTypes.Path)
+                if (str.Contains("{" + parameterWrapper.Name + "}") && parameterWrapper.In == InclusionTypes.Path)
                     str = str.Replace("{" + parameterWrapper.Name + "}", Uri.EscapeDataString(parameterWrapper?.value?.ToString() ?? ""));
                 else
                 {
@@ -552,7 +552,7 @@ namespace Stardust.Interstellar.Rest.Client
           HttpRequestMessage req,
           ActionWrapper action)
         {
-            foreach (ParameterWrapper parameterWrapper in parameters.Where(p => p.In == InclutionTypes.Header))
+            foreach (ParameterWrapper parameterWrapper in parameters.Where(p => p.In == InclusionTypes.Header))
             {
                 // Skip adding header if value is null
                 if (parameterWrapper.value == null)

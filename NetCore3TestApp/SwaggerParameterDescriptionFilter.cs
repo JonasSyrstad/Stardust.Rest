@@ -81,7 +81,7 @@ namespace NetCore3TestApp
             if (operation.RequestBody != null)
             {
                 var bodyParams = methodParameters.Where(p => p.GetCustomAttribute<InBodyAttribute>(true) != null 
-                    || p.GetCustomAttribute<InAttribute>(true)?.InclutionType == InclutionTypes.Body);
+                    || p.GetCustomAttribute<InAttribute>(true)?.InclusionType == InclusionTypes.Body);
                 
                 foreach (var bodyParam in bodyParams)
                 {

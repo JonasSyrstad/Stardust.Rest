@@ -75,7 +75,7 @@ namespace Stardust.Interstellar.Rest.Annotations
         /// Initializes a new instance of the <see cref="InQueryAttribute"/> class.
         /// The query string parameter will use the C# parameter name.
         /// </summary>
-        public InQueryAttribute() : base(InclutionTypes.Query)
+        public InQueryAttribute() : base(InclusionTypes.Query)
         {
         }
 
@@ -96,7 +96,7 @@ namespace Stardust.Interstellar.Rest.Annotations
         ///     [InQuery(Description = "The search query text")] string searchText);
         /// </code>
         /// </example>
-        public InQueryAttribute(string name = null) : base(InclutionTypes.Query, name)
+        public InQueryAttribute(string name = null) : base(InclusionTypes.Query, name)
         {
         }
 

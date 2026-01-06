@@ -36,7 +36,7 @@ namespace Stardust.Interstellar.Rest.Annotations
     /// </list>
     /// <para>
     /// <strong>Default behavior:</strong>
-    /// If no <c>InAttribute</c> is specified on a parameter, it defaults to <see cref="InclutionTypes.Path"/>.
+    /// If no <c>InAttribute</c> is specified on a parameter, it defaults to <see cref="InclusionTypes.Path"/>.
     /// However, it's recommended to be explicit by using <see cref="InPathAttribute"/> for clarity.
     /// </para>
     /// </remarks>
@@ -103,7 +103,7 @@ namespace Stardust.Interstellar.Rest.Annotations
 		/// <summary>
 		/// Initializes a new instance of the <see cref="InPathAttribute"/> class.
 		/// </summary>
-		public InPathAttribute():base(InclutionTypes.Path)
+		public InPathAttribute():base(InclusionTypes.Path)
 		{
             
 		}
@@ -112,7 +112,7 @@ namespace Stardust.Interstellar.Rest.Annotations
 		/// Initializes a new instance of the <see cref="InPathAttribute"/> class with a description.
 		/// </summary>
 		/// <param name="Description">The description for the parameter to be used in generated documentation.</param>
-		public InPathAttribute(string Description):base(InclutionTypes.Path)
+		public InPathAttribute(string Description):base(InclusionTypes.Path)
 		{
             this.Description = Description;
 		}

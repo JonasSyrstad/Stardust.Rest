@@ -21,11 +21,11 @@ namespace NetCoreTestWeb.Controllers
     {
 
         [Get("Echo/{value}","test")]
-        string Echo([In(InclutionTypes.Path)] string value);
+        string Echo([In(InclusionTypes.Path)] string value);
 
         [Obsolete("test")]
         [Get("Echo2/{value}")]
-        Task<StringWrapper> Echo2Async([In(InclutionTypes.Path)] string value);
+        Task<StringWrapper> Echo2Async([In(InclusionTypes.Path)] string value);
 
     }
 

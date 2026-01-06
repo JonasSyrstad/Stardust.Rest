@@ -222,7 +222,7 @@ namespace Stardust.Interstellar.Rest.Service
                 {
                     var p = method.DefineParameter(pid, ParameterAttributes.None, parameterWrapper.Name);
                     
-                    if (parameterWrapper.In == InclutionTypes.Header)
+                    if (parameterWrapper.In == InclusionTypes.Header)
                     {
                         // Apply FromHeaderAttribute with custom name if specified
                         if (!string.IsNullOrWhiteSpace(parameterWrapper.CustomName))
@@ -235,11 +235,11 @@ namespace Stardust.Interstellar.Rest.Service
                             p.SetCustomAttribute(new CustomAttributeBuilder(headerAttrib, new Type[] { }));
                         }
                     }
-                    else if (parameterWrapper.In == InclutionTypes.Path && template.Contains("{" + parameterWrapper.Name + "}")) 
+                    else if (parameterWrapper.In == InclusionTypes.Path && template.Contains("{" + parameterWrapper.Name + "}")) 
                     {
                         p.SetCustomAttribute(new CustomAttributeBuilder(uriAttrib, new Type[] { }));
                     }
-                    else if (parameterWrapper.In == InclutionTypes.Query)
+                    else if (parameterWrapper.In == InclusionTypes.Query)
                     {
                         // Apply FromQueryAttribute with custom name if specified
                         if (!string.IsNullOrWhiteSpace(parameterWrapper.CustomName))
@@ -252,7 +252,7 @@ namespace Stardust.Interstellar.Rest.Service
                             p.SetCustomAttribute(new CustomAttributeBuilder(queryAttib, new Type[] { }));
                         }
                     }
-                    else if (parameterWrapper.In == InclutionTypes.Path)
+                    else if (parameterWrapper.In == InclusionTypes.Path)
                     {
                         // Path parameter not in template - treat as query
                         if (!string.IsNullOrWhiteSpace(parameterWrapper.CustomName))
@@ -265,7 +265,7 @@ namespace Stardust.Interstellar.Rest.Service
                             p.SetCustomAttribute(new CustomAttributeBuilder(queryAttib, new Type[] { }));
                         }
                     }
-                    else if (parameterWrapper.In == InclutionTypes.Body) 
+                    else if (parameterWrapper.In == InclusionTypes.Body) 
                     {
                         p.SetCustomAttribute(new CustomAttributeBuilder(bodyAttrib, new Type[] { }));
                     }
@@ -405,11 +405,11 @@ namespace Stardust.Interstellar.Rest.Service
                 if (@in == null)
                 {
                     var fromBody = parameterInfo.GetCustomAttribute<FromBodyAttribute>(true);
-                    if (fromBody != null) @in = new InAttribute(InclutionTypes.Body);
+                    if (fromBody != null) @in = new InAttribute(InclusionTypes.Body);
                     if (@in == null)
                     {
                         var fromUri = parameterInfo.GetCustomAttribute<FromRouteAttribute>(true) ?? parameterInfo.GetCustomAttribute<FromQueryAttribute>(true) as IBindingSourceMetadata;
-                        if (fromUri != null) @in = new InAttribute(InclutionTypes.Path);
+                        if (fromUri != null) @in = new InAttribute(InclusionTypes.Path);
                     }
                 }
                 methodParams.Add(new ParameterWrapper 
@@ -418,7 +418,7 @@ namespace Stardust.Interstellar.Rest.Service
                     CustomName = @in?.Name,
                     Description = @in?.Description,
                     Type = parameterInfo.ParameterType, 
-                    In = @in?.InclutionType ?? InclutionTypes.Path 
+                    In = @in?.InclusionType ?? InclusionTypes.Path 
                 });
             }
             return methodParams;

@@ -1,10 +1,10 @@
 namespace Stardust.Interstellar.Rest.Annotations
 {
-    public enum InclutionTypes
+    public enum InclusionTypes
     {
         Path,
         Query,
-        Body,
+        Body, 
         Header
     }
 }

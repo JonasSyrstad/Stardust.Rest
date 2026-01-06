@@ -54,7 +54,7 @@ namespace Stardust.Interstellar.Rest.Service
             foreach (var param in method.GetParameters())
             {
                 var inAttribute = param.GetCustomAttribute<InAttribute>();
-                var inclusionType = inAttribute?.InclutionType ?? DetermineDefaultInclusionType(param, method);
+                var inclusionType = inAttribute?.InclusionType ?? DetermineDefaultInclusionType(param, method);
                 
                 // Use custom name if specified, otherwise use parameter name
                 var effectiveName = !string.IsNullOrWhiteSpace(inAttribute?.Name) 
@@ -255,7 +255,7 @@ namespace Stardust.Interstellar.Rest.Service
             OpenApiRequestBody? requestBody = null;
             foreach (var param in endpoint.Parameters)
             {
-                if (param.Source == InclutionTypes.Body)
+                if (param.Source == InclusionTypes.Body)
                 {
                     var schema = context.SchemaGenerator.GenerateSchema(param.Type, context.SchemaRepository);
                     requestBody = new OpenApiRequestBody
@@ -272,9 +272,9 @@ namespace Stardust.Interstellar.Rest.Service
                 {
                     var paramLocation = param.Source switch
                     {
-                        InclutionTypes.Path => ParameterLocation.Path,
-                        InclutionTypes.Query => ParameterLocation.Query,
-                        InclutionTypes.Header => ParameterLocation.Header,
+                        InclusionTypes.Path => ParameterLocation.Path,
+                        InclusionTypes.Query => ParameterLocation.Query,
+                        InclusionTypes.Header => ParameterLocation.Header,
                         _ => ParameterLocation.Query
                     };
 
@@ -283,7 +283,7 @@ namespace Stardust.Interstellar.Rest.Service
                         Name = param.Name,
                         Description = param.Description,
                         In = paramLocation,
-                        Required = param.Source == InclutionTypes.Path || param.IsRequired,
+                        Required = param.Source == InclusionTypes.Path || param.IsRequired,
                         Schema = context.SchemaGenerator.GenerateSchema(param.Type, context.SchemaRepository)
                     });
                 }
@@ -399,14 +399,14 @@ namespace Stardust.Interstellar.Rest.Service
             return $"{prefix}/{methodRoute}".Replace("//", "/");
         }
 
-        private static InclutionTypes DetermineDefaultInclusionType(ParameterInfo param, MethodInfo method)
+        private static InclusionTypes DetermineDefaultInclusionType(ParameterInfo param, MethodInfo method)
         {
             var template = method.GetCustomAttribute<VerbAttribute>()?.Route ?? "";
             if (template.Contains("{" + param.Name + "}") || template.Contains("{" + param.Name + ":"))
-                return InclutionTypes.Path;
+                return InclusionTypes.Path;
             if (param.ParameterType.IsClass && param.ParameterType != typeof(string))
-                return InclutionTypes.Body;
-            return InclutionTypes.Query;
+                return InclusionTypes.Body;
+            return InclusionTypes.Query;
         }
     }
 
@@ -443,7 +443,7 @@ namespace Stardust.Interstellar.Rest.Service
         public string? Description { get; set; }
         
         public Type Type { get; set; } = typeof(object);
-        public InclutionTypes Source { get; set; }
+        public InclusionTypes Source { get; set; }
         public bool IsRequired { get; set; }
         public bool IsNullable { get; set; }
     }

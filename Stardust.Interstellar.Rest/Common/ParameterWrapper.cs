@@ -28,7 +28,7 @@ namespace Stardust.Interstellar.Rest.Common
 
         public object value { get; set; }
 
-        public InclutionTypes In { get; set; }
+        public InclusionTypes In { get; set; }
 
         public Type Type { get; set; }
         

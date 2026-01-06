@@ -94,7 +94,7 @@ namespace Stardust.Interstellar.Rest.Annotations
 		/// <summary>
 		/// Initializes a new instance of the <see cref="InBodyAttribute"/> class.
 		/// </summary>
-		public InBodyAttribute() : base(InclutionTypes.Body)
+		public InBodyAttribute() : base(InclusionTypes.Body)
 		{
 
 		}
@@ -103,7 +103,7 @@ namespace Stardust.Interstellar.Rest.Annotations
 		/// Initializes a new instance of the <see cref="InBodyAttribute"/> class with a description.
 		/// </summary>
 		/// <param name="Description">The description for the parameter to be used in generated documentation.</param>
-		public InBodyAttribute(string Description) : base(InclutionTypes.Body)
+		public InBodyAttribute(string Description) : base(InclusionTypes.Body)
 		{
 			this.Description = Description;
 		}
