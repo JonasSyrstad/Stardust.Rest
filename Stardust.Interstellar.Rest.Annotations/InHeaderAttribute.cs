@@ -107,13 +107,8 @@ namespace Stardust.Interstellar.Rest.Annotations
         ///     [InHeader(Description = "API key for authentication")] string apiKey);
         /// </code>
         /// </example>
-		public InHeaderAttribute(string name = null, string Description = null) : base(InclutionTypes.Header, name)
+		public InHeaderAttribute(string name = null) : base(InclutionTypes.Header, name)
 		{
-            // Set description if provided
-            if (Description != null)
-            {
-                this.Description = Description;
-            }
 		}
 
         /// <summary>

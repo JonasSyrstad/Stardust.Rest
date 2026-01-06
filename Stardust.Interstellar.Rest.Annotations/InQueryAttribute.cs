@@ -96,13 +96,8 @@ namespace Stardust.Interstellar.Rest.Annotations
         ///     [InQuery(Description = "The search query text")] string searchText);
         /// </code>
         /// </example>
-        public InQueryAttribute(string name = null, string Description = null) : base(InclutionTypes.Query, name)
+        public InQueryAttribute(string name = null) : base(InclutionTypes.Query, name)
         {
-            // Set description if provided
-            if (Description != null)
-            {
-                this.Description = Description;
-            }
         }
 
         /// <summary>
