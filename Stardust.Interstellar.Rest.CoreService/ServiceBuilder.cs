@@ -201,7 +201,8 @@ namespace Stardust.Interstellar.Rest.Service
             method.SetReturnType(typeof(Task).IsAssignableFrom(implementationMethod.ReturnType) ? typeof(Task<IActionResult>) : typeof(IActionResult));
             // Adding parameters
             methodParams = GetMethodParams(implementationMethod, serviceLocator);
-            pTypes = methodParams.Where(p => p.In != InclutionTypes.Header).Select(p => p.Type).ToArray();
+            // Include ALL parameters in the method signature, not just non-header ones
+            pTypes = methodParams.Select(p => p.Type).ToArray();
             method.SetParameters(pTypes.ToArray());
             var obsolete = implementationMethod.GetCustomAttribute<ObsoleteAttribute>();
             if (obsolete != null)
@@ -214,14 +215,31 @@ namespace Stardust.Interstellar.Rest.Service
             if (prefix.Prefix.ContainsCharacters())
                 template = $"{prefix.Prefix}/{template}";
             int pid = 1;
-            foreach (var parameterWrapper in methodParams.Where(p => p.In != InclutionTypes.Header))
+            // Define ALL parameters including headers
+            foreach (var parameterWrapper in methodParams)
             {
                 try
                 {
                     var p = method.DefineParameter(pid, ParameterAttributes.None, parameterWrapper.Name);
-                    if (parameterWrapper.In == InclutionTypes.Path && template.Contains("{" + parameterWrapper.Name + "}")) 
+                    
+                    if (parameterWrapper.In == InclutionTypes.Header)
+                    {
+                        // Apply FromHeaderAttribute with custom name if specified
+                        if (!string.IsNullOrWhiteSpace(parameterWrapper.CustomName))
+                        {
+                            p.SetCustomAttribute(new CustomAttributeBuilder(headerAttrib, new object[] { }, 
+                                new[] { headerAttribWithName }, new object[] { parameterWrapper.CustomName }));
+                        }
+                        else
+                        {
+                            p.SetCustomAttribute(new CustomAttributeBuilder(headerAttrib, new Type[] { }));
+                        }
+                    }
+                    else if (parameterWrapper.In == InclutionTypes.Path && template.Contains("{" + parameterWrapper.Name + "}")) 
+                    {
                         p.SetCustomAttribute(new CustomAttributeBuilder(uriAttrib, new Type[] { }));
-                    else if (parameterWrapper.In == InclutionTypes.Path || parameterWrapper.In == InclutionTypes.Query)
+                    }
+                    else if (parameterWrapper.In == InclutionTypes.Query)
                     {
                         // Apply FromQueryAttribute with custom name if specified
                         if (!string.IsNullOrWhiteSpace(parameterWrapper.CustomName))
@@ -234,8 +252,23 @@ namespace Stardust.Interstellar.Rest.Service
                             p.SetCustomAttribute(new CustomAttributeBuilder(queryAttib, new Type[] { }));
                         }
                     }
+                    else if (parameterWrapper.In == InclutionTypes.Path)
+                    {
+                        // Path parameter not in template - treat as query
+                        if (!string.IsNullOrWhiteSpace(parameterWrapper.CustomName))
+                        {
+                            p.SetCustomAttribute(new CustomAttributeBuilder(queryAttib, new object[] { }, 
+                                new[] { queryAttibWithName }, new object[] { parameterWrapper.CustomName }));
+                        }
+                        else
+                        {
+                            p.SetCustomAttribute(new CustomAttributeBuilder(queryAttib, new Type[] { }));
+                        }
+                    }
                     else if (parameterWrapper.In == InclutionTypes.Body) 
+                    {
                         p.SetCustomAttribute(new CustomAttributeBuilder(bodyAttrib, new Type[] { }));
+                    }
                     pid++;
                 }
                 catch (Exception ex)
@@ -383,6 +416,7 @@ namespace Stardust.Interstellar.Rest.Service
                 { 
                     Name = parameterInfo.Name, 
                     CustomName = @in?.Name,
+                    Description = @in?.Description,
                     Type = parameterInfo.ParameterType, 
                     In = @in?.InclutionType ?? InclutionTypes.Path 
                 });

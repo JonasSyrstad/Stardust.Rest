@@ -42,6 +42,9 @@ namespace NetCore3TestApp
                 c.SwaggerDoc("v1", new OpenApiInfo  { Title = "My API", Version = "v1" });
                 c.IgnoreObsoleteActions();
                 
+                // Add operation filter for parameter descriptions on generated controllers
+                c.OperationFilter<SwaggerParameterDescriptionFilter>();
+                
                 // Add the document filter for endpoint routing documentation
                 c.DocumentFilter<EndpointRoutingDocumentFilter>();
             });

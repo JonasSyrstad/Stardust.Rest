@@ -144,6 +144,7 @@ namespace Stardust.Interstellar.Rest.Service
                 {
                     Name = parameterInfo.Name,
                     CustomName = inAttribute?.Name,
+                    Description = inAttribute?.Description,
                     Type = parameterInfo.ParameterType,
                     In = inclusionType
                 });
@@ -1038,6 +1039,8 @@ namespace Stardust.Interstellar.Rest.Service
             {
                 var inAttribute = param.GetCustomAttribute<InAttribute>();
                 var inclusionType = inAttribute?.InclutionType ?? DetermineDefaultInclusionType(param, method);
+                var customName = inAttribute?.Name;
+                var description = inAttribute?.Description;
                 
                 if (inclusionType == InclutionTypes.Body)
                 {
@@ -1047,6 +1050,8 @@ namespace Stardust.Interstellar.Rest.Service
                 // Add parameter metadata for OpenAPI documentation
                 var parameterMetadata = new EndpointParameterMetadata(
                     param.Name,
+                    customName,
+                    description,
                     param.ParameterType,
                     inclusionType,
                     !param.ParameterType.IsValueType || Nullable.GetUnderlyingType(param.ParameterType) != null
@@ -1139,6 +1144,11 @@ namespace Stardust.Interstellar.Rest.Service
         public string CustomName { get; set; }
         
         /// <summary>
+        /// Gets or sets the description for the parameter.
+        /// </summary>
+        public string Description { get; set; }
+        
+        /// <summary>
         /// Gets the effective name to use for the parameter (CustomName if set, otherwise Name).
         /// </summary>
         public string EffectiveName => !string.IsNullOrWhiteSpace(CustomName) ? CustomName : Name;
@@ -1152,15 +1162,33 @@ namespace Stardust.Interstellar.Rest.Service
     /// </summary>
     internal sealed class EndpointParameterMetadata : IParameterBindingMetadata
     {
-        public EndpointParameterMetadata(string name, Type parameterType, InclutionTypes source, bool isOptional)
+        public EndpointParameterMetadata(string name, string customName, string description, Type parameterType, InclutionTypes source, bool isOptional)
         {
             Name = name;
+            CustomName = customName;
+            Description = description;
             ParameterType = parameterType;
             Source = source;
             IsOptional = isOptional;
         }
 
         public string Name { get; }
+        
+        /// <summary>
+        /// Gets the custom name to use for the parameter in requests/responses.
+        /// </summary>
+        public string CustomName { get; }
+        
+        /// <summary>
+        /// Gets the effective name to use for the parameter (CustomName if set, otherwise Name).
+        /// </summary>
+        public string EffectiveName => !string.IsNullOrWhiteSpace(CustomName) ? CustomName : Name;
+        
+        /// <summary>
+        /// Gets the description for the parameter.
+        /// </summary>
+        public string Description { get; }
+        
         public Type ParameterType { get; }
         public InclutionTypes Source { get; }
         public bool IsOptional { get; }
@@ -1172,6 +1200,9 @@ namespace Stardust.Interstellar.Rest.Service
     internal interface IParameterBindingMetadata
     {
         string Name { get; }
+        string CustomName { get; }
+        string EffectiveName { get; }
+        string Description { get; }
         Type ParameterType { get; }
         InclutionTypes Source { get; }
         bool IsOptional { get; }

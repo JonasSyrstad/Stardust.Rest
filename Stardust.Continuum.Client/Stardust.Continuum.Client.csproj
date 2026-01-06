@@ -1,27 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net6.0;net7.0;net8.0</TargetFrameworks>
     <PackageId>Stardust.Continuum.Client</PackageId>
-    <Version>3.5.2</Version>
+    <Version>3.5.2.1</Version>
     <Authors>Stardust</Authors>
     <Company>Stardust</Company>
     <Description>Client for the continuum live log stream service</Description>
-    <Copyright>Copyright © Stardust  2022</Copyright>
+    <Copyright>Copyright © Stardust  2026</Copyright>
     <PackageTags>logging real-time stream</PackageTags>
     <PackageReleaseNotes>netstandard version</PackageReleaseNotes>
-    <PackageIconUrl>https://stardustframework.wdfiles.com/local--files/blog:_start/logo_smal.png</PackageIconUrl>
+    <PackageIcon>icon.png</PackageIcon>
     <RepositoryType>github</RepositoryType>
     <PackageProjectUrl>https://github.com/JonasSyrstad/Stardust.Rest/blob/master/Stardust.Interstellar.Rest/continuum.md</PackageProjectUrl>
     <PackageLicenseUrl></PackageLicenseUrl>
     <RepositoryUrl>https://github.com/JonasSyrstad/Stardust.Interstellar.Rest</RepositoryUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <ApplicationIcon>logo_smal_Ug4_icon.ico</ApplicationIcon>
     <IncludeSource>True</IncludeSource>
     <IncludeSymbols>True</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="icon.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.1" />
@@ -32,5 +35,8 @@
     <ProjectReference Include="..\Stardust.Interstellar.Rest.Annotations\Stardust.Interstellar.Rest.Annotations.csproj" />
     <ProjectReference Include="..\Stardust.Interstellar.Rest\Stardust.Interstellar.Rest.csproj" />
   </ItemGroup>
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' Or '$(TargetFramework)' == 'net6.0' Or '$(TargetFramework)' == 'net7.0' Or '$(TargetFramework)' == 'net8.0' ">
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
 
 </Project>

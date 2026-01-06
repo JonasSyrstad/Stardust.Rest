@@ -61,10 +61,14 @@ namespace Stardust.Interstellar.Rest.Service
                     ? inAttribute.Name 
                     : param.Name ?? string.Empty;
                 
+                // Get description from InAttribute
+                var description = inAttribute?.Description;
+                
                 parameters.Add(new EndpointParameterDoc
                 {
                     Name = effectiveName,
                     ParameterName = param.Name ?? string.Empty,
+                    Description = description,
                     Type = param.ParameterType,
                     Source = inclusionType,
                     IsRequired = !param.ParameterType.IsValueType || Nullable.GetUnderlyingType(param.ParameterType) == null,
@@ -257,6 +261,7 @@ namespace Stardust.Interstellar.Rest.Service
                     requestBody = new OpenApiRequestBody
                     {
                         Required = param.IsRequired,
+                        Description = param.Description,
                         Content = new Dictionary<string, OpenApiMediaType>
                         {
                             ["application/json"] = new OpenApiMediaType { Schema = schema }
@@ -276,6 +281,7 @@ namespace Stardust.Interstellar.Rest.Service
                     operation.Parameters.Add(new OpenApiParameter
                     {
                         Name = param.Name,
+                        Description = param.Description,
                         In = paramLocation,
                         Required = param.Source == InclutionTypes.Path || param.IsRequired,
                         Schema = context.SchemaGenerator.GenerateSchema(param.Type, context.SchemaRepository)
@@ -430,6 +436,11 @@ namespace Stardust.Interstellar.Rest.Service
         /// Gets or sets the C# parameter name.
         /// </summary>
         public string ParameterName { get; set; } = string.Empty;
+        
+        /// <summary>
+        /// Gets or sets the description for the parameter to be used in generated documentation.
+        /// </summary>
+        public string? Description { get; set; }
         
         public Type Type { get; set; } = typeof(object);
         public InclutionTypes Source { get; set; }

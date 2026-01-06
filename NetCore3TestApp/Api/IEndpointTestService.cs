@@ -16,7 +16,7 @@ namespace NetCore3TestApp.Api
         Task<string> GetHelloAsync();
 
         [Get("hello/{name}", "Get Hello with Name", Summary = "Returns a personalized hello message")]
-        Task<string> GetHelloWithNameAsync([InPath] string name);
+        Task<string> GetHelloWithNameAsync([InPath(Description = "The name to include in the greeting")] string name);
 
         [Get("items", "Get All Items", Summary = "Returns all items in the collection")]
         [EndpointRoutingPolicy("Caching")] // Cache the items list
@@ -25,34 +25,39 @@ namespace NetCore3TestApp.Api
 
         [Get("items/{id}", "Get Item by ID", Summary = "Returns a specific item by its ID")]
         [EndpointRoutingPolicy("Caching")]
-        Task<TestItem> GetItemByIdAsync([InPath] int id);
+        Task<TestItem> GetItemByIdAsync([InPath(Description = "The unique identifier of the item to retrieve")] int id);
 
         [Post("items", "Create Item", Summary = "Creates a new item")]
         [SuccessStatusCode(HttpStatusCode.Created)]
         [EndpointRoutingPolicy("RateLimiting")] // Rate limit write operations
-        Task<TestItem> CreateItemAsync([In(InclutionTypes.Body)] TestItem item);
+        Task<TestItem> CreateItemAsync([In(InclutionTypes.Body, Description = "The item to create with name and description")] TestItem item);
 
         [Put("items/{id}", "Update Item", Summary = "Updates an existing item")]
         [EndpointRoutingPolicy("RateLimiting")]
-        Task<TestItem> UpdateItemAsync([InPath] int id, [In(InclutionTypes.Body)] TestItem item);
+        Task<TestItem> UpdateItemAsync(
+            [InPath(Description = "The unique identifier of the item to update")] int id, 
+            [In(InclutionTypes.Body, Description = "The updated item data")] TestItem item);
 
         [Delete("items/{id}", "Delete Item", Summary = "Deletes an item by its ID")]
         [SuccessStatusCode(HttpStatusCode.NoContent)]
         [EndpointRoutingPolicy("RateLimiting")]
-        Task DeleteItemAsync([InPath] int id);
+        Task DeleteItemAsync([InPath(Description = "The unique identifier of the item to delete")] int id);
 
         [Get("query", "Query with Parameters", Summary = "Demonstrates query string parameter binding")]
-        Task<string> GetWithQueryParamsAsync([InQuery] string? filter, [InQuery] int? page);
+        Task<string> GetWithQueryParamsAsync(
+            [InQuery(Description = "Optional filter text to apply to results")] string? filter, 
+            [InQuery(Description = "Optional page number for pagination (1-based)")] int? page);
 
         [Get("headers", "Header Parameter Test", Summary = "Demonstrates header parameter binding")]
-        Task<string> GetWithHeaderParamAsync([InHeader] string? customHeader);
+        Task<string> GetWithHeaderParamAsync(
+            [InHeader(Description = "Optional custom header value to echo back")] string? customHeader);
 
         [Get("sync", "Synchronous Method", Summary = "Demonstrates a synchronous method")]
         string GetSyncMethod();
 
         [Post("void", "Void Return", Summary = "Demonstrates a void-returning async method")]
         [SuccessStatusCode(HttpStatusCode.NoContent)]
-        Task PostVoidAsync([In(InclutionTypes.Body)] TestItem item);
+        Task PostVoidAsync([In(InclutionTypes.Body, Description = "The item to process (will not be persisted)")] TestItem item);
 
         [Get("versioned", "Versioned Endpoint", Summary = "Demonstrates API versioning policy")]
         [EndpointRoutingPolicy("ApiVersion")]
@@ -69,10 +74,10 @@ namespace NetCore3TestApp.Api
         /// </summary>
         [Get("search", "Search with Custom Query Names", Summary = "Demonstrates InQuery with custom parameter names")]
         Task<SearchResult> SearchAsync(
-            [InQuery("q")] string searchQuery,
-            [InQuery("page_size")] int pageSize,
-            [InQuery("sort_by")] string? sortBy,
-            [InQuery("sort_order")] string? sortOrder);
+            [InQuery("q", Description = "Search query text to filter items by name or description")] string searchQuery,
+            [InQuery("page_size", Description = "Number of results to return per page (default: 10)")] int pageSize,
+            [InQuery("sort_by", Description = "Field name to sort results by (options: 'name', 'id')")] string? sortBy,
+            [InQuery("sort_order", Description = "Sort direction: 'asc' for ascending or 'desc' for descending (default: 'asc')")] string? sortOrder);
 
         /// <summary>
         /// Demonstrates custom header names using InHeader with Name property.
@@ -80,20 +85,20 @@ namespace NetCore3TestApp.Api
         /// </summary>
         [Get("custom-headers", "Custom Header Names", Summary = "Demonstrates InHeader with custom header names")]
         Task<HeaderInfo> GetWithCustomHeadersAsync(
-            [InHeader("X-Api-Key")] string apiKey,
-            [InHeader("X-Request-Id")] string? requestId,
-            [InHeader("X-Client-Version")] string? clientVersion,
-            [InHeader("Accept-Language")] string? language);
+            [InHeader("X-Api-Key", Description = "API key for authentication (required for production use)")] string apiKey,
+            [InHeader("X-Request-Id", Description = "Unique request identifier for tracking and correlation across services")] string? requestId,
+            [InHeader("X-Client-Version", Description = "Client application version for compatibility checking (format: 'major.minor.patch')")] string? clientVersion,
+            [InHeader("Accept-Language", Description = "Preferred language for localized responses (RFC 5646 language tag, e.g., 'en-US', 'fr-FR')")] string? language);
 
         /// <summary>
         /// Demonstrates mixing custom-named query and header parameters.
         /// </summary>
         [Get("mixed-params", "Mixed Custom Parameters", Summary = "Demonstrates mixing custom query and header names")]
         Task<MixedParamsResult> GetWithMixedParamsAsync(
-            [InQuery("filter_text")] string filterText,
-            [InQuery("max_results")] int maxResults,
-            [InHeader("Authorization")] string? authToken,
-            [InHeader("X-Correlation-Id")] string? correlationId);
+            [InQuery("$filter", Description = "Text filter to apply to results (case-insensitive substring match)")] string filterText,
+            [InQuery("max_results", Description = "Maximum number of results to return (range: 1-1000, default: 100)")] int maxResults,
+            [InHeader("Authorization", Description = "Bearer token for API authentication (format: 'Bearer {token}')")] string? authToken,
+            [InHeader("X-Correlation-Id", Description = "Correlation identifier for distributed tracing and log aggregation")] string? correlationId);
     }
 
     public class TestItem

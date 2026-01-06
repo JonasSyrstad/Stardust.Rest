@@ -21,6 +21,11 @@ namespace Stardust.Interstellar.Rest.Common
         /// </summary>
         public string EffectiveName => !string.IsNullOrWhiteSpace(CustomName) ? CustomName : Name;
 
+        /// <summary>
+        /// Gets or sets the description for the parameter to be used in generated documentation.
+        /// </summary>
+        public string Description { get; set; }
+
         public object value { get; set; }
 
         public InclutionTypes In { get; set; }
@@ -30,7 +35,7 @@ namespace Stardust.Interstellar.Rest.Common
 
         public ParameterWrapper Create(object value)
         {
-           return new ParameterWrapper { value = value, Type = Type, In = In, Name = Name, CustomName = CustomName };
+           return new ParameterWrapper { value = value, Type = Type, In = In, Name = Name, CustomName = CustomName, Description = Description };
         }
     }
 }

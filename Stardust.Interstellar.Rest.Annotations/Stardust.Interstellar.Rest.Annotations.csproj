@@ -3,10 +3,10 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net6.0;net7.0;net8.0</TargetFrameworks>
     <Description>Annotations for the rest generator tool</Description>
-    <Version>5.6.1</Version>
+    <Version>5.7.0</Version>
     <Company>Stardust</Company>
     <Authors>Stardust</Authors>
-    <Copyright>Copyright © Stardust 2022</Copyright>
+    <Copyright>Copyright © Stardust 2026</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/JonasSyrstad/Stardust.Interstellar.Rest</PackageProjectUrl>
     <RepositoryUrl>https://github.com/JonasSyrstad/Stardust.Rest</RepositoryUrl>

@@ -20,9 +20,9 @@ namespace NetCore3TestApp.Api
         [Get("search")]
         Task<string> Search(
             [InPath] string id,
-            [InQuery("q")] string searchQuery,
-            [InQuery("page_size")] int pageSize,
-            [InQuery("sort_by")] string? sortBy);
+            [InQuery("q", Description = "The search query text to filter results")] string searchQuery,
+            [InQuery("page_size", Description = "Number of results per page (default: 10)")] int pageSize,
+            [InQuery("sort_by", Description = "Field name to sort by (e.g., 'name', 'date', 'price')")] string? sortBy);
 
         /// <summary>
         /// Client method demonstrating custom header names.
@@ -31,17 +31,17 @@ namespace NetCore3TestApp.Api
         [Get("header-test")]
         Task<string> HeaderTest(
             [InPath] string id,
-            [InHeader("X-Api-Key")] string apiKey,
-            [InHeader("X-Request-Id")] string? requestId,
-            [InHeader("Accept-Language")] string? language);
+            [InHeader("X-Api-Key", Description = "API key for authentication (required)")] string apiKey,
+            [InHeader("X-Request-Id", Description = "Unique identifier for request tracking and correlation")] string? requestId,
+            [InHeader("Accept-Language", Description = "Preferred language for the response (e.g., 'en-US', 'fr-FR')")] string? language);
 
         [Get("mixed")]
         Task<MvcMixedResult> MixedParams(
             [InPath] string id,
-            [InQuery("filter_text")] string filterText,
-            [InQuery("max_results")] int maxResults,
-            [InHeader("Authorization")] string? authToken,
-            [InHeader("X-Correlation-Id")] string? correlationId);
+            [InQuery("filter_text", Description = "Text to filter the results by")] string filterText,
+            [InQuery("max_results", Description = "Maximum number of results to return (1-1000)")] int maxResults,
+            [InHeader("Authorization", Description = "Bearer token for authentication")] string? authToken,
+            [InHeader("X-Correlation-Id", Description = "Correlation ID for distributed tracing")] string? correlationId);
     }
 
     [Api("api/{id}")]
@@ -75,10 +75,10 @@ namespace NetCore3TestApp.Api
         [Get("search")]
         Task<MvcSearchResult> Search(
             [InPath] string id,
-            [InQuery("q")] string searchQuery,
-            [InQuery("page_size")] int pageSize,
-            [InQuery("sort_by")] string? sortBy,
-            [InQuery("sort_order")] string? sortOrder);
+            [InQuery("q", Description = "The search query text to filter results")] string searchQuery,
+            [InQuery("page_size", Description = "Number of results per page (default: 10)")] int pageSize,
+            [InQuery("sort_by", Description = "Field name to sort by (e.g., 'name', 'date', 'price')")] string? sortBy,
+            [InQuery("sort_order", Description = "Sort order: 'asc' for ascending or 'desc' for descending")] string? sortOrder);
 
         /// <summary>
         /// Demonstrates custom header names using InHeader with Name property.
@@ -87,10 +87,10 @@ namespace NetCore3TestApp.Api
         [Get("header-test")]
         Task<MvcHeaderInfo> HeaderTest(
             [InPath] string id,
-            [InHeader("X-Api-Key")] string apiKey,
-            [InHeader("X-Request-Id")] string? requestId,
-            [InHeader("X-Client-Version")] string? clientVersion,
-            [InHeader("Accept-Language")] string? language);
+            [InHeader("X-Api-Key", Description = "API key for authentication (required)")] string apiKey,
+            [InHeader("X-Request-Id", Description = "Unique identifier for request tracking and correlation")] string? requestId,
+            [InHeader("X-Client-Version", Description = "Client application version (e.g., '1.2.3')")] string? clientVersion,
+            [InHeader("Accept-Language", Description = "Preferred language for the response (e.g., 'en-US', 'fr-FR')")] string? language);
 
         /// <summary>
         /// Demonstrates mixing custom query and header parameter names.
@@ -99,11 +99,11 @@ namespace NetCore3TestApp.Api
         /// </summary>
         [Get("mixed")]
         Task<MvcMixedResult> MixedParams(
-            [InPath] string id,
-            [InQuery("filter_text")] string filterText,
-            [InQuery("max_results")] int maxResults,
-            [InHeader("Authorization")] string? authToken,
-            [InHeader("X-Correlation-Id")] string? correlationId);
+            [InPath(Description = "The unique identifier for the resource")] string id,
+            [InQuery("$filter", Description = "Text to filter the results by")] string filterText,
+            [InQuery("max_results", Description = "Maximum number of results to return (1-1000)")] int maxResults,
+            [InHeader("Authorization", Description = "Bearer token for authentication")] string? authToken,
+            [InHeader("X-Correlation-Id", Description = "Correlation ID for distributed tracing")] string? correlationId);
     }
 
     public class MvcSearchResult

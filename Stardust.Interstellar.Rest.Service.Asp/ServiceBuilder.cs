@@ -209,22 +209,46 @@ namespace Stardust.Interstellar.Rest.Service
             var route = typeof(RouteAttribute).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { typeof(String) }, null);
             var httpGet = httpMethodAttribute(implementationMethod, serviceLocator);
             var uriAttrib = typeof(FromUriAttribute).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { }, null);
+            var uriAttribWithName = typeof(FromUriAttribute).GetProperty("Name");
             var bodyAttrib = typeof(FromBodyAttribute).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { }, null);
 
             method.SetReturnType(typeof(Task).IsAssignableFrom(implementationMethod.ReturnType) ? typeof(Task<HttpResponseMessage>) : typeof(HttpResponseMessage));
             // Adding parameters
             methodParams = GetMethodParams(implementationMethod, serviceLocator);
-            pTypes = methodParams.Where(p => p.In != InclutionTypes.Header).Select(p => p.Type).ToArray();
+            // Include ALL parameters in method signature (including headers)
+            pTypes = methodParams.Select(p => p.Type).ToArray();
             method.SetParameters(pTypes.ToArray());
             // Parameter id
             int pid = 1;
-            foreach (var parameterWrapper in methodParams.Where(p => p.In != InclutionTypes.Header))
+            foreach (var parameterWrapper in methodParams)
             {
                 try
                 {
                     var p = method.DefineParameter(pid, ParameterAttributes.None, parameterWrapper.Name);
-                    if (parameterWrapper.In == InclutionTypes.Path) p.SetCustomAttribute(new CustomAttributeBuilder(uriAttrib, new Type[] { }));
-                    else if (parameterWrapper.In == InclutionTypes.Body) p.SetCustomAttribute(new CustomAttributeBuilder(bodyAttrib, new Type[] { }));
+                    
+                    if (parameterWrapper.In == InclutionTypes.Header)
+                    {
+                        // Headers are not directly supported in ASP.NET Framework Web API parameters
+                        // They are retrieved from Request.Headers in ServiceWrapperBase
+                        // Skip adding FromUri/FromBody attribute for headers
+                    }
+                    else if (parameterWrapper.In == InclutionTypes.Path || parameterWrapper.In == InclutionTypes.Query)
+                    {
+                        // Apply FromUriAttribute with custom name if specified
+                        if (!string.IsNullOrWhiteSpace(parameterWrapper.CustomName))
+                        {
+                            p.SetCustomAttribute(new CustomAttributeBuilder(uriAttrib, new object[] { }, 
+                                new[] { uriAttribWithName }, new object[] { parameterWrapper.CustomName }));
+                        }
+                        else
+                        {
+                            p.SetCustomAttribute(new CustomAttributeBuilder(uriAttrib, new Type[] { }));
+                        }
+                    }
+                    else if (parameterWrapper.In == InclutionTypes.Body)
+                    {
+                        p.SetCustomAttribute(new CustomAttributeBuilder(bodyAttrib, new Type[] { }));
+                    }
                     pid++;
                 }
                 catch (Exception)
@@ -353,7 +377,14 @@ namespace Stardust.Interstellar.Rest.Service
                         if (fromUri != null) @in = new InAttribute(InclutionTypes.Path);
                     }
                 }
-                methodParams.Add(new ParameterWrapper { Name = parameterInfo.Name, Type = parameterInfo.ParameterType, In = @in?.InclutionType ?? InclutionTypes.Body });
+                methodParams.Add(new ParameterWrapper 
+                { 
+                    Name = parameterInfo.Name, 
+                    CustomName = @in?.Name,
+                    Description = @in?.Description,
+                    Type = parameterInfo.ParameterType, 
+                    In = @in?.InclutionType ?? InclutionTypes.Body 
+                });
             }
             return methodParams;
         }
