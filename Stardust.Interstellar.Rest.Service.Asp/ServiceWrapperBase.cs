@@ -13,6 +13,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
@@ -81,6 +82,7 @@ namespace Stardust.Interstellar.Rest.Service
             {
                 customHandler.SetServiceHeaders(result.Headers);
             }
+
         }
 
         private void SetServiceHeaders(HttpResponseMessage result)
@@ -284,11 +286,25 @@ namespace Stardust.Interstellar.Rest.Service
                 state.SetState("controllerName", typeof(T).FullName);
                 state.SetState("action", action.Name);
                 var i = 0;
+                var webMethodParamIndex = 0;
                 foreach (var parameter in action.Parameters)
                 {
-                    var val = parameter.In == InclusionTypes.Header
-                        ? GetFromHeaders(parameter)
-                        : fromWebMethodParameters[i];
+                    object val;
+                    if (parameter.In == InclusionTypes.Ignore && parameter.Type == typeof(CancellationToken))
+                    {
+                        // Use the request's cancellation token from current context
+                        // In Web API, the cancellation token can be obtained from Request properties
+                        val = GetRequestCancellationToken();
+                    }
+                    else if (parameter.In == InclusionTypes.Header)
+                    {
+                        val = GetFromHeaders(parameter);
+                    }
+                    else
+                    {
+                        val = fromWebMethodParameters[webMethodParamIndex];
+                        webMethodParamIndex++;
+                    }
                     wrappers.Add(parameter.Create(val));
                     i++;
                 }
@@ -406,6 +422,27 @@ namespace Stardust.Interstellar.Rest.Service
             throw new InvalidCastException("Not currently able to deal with collections...");
         }
 
+        /// <summary>
+        /// Gets the cancellation token from the current request context.
+        /// Falls back to CancellationToken.None if not available.
+        /// </summary>
+        private CancellationToken GetRequestCancellationToken()
+        {
+            try
+            {
+                // Try to get the cancellation token from the request's client disconnect token
+                if (HttpContext.Current?.Response?.ClientDisconnectedToken != null)
+                {
+                    return HttpContext.Current.Response.ClientDisconnectedToken;
+                }
+            }
+            catch
+            {
+                // Ignore - may not be available in all hosting scenarios
+            }
+            return CancellationToken.None;
+        }
+
         private static ConcurrentDictionary<Type, ErrorHandlerAttribute> errorhanderCache = new ConcurrentDictionary<Type, ErrorHandlerAttribute>();
         private List<ParameterWrapper> _wrappers;
 
@@ -498,6 +535,18 @@ namespace Stardust.Interstellar.Rest.Service
         {
             foreach (var parameterInfo in methodInfo.GetParameters())
             {
+                // Check if parameter is a CancellationToken - mark as Ignore
+                if (parameterInfo.ParameterType == typeof(CancellationToken))
+                {
+                    action.Parameters.Add(new ParameterWrapper
+                    {
+                        Name = parameterInfo.Name,
+                        Type = parameterInfo.ParameterType,
+                        In = InclusionTypes.Ignore
+                    });
+                    continue;
+                }
+
                 var @in = parameterInfo.GetCustomAttribute<InAttribute>(true);
                 if (@in == null)
                 {

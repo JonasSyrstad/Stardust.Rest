@@ -136,6 +136,37 @@ public class MyService
 
 ---
 
+## HttpClient Management
+
+### Default Provider (Backward Compatible)
+
+By default, the framework uses a static dictionary to cache HttpClient instances per base URL. This prevents socket exhaustion but doesn't handle DNS changes.
+
+### IHttpClientFactory (Recommended for Production)
+
+For production workloads, use the IHttpClientFactory integration for proper connection lifetime management:
+
+```csharp
+// Program.cs or Startup.cs
+services.AddStardustHttpClientFactory()
+    .SetHandlerLifetime(TimeSpan.FromMinutes(15));  // DNS refresh interval
+
+// Or with custom configuration
+services.AddStardustHttpClientFactory(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(30);
+    client.DefaultRequestHeaders.Add("User-Agent", "MyApp/1.0");
+});
+```
+
+**Benefits of IHttpClientFactory:**
+- ? DNS change handling through connection recycling
+- ? Proper connection pooling with configurable lifetime
+- ? Automatic disposal of expired connections
+- ? Integration with Polly for resilience policies
+
+---
+
 ## Parameter Binding
 
 ```csharp
@@ -311,9 +342,134 @@ public interface IXmlService { }
 
 ```csharp
 ClientGlobalSettings.Timeout = 30;                          // HTTP timeout (seconds)
+ClientGlobalSettings.PooledConnectionLifetime = TimeSpan.FromMinutes(15);  // DNS refresh
+ClientGlobalSettings.MaxConnectionsPerServer = 100;         // Connection limit
+
 ProxyFactory.RunAuthProviderBeforeAppendingBody = true;     // Auth before body
 ProxyFactory.EnableExpectContinue100ForPost = true;         // Expect: 100-continue
 ```
+
+---
+
+## ?? Security Considerations
+
+The client library provides several built-in security features, but some security aspects require developer implementation.
+
+### Built-in Security Features
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| HTTP Header Injection Prevention | ? Built-in | Header names and values are automatically sanitized per RFC 7230 |
+| HttpClient Connection Management | ? Built-in | IHttpClientFactory support for proper DNS handling |
+| TLS/HTTPS | ? Uses System Default | Inherits .NET's default TLS configuration |
+
+### Developer Responsibilities
+
+#### ?? Authentication Handler Security
+
+When implementing `IAuthenticationHandler`, follow these best practices:
+
+```csharp
+public class SecureBearerTokenHandler : IAuthenticationHandler
+{
+    private readonly ITokenProvider _tokenProvider;
+    
+    public SecureBearerTokenHandler(ITokenProvider tokenProvider)
+    {
+        _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
+    }
+
+    public async Task ApplyAsync(HttpRequestMessage req)
+    {
+        // ? Get token from secure provider (Azure Key Vault, DPAPI, etc.)
+        var token = await _tokenProvider.GetTokenAsync();
+        
+        if (!string.IsNullOrEmpty(token))
+        {
+            req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
+    }
+
+    // ...
+}
+```
+
+**?? Security Checklist:**
+- ? Never hardcode credentials in source code
+- ? Never store tokens in plain text configuration
+- ? Use secure token storage (Azure Key Vault, DPAPI, Credential Manager)
+- ? Implement token refresh/rotation
+- ? Handle 401 responses gracefully (re-authenticate and retry)
+
+#### ?? Custom Header Handler Security
+
+When implementing `IHeaderHandler`, ensure values are sanitized:
+
+```csharp
+public class SecureHeaderHandler : IHeaderHandler
+{
+    public void SetHeader(HttpRequestMessage req)
+    {
+        // ? Framework automatically sanitizes header values via SanitizeHttpHeaderValue()
+        // ? Framework automatically validates header names via SanitizeHttpHeaderName()
+        // ?? If bypassing framework methods, sanitize manually:
+        
+        var userInput = GetUserInput();
+        // Remove CR/LF and other injection characters
+        var sanitized = userInput?.Replace("\r", "").Replace("\n", "") ?? "";
+        req.Headers.Add("X-Custom-Header", sanitized);
+    }
+}
+```
+
+#### ?? Response Deserialization Security
+
+The framework uses Newtonsoft.Json for deserialization. For secure deserialization:
+
+```csharp
+// Configure secure JSON settings for a service type
+var settings = new JsonSerializerSettings
+{
+    TypeNameHandling = TypeNameHandling.None,  // ?? Prevent type confusion attacks
+    MaxDepth = 64                               // Prevent stack overflow
+};
+
+settings.AddClientSerializer<IMyService>();
+```
+
+**?? Security Checklist:**
+- ? Set `TypeNameHandling = TypeNameHandling.None` (default)
+- ? Validate expected response schemas
+- ?? Be cautious with `IClientResponseInjector` implementations
+
+#### ?? Connection Security
+
+For production environments, use IHttpClientFactory with proper TLS configuration:
+
+```csharp
+services.AddStardustHttpClientFactory()
+    .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+    {
+        SslOptions = new SslClientAuthenticationOptions
+        {
+            EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
+            // Optional: Certificate pinning
+            RemoteCertificateValidationCallback = ValidateCertificate
+        },
+        PooledConnectionLifetime = TimeSpan.FromMinutes(15),
+        MaxConnectionsPerServer = 100
+    });
+```
+
+### Security Testing Checklist
+
+Before deploying to production:
+
+- [ ] Authentication handler uses secure credential storage
+- [ ] TLS 1.2+ enforced for all connections
+- [ ] No sensitive data logged in error handlers
+- [ ] Circuit breaker thresholds prevent DoS amplification
+- [ ] Response size limits configured for large payload protection
 
 ---
 
@@ -325,6 +481,7 @@ ProxyFactory.EnableExpectContinue100ForPost = true;         // Expect: 100-conti
 
 - Stardust.Interstellar.Rest.Annotations
 - Microsoft.Extensions.DependencyInjection.Abstractions
+- Microsoft.Extensions.Http (for IHttpClientFactory support)
 - Newtonsoft.Json
 
 ## License
@@ -335,3 +492,4 @@ Apache-2.0
 
 - [GitHub](https://github.com/JonasSyrstad/Stardust.Rest)
 - [NuGet](https://www.nuget.org/packages/Stardust.Interstellar.Rest)
+- [Security Assessment](docs/SECURITY_ASSESSMENT.md)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading;
 using Stardust.Interstellar.Rest.Annotations;
 using Stardust.Interstellar.Rest.Annotations.Messaging;
 using Stardust.Interstellar.Rest.Client;
@@ -75,6 +76,18 @@ namespace Stardust.Interstellar.Rest.Common
             }
             foreach (var parameterInfo in methodInfo.GetParameters())
             {
+                // Check if parameter is a CancellationToken - mark as Ignore
+                if (parameterInfo.ParameterType == typeof(CancellationToken))
+                {
+                    action.Parameters.Add(new ParameterWrapper
+                    {
+                        Name = parameterInfo.Name,
+                        Type = parameterInfo.ParameterType,
+                        In = InclusionTypes.Ignore
+                    });
+                    continue;
+                }
+
                 var @in = parameterInfo.GetCustomAttribute<InAttribute>(true);
                 //if (@in == null)
                 //{

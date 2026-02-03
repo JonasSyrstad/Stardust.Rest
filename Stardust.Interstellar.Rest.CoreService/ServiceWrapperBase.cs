@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -22,6 +23,7 @@ namespace Stardust.Interstellar.Rest.Service
     public abstract class ServiceWrapperBase : Controller
     {
         protected internal readonly IServiceProvider _serviceLocator;
+
 
         protected ServiceWrapperBase(IServiceProvider serviceLocator)
         {
@@ -304,11 +306,24 @@ namespace Stardust.Interstellar.Rest.Service
                 state.SetState("controllerName", typeof(T).FullName);
                 state.SetState("action", action.Name);
                 var i = 0;
+                var webMethodParamIndex = 0;
                 foreach (var parameter in action.Parameters)
                 {
-                    var val = parameter.In == InclusionTypes.Header
-                        ? GetFromHeaders(parameter)
-                        : fromWebMethodParameters[i];
+                    object val;
+                    if (parameter.In == InclusionTypes.Ignore && parameter.Type == typeof(CancellationToken))
+                    {
+                        // Use the request's cancellation token from HttpContext
+                        val = HttpContext.RequestAborted;
+                    }
+                    else if (parameter.In == InclusionTypes.Header)
+                    {
+                        val = GetFromHeaders(parameter);
+                    }
+                    else
+                    {
+                        val = fromWebMethodParameters[webMethodParamIndex];
+                        webMethodParamIndex++;
+                    }
                     wrappers.Add(parameter.Create(val));
                     i++;
                 }
@@ -527,6 +542,18 @@ namespace Stardust.Interstellar.Rest.Service
         {
             foreach (var parameterInfo in methodInfo.GetParameters())
             {
+                // Check if parameter is a CancellationToken - mark as Ignore
+                if (parameterInfo.ParameterType == typeof(CancellationToken))
+                {
+                    action.Parameters.Add(new ParameterWrapper
+                    {
+                        Name = parameterInfo.Name,
+                        Type = parameterInfo.ParameterType,
+                        In = InclusionTypes.Ignore
+                    });
+                    continue;
+                }
+
                 var @in = parameterInfo.GetCustomAttribute<InAttribute>(true);
                 if (@in == null)
                 {

@@ -11,8 +11,8 @@ namespace Stardust.Interstellar.Rest.Client
     public static class ClientGlobalSettings
     {
         /// <summary>
-        /// Gets or sets the time-out value in milliseconds for the System.Net.HttpWebRequest.GetResponse
-        /// and System.Net.HttpWebRequest.GetRequestStream methods.
+        /// Gets or sets the time-out value in seconds for HTTP requests.
+        /// Default is 100 seconds if not specified.
         /// </summary>
         public static int? Timeout { get; set; }
 
@@ -29,11 +29,39 @@ namespace Stardust.Interstellar.Rest.Client
 
         public static bool? KeepAlive { get; set; }
 
+        /// <summary>
+        /// Gets or sets the maximum lifetime of pooled connections when using IHttpClientFactory.
+        /// When this time elapses, connections are recycled, allowing DNS changes to take effect.
+        /// Default is 15 minutes if not specified.
+        /// </summary>
+        /// <remarks>
+        /// This setting only applies when using <see cref="HttpClientFactoryProvider"/> with IHttpClientFactory.
+        /// The <see cref="DefaultHttpClientProvider"/> does not support connection lifetime management.
+        /// </remarks>
+        public static TimeSpan? PooledConnectionLifetime { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum number of connections per server when using IHttpClientFactory.
+        /// Default is 100 if not specified.
+        /// </summary>
+        public static int? MaxConnectionsPerServer { get; set; }
+
         public static void SetExtendedTimeouts()
         {
             Timeout = 300000;
             ReadWriteTimeout = 3000000;
             ContinueTimeout = 300000;
+        }
+
+        /// <summary>
+        /// Configures recommended production settings for HttpClient management.
+        /// </summary>
+        /// <param name="connectionLifetimeMinutes">Connection lifetime in minutes for DNS refresh. Default is 15.</param>
+        /// <param name="maxConnectionsPerServer">Maximum connections per server. Default is 100.</param>
+        public static void SetProductionDefaults(int connectionLifetimeMinutes = 15, int maxConnectionsPerServer = 100)
+        {
+            PooledConnectionLifetime = TimeSpan.FromMinutes(connectionLifetimeMinutes);
+            MaxConnectionsPerServer = maxConnectionsPerServer;
         }
 
         public static ServiceConfigurationContext<T> ServiceSettings<T>(IServiceLocator locator)

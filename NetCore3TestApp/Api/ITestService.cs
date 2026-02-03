@@ -11,7 +11,7 @@ namespace NetCore3TestApp.Api
         Task<string> Test([InPath] string id, [InPath] string message);
 
         [Get("paramsTest")]
-        Task<string> Params([InPath] string id, [InQuery] Dictionary<string, string> prefixedParameters);
+        Task<string> Params([InPath] string id, [InQuery] Dictionary<string, string> prefixedParameters, CancellationToken cancellationToken);
 
         /// <summary>
         /// Client method demonstrating custom query parameter names.
@@ -49,7 +49,7 @@ namespace NetCore3TestApp.Api
     {
         [Get("test")]
         [SuccessStatusCode(HttpStatusCode.Accepted)]
-        Task<string> Test([InPath] string id, [InPath] string message);
+        Task<string> Test([InPath] string id, [InPath] string message, CancellationToken cancellationToken = default);
 
         [Get("test2")]
         Task<string> Test2([InPath] string id, [InPath] string message);
@@ -61,7 +61,7 @@ namespace NetCore3TestApp.Api
         [Get("test4")]
         string Test4([InPath] string id, [InPath] string message);
 
-        [Post("test5")] 
+        [Post("test5")]
         [SuccessStatusCode(HttpStatusCode.Accepted)]
         Task Test5([InPath] string id, [InQuery] string tt);
 
@@ -137,7 +137,7 @@ namespace NetCore3TestApp.Api
 
     public class TestService : ITestService
     {
-        public Task<string> Test(string id, string message)
+        public Task<string> Test(string id, string message, CancellationToken cancellationToken = default)
         {
             return Task.FromResult($"{DateTime.UtcNow}: '{message}' with id '{id}'");
         }
@@ -157,7 +157,7 @@ namespace NetCore3TestApp.Api
             return $"{DateTime.UtcNow}: {message}";
         }
 
-        public Task Test5(string id, string tt) 
+        public Task Test5(string id, string tt)
         {
             return Task.CompletedTask;
         }

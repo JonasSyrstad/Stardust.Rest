@@ -224,7 +224,8 @@ namespace Stardust.Interstellar.Rest.Client
           ActionWrapper action,
           string path)
         {
-            return Task.Run(async () => await InvokeActionAsync(parameters, action, path)).Result;
+            CancellationToken cancellationToken = ExtractCancellationToken(parameters);
+            return Task.Run(async () => await InvokeActionAsync(parameters, action, path, cancellationToken), cancellationToken).Result;
         }
 
         private void GetHeaderValues(ActionWrapper action, HttpResponseMessage response)
@@ -463,6 +464,17 @@ namespace Stardust.Interstellar.Rest.Client
             return str;
         }
 
+        /// <summary>
+        /// Extracts the CancellationToken from the parameters array, if present.
+        /// </summary>
+        private static CancellationToken ExtractCancellationToken(ParameterWrapper[] parameters)
+        {
+            var ctParameter = parameters?.FirstOrDefault(p => p.In == InclusionTypes.Ignore && p.Type == typeof(CancellationToken));
+            if (ctParameter?.value is CancellationToken ct)
+                return ct;
+            return CancellationToken.None;
+        }
+
         public bool VerboseLogging { get; set; }
 
         public static bool DisableProxy { get; set; }
@@ -583,14 +595,16 @@ namespace Stardust.Interstellar.Rest.Client
         {
             ActionWrapper action = GetAction(name);
             string path = BuildActionUrl(parameters, action);
+            CancellationToken cancellationToken = ExtractCancellationToken(parameters);
             int cnt = 0;
             int waittime = action.Interval;
             while (cnt <= action.NumberOfRetries)
             {
                 ++cnt;
+                cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
-                    ResultWrapper result = await CircuitBreakerContainer.GetCircuitBreaker(interfaceType, _serviceLocator).ExecuteAsync(baseUri + path, async () => await InvokeActionAsync(parameters, action, path), _serviceLocator);
+                    ResultWrapper result = await CircuitBreakerContainer.GetCircuitBreaker(interfaceType, _serviceLocator).ExecuteAsync(baseUri + path, async () => await InvokeActionAsync(parameters, action, path, cancellationToken), _serviceLocator);
                     if (result.Error != null)
                     {
                         if (result.Error is SuspendedDependencyException || !action.Retry || cnt > action.NumberOfRetries || !IsTransient(action, result.Error))
@@ -599,7 +613,7 @@ namespace Stardust.Interstellar.Rest.Client
                         _serviceLocator.GetService<ILogger>()?.Message(string.Format("Retrying action {0}, retry count {1}", action.Name, cnt));
                         waittime *= action.IncrementalRetry ? cnt : 1;
                         result.EndState();
-                        await Task.Delay(waittime);
+                        await Task.Delay(waittime, cancellationToken);
                     }
                     else
                     {
@@ -608,11 +622,15 @@ namespace Stardust.Interstellar.Rest.Client
                         return result;
                     }
                 }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
                 catch (Exception ex)
                 {
                     if (!action.Retry || cnt > action.NumberOfRetries || !IsTransient(action, ex))
                         throw;
-                    await Task.Delay(action.IncrementalRetry ? cnt : action.Interval);
+                    await Task.Delay(action.IncrementalRetry ? cnt : action.Interval, cancellationToken);
                 }
             }
             throw new Exception("Should not get here!?!");
@@ -636,14 +654,15 @@ namespace Stardust.Interstellar.Rest.Client
         private async Task<ResultWrapper> InvokeActionAsync(
           ParameterWrapper[] parameters,
           ActionWrapper action,
-          string path)
+          string path,
+          CancellationToken cancellationToken = default)
         {
             HttpRequestMessage req = await CreateActionRequestAsync(parameters, action, path);
             HttpResponseMessage response = null;
             ResultWrapper errorResult;
             try
             {
-                response = await GetClient().SendAsync(req);
+                response = await GetClient().SendAsync(req, cancellationToken);
                 if (!response.IsSuccessStatusCode)
                     throw new HttpRequestException(response.ReasonPhrase);
                 EnsureActionId(req, response);
@@ -651,6 +670,10 @@ namespace Stardust.Interstellar.Rest.Client
                 ResultWrapper result = await CreateResult(action, response);
                 result.ActionId = req.ActionId();
                 return result;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (HttpRequestException ex)
             {

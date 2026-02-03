@@ -341,6 +341,304 @@ ServiceFactory.DisableStardustVersion();
 
 ---
 
+## 🔒 Security Considerations
+
+The server library generates ASP.NET Core controllers and endpoints from your interfaces. Several security aspects require developer attention.
+
+### Built-in Security Features
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| HTTP Header Sanitization | ✅ Built-in | Response headers are automatically sanitized |
+| ASP.NET Core Integration | ✅ Built-in | Leverages ASP.NET Core's security infrastructure |
+| Authorization Support | ✅ Built-in | `[AuthorizeWrapper]` maps to ASP.NET Core authorization |
+| Model Binding | ✅ Built-in | Uses ASP.NET Core's secure model binding |
+
+### Developer Responsibilities
+
+#### 🚨 Error Handling & Information Disclosure
+
+By default, exception messages may be exposed to clients. Implement a secure error handler:
+
+```csharp
+public class SecureErrorHandler : IErrorHandler
+{
+    private readonly ILogger<SecureErrorHandler> _logger;
+    private readonly IHostEnvironment _env;
+
+    public SecureErrorHandler(ILogger<SecureErrorHandler> logger, IHostEnvironment env)
+    {
+        _logger = logger;
+        _env = env;
+    }
+
+    public HttpResponseMessage ConvertToErrorResponse(Exception ex, HttpRequestMessage req)
+    {
+        // ✅ Generate unique error ID for correlation
+        var errorId = Guid.NewGuid().ToString("N");
+        
+        // ✅ Log full exception internally
+        _logger.LogError(ex, "Error {ErrorId} processing {Method} {Path}", 
+            errorId, req.Method, req.RequestUri?.PathAndQuery);
+        
+        // ✅ Return sanitized response based on environment
+        var response = new ErrorResponse
+        {
+            ErrorId = errorId,
+            Message = _env.IsDevelopment() 
+                ? ex.Message 
+                : "An error occurred processing your request.",
+            // ❌ Never include: ex.StackTrace, ex.InnerException, connection strings
+        };
+        
+        return req.CreateResponse(GetStatusCode(ex), response);
+    }
+
+    private HttpStatusCode GetStatusCode(Exception ex) => ex switch
+    {
+        ArgumentException => HttpStatusCode.BadRequest,
+        UnauthorizedAccessException => HttpStatusCode.Unauthorized,
+        KeyNotFoundException => HttpStatusCode.NotFound,
+        _ => HttpStatusCode.InternalServerError
+    };
+}
+
+// Register globally
+services.AddScoped<IErrorHandler, SecureErrorHandler>();
+```
+
+**⚠️ Information Disclosure Risks:**
+- ❌ Stack traces reveal internal structure
+- ❌ Exception messages may contain file paths
+- ❌ Database errors may expose connection strings
+- ❌ Validation errors may reveal expected formats
+
+#### 🔐 Authorization Best Practices
+
+Use ASP.NET Core's authorization system with `[AuthorizeWrapper]`:
+
+```csharp
+[Api("api/admin")]
+[AuthorizeWrapper(Roles = "Admin")]  // Require Admin role for all methods
+public interface IAdminService
+{
+    [Get("users")]
+    Task<List<User>> GetAllUsersAsync();
+
+    [Delete("users/{id}")]
+    [AuthorizeWrapper(Policy = "SuperAdmin")]  // Additional policy requirement
+    Task DeleteUserAsync([InPath] string id);
+}
+```
+
+**Configure authorization:**
+```csharp
+services.AddAuthorization(options =>
+{
+    options.AddPolicy("SuperAdmin", policy =>
+        policy.RequireRole("Admin")
+              .RequireClaim("department", "IT"));
+});
+
+// Require authentication by default
+services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
+```
+
+#### 🛡️ Input Validation
+
+Implement input validation using `IInputInterceptor` or ASP.NET Core model validation:
+
+```csharp
+// Option 1: Use Data Annotations on your models
+public class CreateUserRequest
+{
+    [Required]
+    [StringLength(100, MinimumLength = 1)]
+    public string Name { get; set; }
+
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; }
+
+    [Range(0, 150)]
+    public int? Age { get; set; }
+}
+
+// Option 2: Custom input interceptor
+public class ValidationInterceptor : IInputInterceptor
+{
+    public bool Intercept(object[] values, StateDictionary state,
+        out string message, out HttpStatusCode statusCode)
+    {
+        foreach (var value in values.Where(v => v != null))
+        {
+            var context = new ValidationContext(value);
+            var results = new List<ValidationResult>();
+            
+            if (!Validator.TryValidateObject(value, context, results, true))
+            {
+                message = string.Join("; ", results.Select(r => r.ErrorMessage));
+                statusCode = HttpStatusCode.BadRequest;
+                return true;  // Cancel request
+            }
+        }
+        
+        message = null;
+        statusCode = HttpStatusCode.OK;
+        return false;
+    }
+}
+
+// Apply to interface
+[InputInterceptor(typeof(ValidationInterceptor))]
+public interface IUserService { }
+```
+
+#### ⏱️ Rate Limiting
+
+Protect against DoS attacks using the built-in throttling:
+
+```csharp
+// Interface-level rate limiting
+[Api("api/users")]
+[Throttling(maxRequestsPerSecound: 100)]
+public interface IUserService { }
+
+// Method-level (more restrictive for expensive operations)
+[Api("api/reports")]
+public interface IReportService
+{
+    [Get]
+    [Throttling(maxRequestsPerSecound: 10)]  // Expensive operation
+    Task<Report> GenerateReportAsync([InQuery] ReportRequest request);
+}
+```
+
+**⚠️ Limitations:**
+- Built-in throttling is in-memory only
+- For distributed environments, use ASP.NET Core Rate Limiting or a custom `IThrottlingManager`
+
+```csharp
+// .NET 7+ Rate Limiting Middleware (recommended for production)
+builder.Services.AddRateLimiter(options =>
+{
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.User.Identity?.Name ?? context.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                Window = TimeSpan.FromSeconds(1),
+                PermitLimit = 100
+            }));
+});
+
+app.UseRateLimiter();
+```
+
+#### 📋 Response Header Security
+
+Add security headers using endpoint routing policies:
+
+```csharp
+public class SecurityHeadersPolicy : IEndpointRoutingPolicy
+{
+    public string PolicyName => "SecurityHeaders";
+
+    public void ApplyPolicyAsync(RouteHandlerBuilder builder)
+    {
+        builder.AddEndpointFilter(async (context, next) =>
+        {
+            var result = await next(context);
+            
+            var response = context.HttpContext.Response;
+            response.Headers["X-Content-Type-Options"] = "nosniff";
+            response.Headers["X-Frame-Options"] = "DENY";
+            response.Headers["X-XSS-Protection"] = "1; mode=block";
+            response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+            
+            return result;
+        });
+    }
+
+    public Dictionary<string, string> GetResponseHeaders() => new()
+    {
+        ["X-Content-Type-Options"] = "nosniff",
+        ["X-Frame-Options"] = "DENY"
+    };
+}
+
+// Apply to all endpoints
+[Api("api/users")]
+[EndpointRoutingPolicy("SecurityHeaders")]
+public interface IUserService { }
+```
+
+#### 🔍 Logging & Auditing
+
+Implement proper logging without exposing sensitive data:
+
+```csharp
+public class AuditingHeaderHandler : IHeaderHandler
+{
+    private readonly ILogger _logger;
+    
+    public int ProcessingOrder => int.MaxValue;  // Run last
+
+    public void SetHeader(HttpRequestMessage req)
+    {
+        // Add correlation ID for tracing
+        var correlationId = Activity.Current?.Id ?? Guid.NewGuid().ToString();
+        req.Headers.Add("X-Correlation-Id", correlationId);
+    }
+
+    public void GetHeader(HttpResponseMessage response)
+    {
+        // ✅ Log request completion
+        // ❌ Don't log: Authorization headers, request bodies with PII
+        _logger.LogInformation(
+            "Request completed: {Method} {Path} -> {StatusCode}",
+            response.RequestMessage?.Method,
+            response.RequestMessage?.RequestUri?.PathAndQuery,
+            response.StatusCode);
+    }
+}
+```
+
+### Security Configuration Checklist
+
+**Error Handling:**
+- [ ] Custom `IErrorHandler` implemented
+- [ ] Stack traces hidden in production
+- [ ] Error IDs generated for correlation
+- [ ] Sensitive data scrubbed from messages
+
+**Authorization:**
+- [ ] `[AuthorizeWrapper]` applied appropriately
+- [ ] Policies configured for sensitive operations
+- [ ] Default deny policy considered
+
+**Input Validation:**
+- [ ] Data Annotations on request models
+- [ ] Custom `IInputInterceptor` for complex validation
+- [ ] Size limits on request bodies
+
+**Rate Limiting:**
+- [ ] `[Throttling]` applied to public endpoints
+- [ ] Distributed rate limiting for scaled deployments
+- [ ] Different limits for different operations
+
+**Response Security:**
+- [ ] Security headers added
+- [ ] CORS configured appropriately
+- [ ] Sensitive data not in responses
+
+---
+
 ## Full Example
 
 ```csharp
@@ -351,16 +649,27 @@ builder.Services.AddInterstellar();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
+// Security: Add error handler
+builder.Services.AddScoped<IErrorHandler, SecureErrorHandler>();
+
 builder.Services.AddMvc()
     .AddAsController<IUserService, UserService>()
     .UseInterstellar();
 
 builder.Services.AddSwaggerGen();
 
+// Security: Add authorization
+builder.Services.AddAuthorization();
+
+// Security: Add rate limiting (.NET 7+)
+builder.Services.AddRateLimiter(options => { /* ... */ });
+
 var app = builder.Build();
 
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 app.UseEndpoints(endpoints =>
 {
@@ -394,3 +703,4 @@ Apache-2.0
 
 - [GitHub](https://github.com/JonasSyrstad/Stardust.Rest)
 - [NuGet](https://www.nuget.org/packages/Stardust.Interstellar.Rest.Service.AspNetCore)
+- [Security Assessment](docs/SECURITY_ASSESSMENT.md)

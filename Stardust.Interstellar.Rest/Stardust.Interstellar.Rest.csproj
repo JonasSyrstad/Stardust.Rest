@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>5.7.0</Version>
+    <Version>5.7.2</Version>
     <Authors>Stardust</Authors>
     <Company>Stardust</Company>
     <PackageId>Stardust.Interstellar.Rest</PackageId>
@@ -17,7 +17,8 @@
     <PackageTags>rest client proxy generator</PackageTags>
     <PackageReleaseNotes>Bugfix: nullreference when action parameters has null values
 Enhancement: set WebProxy for IConfigurableService services
-Bugfix: fixed over eager circuit breaker</PackageReleaseNotes>
+Bugfix: fixed over eager circuit breaker
+Enhancement: Added IHttpClientProvider for proper HttpClient management with IHttpClientFactory support</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSource>True</IncludeSource>
     <IncludeSymbols>True</IncludeSymbols>
@@ -30,7 +31,8 @@ Bugfix: fixed over eager circuit breaker</PackageReleaseNotes>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Primitives" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="2.1.1" />
     <PackageReference Include="Stardust.Particles" Version="5.0.2" />
   </ItemGroup>
 

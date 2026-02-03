@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Threading;
 using System.Threading.Tasks;
 using Stardust.Interstellar.Rest.Annotations.Service;
 using Stardust.Particles;
@@ -393,6 +394,7 @@ namespace Stardust.Interstellar.Rest.Service
             return implementationMethod.ReturnType;
         }
 
+
         private static List<ParameterWrapper> GetMethodParams(MethodInfo implementationMethod, IServiceLocator serviceLocator)
         {
             var resolver = serviceLocator.GetService<IServiceParameterResolver>();
@@ -401,6 +403,59 @@ namespace Stardust.Interstellar.Rest.Service
             var methodParams = new List<ParameterWrapper>();
             foreach (var parameterInfo in implementationMethod.GetParameters())
             {
+                // Skip CancellationToken parameters - they are handled by ASP.NET Core automatically
+                if (parameterInfo.ParameterType == typeof(CancellationToken))
+                {
+                    continue;
+                }
+
+                var @in = parameterInfo.GetCustomAttribute<InAttribute>(true);
+                if (@in == null)
+                {
+                    var fromBody = parameterInfo.GetCustomAttribute<FromBodyAttribute>(true);
+                    if (fromBody != null) @in = new InAttribute(InclusionTypes.Body);
+                    if (@in == null)
+                    {
+                        var fromUri = parameterInfo.GetCustomAttribute<FromRouteAttribute>(true) ?? parameterInfo.GetCustomAttribute<FromQueryAttribute>(true) as IBindingSourceMetadata;
+                        if (fromUri != null) @in = new InAttribute(InclusionTypes.Path);
+                    }
+                }
+                methodParams.Add(new ParameterWrapper 
+                { 
+                    Name = parameterInfo.Name, 
+                    CustomName = @in?.Name,
+                    Description = @in?.Description,
+                    Type = parameterInfo.ParameterType, 
+                    In = @in?.InclusionType ?? InclusionTypes.Path 
+                });
+            }
+            return methodParams;
+        }
+
+        /// <summary>
+        /// Gets ALL method parameters including CancellationToken (marked as Ignore).
+        /// Used by DelegateBuilder to correctly invoke the implementation method.
+        /// </summary>
+        private static List<ParameterWrapper> GetAllMethodParams(MethodInfo implementationMethod, IServiceLocator serviceLocator)
+        {
+            var resolver = serviceLocator.GetService<IServiceParameterResolver>();
+            var resolvedParams = resolver?.ResolveParameters(implementationMethod);
+            if (resolvedParams != null && resolvedParams.Count() == implementationMethod.GetParameters().Length) return resolvedParams.ToList();
+            var methodParams = new List<ParameterWrapper>();
+            foreach (var parameterInfo in implementationMethod.GetParameters())
+            {
+                // Include CancellationToken parameters marked as Ignore
+                if (parameterInfo.ParameterType == typeof(CancellationToken))
+                {
+                    methodParams.Add(new ParameterWrapper
+                    {
+                        Name = parameterInfo.Name,
+                        Type = parameterInfo.ParameterType,
+                        In = InclusionTypes.Ignore
+                    });
+                    continue;
+                }
+
                 var @in = parameterInfo.GetCustomAttribute<InAttribute>(true);
                 if (@in == null)
                 {
@@ -588,13 +643,15 @@ namespace Stardust.Interstellar.Rest.Service
 
         public MethodBuilder BuildAsyncMethod(TypeBuilder type, MethodInfo implementationMethod, IServiceLocator serviceLocator)
         {
-            return InternalMethodBuilder(type, implementationMethod, (a, b, c, d) => BuildAsyncMethodBody(a, b, c, d, type), serviceLocator);
+            // Get all params including CancellationToken for the delegate
+            var allMethodParams = GetAllMethodParams(implementationMethod, serviceLocator);
+            return InternalMethodBuilder(type, implementationMethod, (a, b, c, d) => BuildAsyncMethodBody(a, b, c, d, type, allMethodParams), serviceLocator);
         }
         private static readonly int typeCounter = 0;
         private readonly bool _apiControllerAttributeTypeExecuted;
 
 
-        private MethodBuilder BuildAsyncMethodBody(MethodInfo implementationMethod, MethodBuilder method, Type[] pTypes, List<ParameterWrapper> methodParams, TypeBuilder parent)
+        private MethodBuilder BuildAsyncMethodBody(MethodInfo implementationMethod, MethodBuilder method, Type[] pTypes, List<ParameterWrapper> methodParams, TypeBuilder parent, List<ParameterWrapper> allMethodParams)
         {
             MethodInfo gatherParams = typeof(ServiceWrapperBase<>).MakeGenericType(implementationMethod.DeclaringType).GetMethod(
                     "GatherParameters",
@@ -606,7 +663,8 @@ namespace Stardust.Interstellar.Rest.Service
                               },
                     null
                     );
-            var delegateType = new DelegateBuilder(myModuleBuilder).CreateDelegate(implementationMethod, parent, methodParams);
+            // Use allMethodParams (includes CancellationToken) for the delegate to correctly invoke implementation
+            var delegateType = new DelegateBuilder(myModuleBuilder).CreateDelegate(implementationMethod, parent, allMethodParams);
             var delegateCtor = delegateType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { }, null);
             var baseType = typeof(ServiceWrapperBase<>).MakeGenericType(implementationMethod.DeclaringType);
             var implementation = baseType.GetRuntimeFields().Single(f => f.Name == "implementation");
@@ -715,10 +773,12 @@ namespace Stardust.Interstellar.Rest.Service
 
         public MethodBuilder BuildAsyncVoidMethod(TypeBuilder type, MethodInfo implementationMethod, IServiceLocator serviceLocator)
         {
-            return InternalMethodBuilder(type, implementationMethod, (a, b, c, d) => BuildAsyncVoidMethodBody(a, b, c, d, type), serviceLocator);
+            // Get all params including CancellationToken for the delegate
+            var allMethodParams = GetAllMethodParams(implementationMethod, serviceLocator);
+            return InternalMethodBuilder(type, implementationMethod, (a, b, c, d) => BuildAsyncVoidMethodBody(a, b, c, d, type, allMethodParams), serviceLocator);
         }
 
-        private MethodBuilder BuildAsyncVoidMethodBody(MethodInfo implementationMethod, MethodBuilder method, Type[] pTypes, List<ParameterWrapper> methodParams, TypeBuilder parent)
+        private MethodBuilder BuildAsyncVoidMethodBody(MethodInfo implementationMethod, MethodBuilder method, Type[] pTypes, List<ParameterWrapper> methodParams, TypeBuilder parent, List<ParameterWrapper> allMethodParams)
         {
             MethodInfo gatherParams = typeof(ServiceWrapperBase<>).MakeGenericType(implementationMethod.DeclaringType).GetMethod(
                      "GatherParameters",
@@ -730,7 +790,8 @@ namespace Stardust.Interstellar.Rest.Service
                                },
                      null
                      );
-            var delegateType = new VoidDelegateBuilder(myModuleBuilder).CreateVoidDelegate(implementationMethod, parent, methodParams);
+            // Use allMethodParams (includes CancellationToken) for the delegate to correctly invoke implementation
+            var delegateType = new VoidDelegateBuilder(myModuleBuilder).CreateVoidDelegate(implementationMethod, parent, allMethodParams);
             var delegateCtor = delegateType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { }, null);
             var baseType = typeof(ServiceWrapperBase<>).MakeGenericType(implementationMethod.DeclaringType);
             var implementation = baseType.GetRuntimeFields().Single(f => f.Name == "implementation");

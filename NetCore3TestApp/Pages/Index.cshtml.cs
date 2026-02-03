@@ -16,7 +16,7 @@ namespace NetCore3TestApp.Pages
 
         public async Task OnGet()
         {
-            var d = await _client.Params("test123", new Dictionary<string, string> { { "$filter", "some filter" }, { "$top", "100" } });
+            var d = await _client.Params("test123", new Dictionary<string, string> { { "$filter", "some filter" }, { "$top", "100" } }, HttpContext.RequestAborted);
             var x = await _client.MixedParams("123", "123", 10, null, "123-123");
         }
     }
